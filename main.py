@@ -9,7 +9,7 @@ def main(argv):
     lexer = HelloLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = HelloParser(stream)
-    tree = parser.startRule()
+    tree = parser.start_rule()
 
 
 

@@ -1,21 +1,32 @@
 grammar c;
-startRule: operationCompareEq ';';
-operationCompareEq: operationCompareEq '==' operationCompareLeqGeqLG
-                    | operationCompareLeqGeqLG;
+start_rule: operation ';';
 
-operationCompareLeqGeqLG: operationCompareLeqGeqLG '>' operationPlusMinus
-                        | operationCompareLeqGeqLG '<' operationPlusMinus
-                        | operationCompareLeqGeqLG '<=' operationPlusMinus
-                        | operationCompareLeqGeqLG '>=' operationPlusMinus
-                        | operationPlusMinus;
+operation: operation_compare_eq_neq;
 
-operationPlusMinus: operationPlusMinus '+' operationMultDiv
-                  | operationPlusMinus '-' operationMultDiv
-                  | operationMultDiv;
+operation_compare_eq_neq: operation_compare_eq_neq '==' operation_compare_leq_geq_l_g
+                    | operation_compare_eq_neq '!=' operation_compare_leq_geq_l_g
+                    | operation_compare_leq_geq_l_g;
 
-operationMultDiv: ID '*' ID
-                | ID '/' ID
-                | ID '%' ID
+operation_compare_leq_geq_l_g: operation_compare_leq_geq_l_g '>' operation_plus_minus
+                        | operation_compare_leq_geq_l_g '<' operation_plus_minus
+                        | operation_compare_leq_geq_l_g '<=' operation_plus_minus
+                        | operation_compare_leq_geq_l_g '>=' operation_plus_minus
+                        | operation_plus_minus;
+
+operation_plus_minus: operation_plus_minus '+' operation_mult_div
+                  | operation_plus_minus '-' operation_mult_div
+                  | operation_mult_div;
+
+operation_mult_div: operation_mult_div '*' operation_unary_plus_minus
+                | operation_mult_div '/' operation_unary_plus_minus
+                | operation_mult_div '%' operation_unary_plus_minus
+                | operation_unary_plus_minus;
+
+operation_unary_plus_minus: '+' operation_brackets
+                          | '-' operation_brackets
+                          | operation_brackets;
+
+operation_brackets: '(' operation ')'
                 | ID;
 
 ID: [0-9]+;
