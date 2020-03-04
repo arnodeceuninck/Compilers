@@ -1,5 +1,8 @@
 grammar c;
-start_rule: operation ';';
+start_rule: operation_block;
+
+operation_block: operation ';'
+                | operation ';' operation_block;
 
 operation: operation_compare_eq_neq;
 
