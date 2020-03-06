@@ -27,13 +27,6 @@ class AST:
         self.children = list()
         pass
 
-    def visitNumberExpr(self, ctx: cParser.cParser.ID):
-        node = AST()
-        if (ctx.ID()):
-            print("test")
-
-        return node
-
     def childIndex(self, ast):
         return self.children.index(ast)
 
