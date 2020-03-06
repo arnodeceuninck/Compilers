@@ -1,3 +1,5 @@
+# https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
+
 from antlr4 import *
 from gen import cParser
 
@@ -14,21 +16,22 @@ class Node:
 
 
 class AST:
-    # Constructor of the AST class
-    def __init__(self, tree: ParserRuleContext):
-        self.children = list()
+
+    def __init__(self, value=None):
+        self.value = value
+        self.left = None
+        self.right = None
         self.parent = None
-        self.node = Node(tree)
-        if not tree.getChildCount():
-            return
+        self.node = None
+        self.children = list()
+        pass
 
-        child: ParserRuleContext
-        for child in tree.getChildren():
-            tempChild = AST(child)
-            tempChild.parent = self
-            self.children.append(tempChild)
-            # self.children.append(AST(child))
+    def visitNumberExpr(self, ctx: cParser.cParser.ID):
+        node = AST()
+        if (ctx.ID()):
+            print("test")
 
+        return node
 
     def childIndex(self, ast):
         return self.children.index(ast)
@@ -41,9 +44,6 @@ class AST:
                 self.simplifyTree()
             else:
                 self.children[idx].simplifyTree()
-
-    def is_leaf(self):
-        return self.children.count()
 
     def __str__(self):
         returnStr = ""

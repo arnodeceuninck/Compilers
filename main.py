@@ -3,6 +3,7 @@ from antlr4 import *
 from gen import cLexer
 from gen import cParser
 from AST import AST
+from gen.cVisitor import cVisitor
 
 def main(argv):
     input_stream = FileStream(argv[1])
@@ -10,10 +11,7 @@ def main(argv):
     stream = CommonTokenStream(lexer)
     parser = cParser.cParser(stream)
     tree = parser.start_rule()
-    our_tree = AST(tree)
-    our_tree.simplifyTree()
-    our_tree.simplifyTree()
-    our_tree.print_dot()
+    communismRules = cVisitor().visitStart_rule(tree)
 
 if __name__ == '__main__':
     main(sys.argv)
