@@ -12,6 +12,7 @@ def main(argv):
     parser = cParser.cParser(stream)
     tree = parser.start_rule()
     communismRules = cVisitor().visitStart_rule(tree)
+    print("Done")
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -4,6 +4,7 @@ from antlr4 import *
 from gen import cParser
 
 
+
 class Node:
     def __init__(self, tree_node: ParserRuleContext):
         if tree_node.getChildCount():
@@ -84,3 +85,4 @@ class AST:
 
         outputFile = open("c_tree.dot", "w")
         outputFile.write(output)
+
