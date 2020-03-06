@@ -23,10 +23,8 @@ class cVisitor(ParseTreeVisitor):
     # Visit a parse tree produced by cParser#operation_logic_or.
     def visitOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
         node = AST()
-        if ctx.PLUS:
-            node.value = '+'
-        elif ctx.MIN:
-            node.value = '-'
+        if ctx.LOR:
+            node.value = '||'
         node.left = self.visit(ctx.left)
         node.right = self.visit(ctx.right)
         return self.visitChildren(ctx)
