@@ -52,7 +52,7 @@ class AST:
     def dotNode(self):
         output = ""
         output += str(self)
-        output += '[label="{}"] \n'.format(str(self.node))
+        output += '[label="{}"] \n'.format(str(self.value))
 
         for child in self.children:
             output += child.dotNode()
