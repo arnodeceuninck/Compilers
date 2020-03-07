@@ -59,7 +59,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_logic_or.
     def exitOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
-        if len(self.trees) > 2 and ctx.getChildCount() == 2:
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.value
             if symbol == "||":
@@ -80,7 +80,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_logic_and.
     def exitOperation_logic_and(self, ctx: cParser.Operation_logic_andContext):
-        if len(self.trees) > 2 and ctx.getChildCount() == 2:
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.value
             if symbol == "&&":
@@ -202,7 +202,7 @@ class customListener(ParseTreeListener):
 
     def unary_op_simplify(self):
         tree = self.trees[len(self.trees) - 2]
-        sub_tree = self.trees[len(self.trees) - 2]
+        sub_tree = self.trees[len(self.trees) - 1]
         sub_tree.parent = tree
         tree.children.append(sub_tree)
         self.trees.pop()
@@ -225,7 +225,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_unary_plus_minus_not.
     def exitOperation_unary_plus_minus_not(self, ctx: cParser.Operation_unary_plus_minus_notContext):
-        if len(self.trees) > 1:
+        if len(self.trees) > 1 and ctx.getChildCount() == 2:
             tree = self.trees[len(self.trees) - 2]
             symbol = tree.value
             if symbol == "+" or symbol == "-" or symbol == "!":
