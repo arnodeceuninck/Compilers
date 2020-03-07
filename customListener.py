@@ -221,6 +221,8 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_brackets.
     def enterOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("enter (")
+        if ctx.getChildCount() == 3:
+            self.trees.append(AST("[BRACKETS]"))
         pass
 
     # Exit a parse tree produced by cParser#operation_brackets.
@@ -229,6 +231,11 @@ class customListener(ParseTreeListener):
         if ctx.ID():
             print(ctx.getText())
             self.trees.append(AST(value=ctx.getText()))
+        else:
+            if len(self.trees) > 1:
+                self.trees[len(self.trees)-2] = self.trees[len(self.trees)-1]
+                self.trees.pop()
+
         pass
 
     # Enter a parse tree produced by cParser#identifier.
