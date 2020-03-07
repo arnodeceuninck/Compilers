@@ -4,7 +4,6 @@ from antlr4 import *
 from gen import cParser
 
 
-
 class Node:
     def __init__(self, tree_node: ParserRuleContext):
         if tree_node.getChildCount():
@@ -68,7 +67,7 @@ class AST:
         return output
 
     # Print the tree in dot
-    def print_dot(self):
+    def print_dot(self, filename):
         output = "Digraph G { \n"
 
         output += self.dotNode()
@@ -76,6 +75,71 @@ class AST:
 
         output += "}"
 
-        outputFile = open("c_tree.dot", "w")
+        outputFile = open(filename, "w")
         outputFile.write(output)
 
+    def plus(self, x, y):
+        return x + y
+
+    def min(self, x, y):
+        return x - y
+
+    def mult(self, x, y):
+        return x * y
+
+    def div(self, x, y):
+        return x / y
+
+    def mod(self, x, y):
+        return x % y
+
+    def minU(self, x):
+        return -x
+
+    def plusU(self, x):
+        return +x
+
+    # Does nothing with Comparison operators or logical operators
+    def constant_folding(self):
+        binary = True
+        if self.value == "+":
+            if len(self.children) == 1:
+                funct = self.plusU
+                binary = False
+            else:
+                funct = self.plus
+        elif self.value == "-":
+            if len(self.children) == 1:
+                funct = self.minU
+                binary = False
+            else:
+                funct = self.min
+        elif self.value == "*":
+            funct = self.mult
+        elif self.value == "/":
+            funct = self.div
+        elif self.value == "%":
+            funct = self.mod
+        else:
+            try:
+                return True, float(self.value)
+            except ValueError:
+                # The casting of value to float has failed
+                return False
+
+        left = self.children[0].constant_folding()
+        if binary:
+            right = self.children[1].constant_folding()
+
+        # Check whether the substrees where able to const fold succesfully
+        if left[0]:
+            if binary:
+                if not right[0]:
+                    return False
+                self.value = funct(left[1], right[1])
+            elif not binary:
+                self.value = funct(left[1])
+            self.children = []
+            return True, self.value
+        else:
+            return False

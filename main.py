@@ -15,7 +15,14 @@ def main(argv):
     communismRules = customListener()
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
-    communismRules.trees[0].print_dot()
+
+    communismForLife = communismRules.trees[0]
+
+    communismForLife.print_dot("c_tree.dot")
+
+    communismForLife.constant_folding()
+    communismForLife.print_dot("c_tree_folded.dot")
+
     print("Done")
 
 if __name__ == '__main__':
