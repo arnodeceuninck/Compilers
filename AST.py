@@ -102,6 +102,7 @@ class AST:
     # Does nothing with Comparison operators or logical operators
     def constant_folding(self):
         binary = True
+        funct = None
         if self.value == "+":
             if len(self.children) == 1:
                 funct = self.plusU
@@ -120,7 +121,7 @@ class AST:
             funct = self.div
         elif self.value == "%":
             funct = self.mod
-        else:
+        elif len(self.children) == 0:
             try:
                 return True, float(self.value)
             except ValueError:
@@ -132,7 +133,7 @@ class AST:
             right = self.children[1].constant_folding()
 
         # Check whether the substrees where able to const fold succesfully
-        if left[0]:
+        if funct is not None and left[0]:
             if binary:
                 if not right[0]:
                     return False
