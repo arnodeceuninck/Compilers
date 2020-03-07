@@ -20,8 +20,8 @@ class AST:
 
     def __init__(self, value=None):
         self.value = value
-        self.left = None
-        self.right = None
+        # self.left = None
+        # self.right = None
         self.parent = None
         self.node = None
         self.children = list()

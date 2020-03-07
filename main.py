@@ -15,6 +15,7 @@ def main(argv):
     communismRules = customListener()
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
+    communismRules.finalTree.print_dot()
     print("Done")
 
 if __name__ == '__main__':

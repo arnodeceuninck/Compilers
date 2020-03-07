@@ -69,12 +69,14 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_plus_minus.
     def enterOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
         print("Enter +-")
+        self.previousTree = AST('+')
         pass
 
     # Exit a parse tree produced by cParser#operation_plus_minus.
     def exitOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
         print("Exit +-")
-
+        # self.finalTree.children.append(self.previousTree)
+        # self.previousTree = None
         pass
 
     # Enter a parse tree produced by cParser#operation_mult_div.
@@ -98,14 +100,14 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_brackets.
     def enterOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("enter (")
-        if ctx.ID():
-            print(ctx.getText())
-            self.previousTree = AST(value=ctx.getText())
         pass
 
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("exit )")
+        if ctx.ID():
+            print(ctx.getText())
+            self.previousTree.children.append(AST(value=ctx.getText()))
         pass
 
     # Enter a parse tree produced by cParser#identifier.
