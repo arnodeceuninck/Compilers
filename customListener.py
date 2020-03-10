@@ -1,28 +1,44 @@
 from antlr4 import *
 from AST import AST
 from gen.cParser import cParser
+import os
 
 
 # This class defines a complete listener for a parse tree produced by cParser.
 class customListener(ParseTreeListener):
     # Beste Basil,
-    
+
     # Sorry dat ik doorheen deze code niet echt veel heb gedocumenteerd.
     # Bij deze zal ik het dus kort even uitleggen:
-    
+
     # Op weg naar beneden worden bomen aangemaakt met het juiste karakter erop en die worden op een stack gepusht. 
     # Dit gebeurt enkel indien er meer dan 1 kind is (want anders verwijst het gewoon naar de volgende operatie, 
     # en komt de operatie dus niet echt voor op die plaats.
-    
+
     # Op weg naar boven wordt er gecheckt of de stack top -2 een teken bevat van de regel. Als dit zo is, dan worden de 
     # twee achterste elementen van de stack gepopt en ingesteld als kinderen van de boom met het teken.
-    
+
     # Hopelijk begrijp je deze brakka uitleg en beetje, en anders ga je alsnog in de code moeten kijken
     trees = []  # This should be used as a stack
 
     def __init__(self):
         self.previousTree = None
         self.finalTree = None
+
+    """
+    Combines all the left over trees in the trees global variable
+    It also changes the ids of every child with the position it is normally in
+    """
+    def combine_trees(self):
+        newRoot = AST("Root")
+        newIndex = 0
+        # Needs a lot of fixing
+        for tree in self.trees:
+            tree.appendId(newIndex)
+            newRoot.children.append(tree)
+            newIndex += 1
+        self.trees.clear()
+        self.trees.append(newRoot)
 
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
@@ -33,6 +49,8 @@ class customListener(ParseTreeListener):
     def exitStart_rule(self, ctx: cParser.Start_ruleContext):
         print("exit Start")
         self.finalTree = self.previousTree
+        # Will combine all the generated trees
+        self.combine_trees()
         pass
 
     # Enter a parse tree produced by cParser#operation.
@@ -103,7 +121,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_compare_eq_neq.
     def exitOperation_compare_eq_neq(self, ctx: cParser.Operation_compare_eq_neqContext):
-        if len(self.trees) > 2 and ctx.getChildCount() == 3: 
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.value
             if symbol == "==" or symbol == "!=":
@@ -130,7 +148,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_compare_leq_geq_l_g.
     def exitOperation_compare_leq_geq_l_g(self, ctx: cParser.Operation_compare_leq_geq_l_gContext):
-        if len(self.trees) > 2 and ctx.getChildCount() == 3: 
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.value
             if symbol == "<=" or symbol == ">=" or symbol == "<" or symbol == ">":
@@ -154,7 +172,7 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#operation_plus_minus.
     def exitOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
         print("Exit +-")
-        if len(self.trees) > 2 and ctx.getChildCount() == 3: 
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.value
             if symbol == "+" or symbol == "-":

@@ -19,10 +19,10 @@ class AST:
 
     def __init__(self, value=None):
         self.value = value
-        # self.left = None
-        # self.right = None
         self.parent = None
         self.node = None
+        # Keeps an internal string representation of the node
+        self.astId = "Root"
         self.children = list()
         pass
 
@@ -49,9 +49,9 @@ class AST:
         return returnStr
 
     def dotNode(self):
-        output = ""
-        output += str(self)
-        output += '[label="{}"] \n'.format(str(self.value))
+        # The output needs to be the id + The contents of the labels
+        output = self.astId
+        output += '[label="{}"] \n'.format(self.value)
 
         for child in self.children:
             output += child.dotNode()
@@ -61,7 +61,7 @@ class AST:
     def dotConnections(self):
         output = ""
         for child in self.children:
-            output += str(self) + " -> " + str(child) + "\n"
+            output += self.astId + " -> " + str(child.astId) + "\n"
             output += child.dotConnections()
 
         return output
@@ -98,6 +98,18 @@ class AST:
 
     def plusU(self, x):
         return +x
+
+    # Pre order traversal of AST
+    def appendId(self, idx):
+        # Sets the index combined with the string representation of the current ast node to the astId
+        self.astId = str(self) + str(idx)
+        # If no children are detected it is a leaf node exit function
+        if not len(self.children):
+            return
+
+        # It sets the astId of each of the children
+        for child in self.children:
+            child.appendId(idx)
 
     # Does nothing with Comparison operators or logical operators
     def constant_folding(self):

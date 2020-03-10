@@ -30,10 +30,6 @@ operation_unary_plus_minus_not: '+' right=operation_brackets
 operation_brackets: '(' operation ')'
                   | ID;
 
-identifier
-    : ID ;
-
-
 PLUS: '+';
 MIN: '-';
 NOT: '!';
