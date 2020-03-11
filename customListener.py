@@ -11,11 +11,11 @@ class customListener(ParseTreeListener):
     # Sorry dat ik doorheen deze code niet echt veel heb gedocumenteerd.
     # Bij deze zal ik het dus kort even uitleggen:
 
-    # Op weg naar beneden worden bomen aangemaakt met het juiste karakter erop en die worden op een stack gepusht. 
-    # Dit gebeurt enkel indien er meer dan 1 kind is (want anders verwijst het gewoon naar de volgende operatie, 
+    # Op weg naar beneden worden bomen aangemaakt met het juiste karakter erop en die worden op een stack gepusht.
+    # Dit gebeurt enkel indien er meer dan 1 kind is (want anders verwijst het gewoon naar de volgende operatie,
     # en komt de operatie dus niet echt voor op die plaats.
 
-    # Op weg naar boven wordt er gecheckt of de stack top -2 een teken bevat van de regel. Als dit zo is, dan worden de 
+    # Op weg naar boven wordt er gecheckt of de stack top -2 een teken bevat van de regel. Als dit zo is, dan worden de
     # twee achterste elementen van de stack gepopt en ingesteld als kinderen van de boom met het teken.
 
     # Hopelijk begrijp je deze brakka uitleg en beetje, en anders ga je alsnog in de code moeten kijken
@@ -31,12 +31,10 @@ class customListener(ParseTreeListener):
     """
     def combine_trees(self):
         newRoot = AST("Root")
-        newIndex = 0
         # Needs a lot of fixing
         for tree in self.trees:
-            tree.appendId(newIndex)
             newRoot.children.append(tree)
-            newIndex += 1
+            tree.parent = newRoot
         self.trees.clear()
         self.trees.append(newRoot)
 
