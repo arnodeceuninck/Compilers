@@ -33,8 +33,8 @@ class customListener(ParseTreeListener):
         newRoot = AST("Root")
         # Needs a lot of fixing
         for tree in self.trees:
-            newRoot.children.append(tree)
             tree.parent = newRoot
+            newRoot.children.append(tree)
         self.trees.clear()
         self.trees.append(newRoot)
 
