@@ -30,13 +30,18 @@ class customListener(ParseTreeListener):
     It also changes the ids of every child with the position it is normally in
     """
     def combine_trees(self):
+        # If there is 1 tree left set no root
+        if len(self.trees) == 1:
+            return
+
+        # If there are more trees link them with a root
         newRoot = AST("Root")
-        # Needs a lot of fixing
         for tree in self.trees:
             tree.parent = newRoot
             newRoot.children.append(tree)
         self.trees.clear()
         self.trees.append(newRoot)
+
 
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):

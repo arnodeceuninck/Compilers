@@ -6,6 +6,7 @@ from AST import AST
 from customVisitor import customVisitor
 from customListener import customListener
 
+
 def main(argv):
     input_stream = FileStream(argv[1])
     lexer = cLexer.cLexer(input_stream)
@@ -24,6 +25,7 @@ def main(argv):
     communismForLife.print_dot("c_tree_folded.dot")
 
     print("Done")
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -101,6 +101,12 @@ class AST:
     def constant_folding(self):
         binary = True
         funct = None
+        # Special case for when we are in the root
+        if self.value == "Root":
+            for child in self.children:
+                child.constant_folding()
+            return
+
         if self.value == "+":
             if len(self.children) == 1:
                 funct = self.plusU
