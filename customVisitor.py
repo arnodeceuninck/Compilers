@@ -10,7 +10,6 @@ class cListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
-        print("kaas")
         pass
 
     # Exit a parse tree produced by cParser#start_rule.
@@ -87,14 +86,6 @@ class cListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
-        pass
-
-    # Enter a parse tree produced by cParser#identifier.
-    def enterIdentifier(self, ctx: cParser.IdentifierContext):
-        pass
-
-    # Exit a parse tree produced by cParser#identifier.
-    def exitIdentifier(self, ctx: cParser.IdentifierContext):
         pass
 
 
@@ -207,10 +198,6 @@ class customVisitor(ParseTreeVisitor):
         if ctx.getChildCount() == 1:
             return ctx.getChild(0).accept(self)
         return ctx.getChild(1).accept(self)
-
-    # Visit a parse tree produced by cParser#identifier.
-    def visitIdentifier(self, ctx: cParser.IdentifierContext):
-        return AST(ctx.getText())
 
 
 del cParser

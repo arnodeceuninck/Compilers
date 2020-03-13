@@ -2,7 +2,9 @@ grammar c;
 
 start_rule: (operation ';')*;
 
-operation: operation_logic_or;
+operation: (assignment | operation_logic_or);
+
+assignment: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) VAR_NAME '=' operation;
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
@@ -47,5 +49,9 @@ MULT: '*';
 LAND: '&&';
 LOR: '||';
 SEMI: ';';
-ID: [0-9]+;
+INT_TYPE: 'int';
+FLOAT_TYPE: 'float';
+CHAR_TYPE: 'char';
+VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
+ID: [0-9]+[.]?[0-9]*;
 WS: [ \t\r\n]+ -> skip;

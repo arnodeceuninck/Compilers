@@ -66,6 +66,18 @@ class customListener(ParseTreeListener):
         print("Exit operation")
         pass
 
+        # Enter a parse tree produced by cParser#assignment.
+
+    def enterAssignment(self, ctx: cParser.AssignmentContext):
+        print("Enter Assignment")
+        pass
+
+        # Exit a parse tree produced by cParser#assignment.
+
+    def exitAssignment(self, ctx: cParser.AssignmentContext):
+        print("Exit Assignment")
+        pass
+
     # Enter a parse tree produced by cParser#operation_logic_or.
     def enterOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
         # Check whether there are three children: leftside, OP, rightside
@@ -271,14 +283,4 @@ class customListener(ParseTreeListener):
                 self.trees[len(self.trees) - 2] = self.trees[len(self.trees) - 1]
                 self.trees.pop()
 
-        pass
-
-    # Enter a parse tree produced by cParser#identifier.
-    def enterIdentifier(self, ctx: cParser.IdentifierContext):
-        print("Enter identifier")
-        pass
-
-    # Exit a parse tree produced by cParser#identifier.
-    def exitIdentifier(self, ctx: cParser.IdentifierContext):
-        print("Exit identifier")
         pass
