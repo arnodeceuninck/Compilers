@@ -300,7 +300,7 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("exit )")
-        if ctx.ID():
+        if ctx.ID() or ctx.VAR_NAME():
             print(ctx.getText())
             self.trees.append(AST(value=ctx.getText()))
         else:
