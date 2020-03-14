@@ -4,7 +4,9 @@ start_rule: (operation ';')*;
 
 operation: (assignment | operation_logic_or);
 
-assignment: (CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)? VAR_NAME '=' operation;
+assignment: lvalue '=' operation;
+
+lvalue: (CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)? VAR_NAME;
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
@@ -53,6 +55,7 @@ INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';
 CONST: 'const';
+ASSIGN: '=';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 ID: [0-9]+[.]?[0-9]*;
 WS: [ \t\r\n]+ -> skip;

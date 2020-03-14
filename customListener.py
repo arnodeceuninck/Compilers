@@ -70,12 +70,31 @@ class customListener(ParseTreeListener):
 
     def enterAssignment(self, ctx: cParser.AssignmentContext):
         print("Enter Assignment")
+        if ctx.getChildCount() == 3:
+            symbol = ""
+            if ctx.ASSIGN():
+                symbol = "="
+            else:
+                raise
+            self.trees.append(AST(symbol))
         pass
 
-        # Exit a parse tree produced by cParser#assignment.
+    # Enter a parse tree produced by cParser#lvalue.
+    def enterLvalue(self, ctx: cParser.LvalueContext):
+        pass
+
+    # Exit a parse tree produced by cParser#lvalue.
+    def exitLvalue(self, ctx: cParser.LvalueContext):
+        self.trees.append(AST(value=ctx.getText()))
+        pass
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
         print("Exit Assignment")
+        if len(self.trees) > 2 and ctx.getChildCount() == 3:
+            tree = self.trees[len(self.trees) - 3]
+            symbol = tree.value
+            if symbol == "=":
+                self.binary_op_simplify()
         pass
 
     # Enter a parse tree produced by cParser#operation_logic_or.
