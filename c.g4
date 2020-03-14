@@ -4,7 +4,7 @@ start_rule: (operation ';')*;
 
 operation: (assignment | operation_logic_or);
 
-assignment: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) VAR_NAME '=' operation;
+assignment: (CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)? VAR_NAME '=' operation;
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
@@ -30,7 +30,7 @@ operation_unary_plus_minus_not: '+' right=operation_brackets
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | ID;
+                  | (ID|VAR_NAME);
 
 PLUS: '+';
 MIN: '-';
@@ -52,6 +52,7 @@ SEMI: ';';
 INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';
+CONST: 'const';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 ID: [0-9]+[.]?[0-9]*;
 WS: [ \t\r\n]+ -> skip;
