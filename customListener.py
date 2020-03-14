@@ -85,7 +85,13 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#lvalue.
     def exitLvalue(self, ctx: cParser.LvalueContext):
-        self.trees.append(AST(value=ctx.getText()))
+        value = ""
+        for child in ctx.getChildren():
+            if child.symbol == ctx.variable:
+                value += "| " + child.getText()
+            else:
+                value += child.getText() + " "
+        self.trees.append(AST(value=value))
         pass
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
