@@ -132,7 +132,7 @@ class AST:
                 right = result
 
         # Check whether the substrees where able to const fold succesfully
-        if funct is not None and left[0]:
+        if funct is not None and left is not None and left[0]:
             if binary:
                 if not right[0]:
                     return False
