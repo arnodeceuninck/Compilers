@@ -1,26 +1,15 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
 
 from antlr4 import *
+from Node import *
 from gen import cParser
 
 
-class Node:
-    def __init__(self, tree_node: ParserRuleContext):
-        if tree_node.getChildCount():
-            self.string = cParser.cParser.ruleNames[tree_node.getRuleIndex()]
-        else:
-            self.string = tree_node.getText()
-
-    def __str__(self):
-        return str(self.string)
-
-
 class AST:
-
-    def __init__(self, value=None):
+    def __init__(self, value=None, node=None):
         self.value = value
         self.parent = None
-        self.node = None
+        self.node = node
         self.children = list()
         pass
 
@@ -47,9 +36,9 @@ class AST:
         return returnStr
 
     def dotNode(self):
-        # The output needs to be the id + The contents of the labels
+        # The output needs to be the id + The label itself
         output = str(self)
-        output += '[label="{}"] \n'.format(self.value)
+        output += str(self.node)
 
         for child in self.children:
             output += child.dotNode()
@@ -67,6 +56,7 @@ class AST:
     # Print the tree in dot
     def print_dot(self, filename):
         output = "Digraph G { \n"
+        output += "node [style=filled, shape=rectangle, penwidth=2];\n"
 
         output += self.dotNode()
         output += self.dotConnections()
@@ -102,32 +92,32 @@ class AST:
         binary = True
         funct = None
         # Special case for when we are in the root
-        if self.value == "Root":
+        if self.node.value == "Root":
             for child in self.children:
                 child.constant_folding()
             return
 
-        if self.value == "+":
+        if self.node.value == "+":
             if len(self.children) == 1:
                 funct = self.plusU
                 binary = False
             else:
                 funct = self.plus
-        elif self.value == "-":
+        elif self.node.value == "-":
             if len(self.children) == 1:
                 funct = self.minU
                 binary = False
             else:
                 funct = self.min
-        elif self.value == "*":
+        elif self.node.value == "*":
             funct = self.mult
-        elif self.value == "/":
+        elif self.node.value == "/":
             funct = self.div
-        elif self.value == "%":
+        elif self.node.value == "%":
             funct = self.mod
         elif len(self.children) == 0:
             try:
-                return True, float(self.value)
+                return True, float(self.node.value)
             except ValueError:
                 # The casting of value to float has failed
                 return False, None
@@ -146,10 +136,10 @@ class AST:
             if binary:
                 if not right[0]:
                     return False
-                self.value = funct(left[1], right[1])
+                self.node = CInt(funct(left[1], right[1]))
             elif not binary:
-                self.value = funct(left[1])
+                self.node = CInt(funct(left[1]))
             self.children = []
-            return True, self.value
+            return True, self.node.value
         else:
             return False

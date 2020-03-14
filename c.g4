@@ -32,7 +32,9 @@ operation_unary_plus_minus_not: '+' right=operation_brackets
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (ID|VAR_NAME);
+                  | INT_ID
+                  | FLOAT_ID
+                  | VAR_NAME;
 
 PLUS: '+';
 MIN: '-';
@@ -57,5 +59,6 @@ CHAR_TYPE: 'char';
 CONST: 'const';
 ASSIGN: '=';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
-ID: [0-9]+[.]?[0-9]*;
+INT_ID: [0-9]+;
+FLOAT_ID: [0-9]+[.]?[0-9]*;
 WS: [ \t\r\n]+ -> skip;
