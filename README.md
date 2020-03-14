@@ -30,4 +30,7 @@ Arno Deceuninck & Basil Rommens
 - [ ] Retaining comments in compilation process
 - [ ] Comment after every instruction that contains the statement from the input code
 
+## Node klasse-structuur
+![alt text](doc/NodeClass.png)
+
 ## Testen
