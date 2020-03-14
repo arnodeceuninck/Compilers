@@ -28,7 +28,6 @@ class customListener(ParseTreeListener):
     Combines all the left over trees in the trees global variable
     It also changes the ids of every child with the position it is normally in
     """
-
     def combine_trees(self):
         # If there is 1 tree left set no root
         if len(self.trees) == 1:
@@ -43,7 +42,6 @@ class customListener(ParseTreeListener):
         self.trees.append(newRoot)
 
     # Enter a parse tree produced by cParser#start_rule.
-
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
         print("enter Start")
         pass
@@ -72,11 +70,13 @@ class customListener(ParseTreeListener):
         print("Enter Assignment")
         if ctx.getChildCount() == 3:
             symbol = ""
+            node = None
             if ctx.ASSIGN():
                 symbol = "="
+                node = Node(symbol)
             else:
                 raise
-            self.trees.append(AST(symbol))
+            self.trees.append(AST(symbol, node))
         pass
 
     # Enter a parse tree produced by cParser#lvalue.
@@ -85,7 +85,13 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#lvalue.
     def exitLvalue(self, ctx: cParser.LvalueContext):
-        self.trees.append(AST(value=ctx.getText()))
+        value = ""
+        for child in ctx.getChildren():
+            if child.symbol == ctx.variable:
+                value += "| " + child.getText()
+            else:
+                value += child.getText() + " "
+        self.trees.append(AST(value=value, node=Node(value)))
         pass
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
@@ -317,7 +323,7 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("exit )")
-        if ctx.INT_ID():
+        if ctx.INT_ID() or ctx.VAR_NAME():
             print(ctx.getText())
             self.trees.append(AST(value=ctx.getText(), node=CInt(ctx.getText())))
         else:
