@@ -130,11 +130,16 @@ class AST:
                 return True, float(self.value)
             except ValueError:
                 # The casting of value to float has failed
-                return False
+                return False, None
 
-        left = self.children[0].constant_folding()
-        if binary:
-            right = self.children[1].constant_folding()
+        left = None
+        right = None
+        for child in self.children:
+            result = child.constant_folding()
+            if left is None:
+                left = result
+            elif right is None:
+                right = result
 
         # Check whether the substrees where able to const fold succesfully
         if funct is not None and left[0]:
