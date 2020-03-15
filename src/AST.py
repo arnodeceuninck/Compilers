@@ -1,9 +1,11 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
 
 from src.Node import *
-
+from src.symbolTable import *
 
 class AST:
+    symbol_table = SymbolTable()
+
     def __init__(self, value=None, node=None):
         self.value = value
         self.parent = None
@@ -54,11 +56,16 @@ class AST:
     # Print the tree in dot
     def print_dot(self, filename):
         output = "Digraph G { \n"
+        # Add symbol table
+        output += str(self.symbol_table)
+        output += "subgraph cluster_1 {\n"
         output += "node [style=filled, shape=rectangle, penwidth=2];\n"
 
         output += self.dotNode()
         output += self.dotConnections()
 
+        output += "label = \"AST\";\n"
+        output += "}\n"
         output += "}"
 
         outputFile = open(filename, "w")
@@ -84,6 +91,11 @@ class AST:
 
     def plusU(self, x):
         return +x
+
+    def traverse(self, func):
+        func(self)
+        for child in self.children:
+            func(child)
 
     # Does nothing with Comparison operators or logical operators
     def constant_folding(self):

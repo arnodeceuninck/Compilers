@@ -217,6 +217,7 @@ class Assign(Binary):
 class Variable(Node):
     def __init__(self, value=""):
         Node.__init__(self, value)
+        self.type = ""
         self.ptr = False
         self.const = False
 
