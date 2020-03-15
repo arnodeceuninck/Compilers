@@ -1,5 +1,5 @@
 """
-|| && !
+!
 """
 
 
@@ -227,7 +227,7 @@ class Variable(Node):
 
 class VInt(Variable):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Variable.__init__(self, value)
         self.type = "int"
 
     def __str__(self):
@@ -239,7 +239,7 @@ class VInt(Variable):
 
 class VFloat(Variable):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Variable.__init__(self, value)
         self.type = "float"
 
     def __str__(self):
@@ -251,7 +251,7 @@ class VFloat(Variable):
 
 class VChar(Variable):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Variable.__init__(self, value)
         self.type = "char"
 
     def __str__(self):

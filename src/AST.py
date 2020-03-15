@@ -96,6 +96,7 @@ class AST:
         func(self)
         for child in self.children:
             func(child)
+            child.traverse(func)
 
     # Does nothing with Comparison operators or logical operators
     def constant_folding(self):
