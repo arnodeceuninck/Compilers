@@ -45,7 +45,10 @@ def main(argv):
 
     communismForLife = communismRules.trees[0]
 
+    # The two methods of below should be combined in order to make it one pass and apply error checking
+    # Create symbol table
     communismForLife.traverse(assignment)
+    # Apply symbol table to all the variables
     communismForLife.traverse(convertVar)
     communismForLife.print_dot("output/c_tree.dot")
     # communismForLife.constant_folding()

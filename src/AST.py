@@ -7,12 +7,10 @@ from src.symbolTable import *
 class AST:
     symbol_table = SymbolTable()
 
-    def __init__(self, value=None, node=None):
-        self.value = value
-        self.parent = None
+    def __init__(self, node=None):
         self.node = node
+        self.parent = None
         self.children = list()
-        pass
 
     def childIndex(self, ast):
         return self.children.index(ast)
@@ -104,28 +102,32 @@ class AST:
         binary = True
         funct = None
         # Special case for when we are in the root
-        if self.node.value == "Root":
+        if self.node.value == "Statement Sequence" or self.node.value == "=" or isinstance(self.node, Variable):
             for child in self.children:
                 child.constant_folding()
             return
 
         if self.node.value == "+":
-            if len(self.children) == 1:
+            if len(self.children) == 1 and not isinstance(self.children[0], Variable):
                 funct = self.plusU
                 binary = False
-            else:
+            elif len(self.children) == 1:
+                binary = False
+            elif not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
                 funct = self.plus
         elif self.node.value == "-":
-            if len(self.children) == 1:
+            if len(self.children) == 1 and not isinstance(self.children[0], Variable):
                 funct = self.minU
                 binary = False
-            else:
+            elif len(self.children) == 1:
+                binary = False
+            elif not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
                 funct = self.min
-        elif self.node.value == "*":
+        elif self.node.value == "*" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
             funct = self.mult
-        elif self.node.value == "/":
+        elif self.node.value == "/" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
             funct = self.div
-        elif self.node.value == "%":
+        elif self.node.value == "%" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
             funct = self.mod
         elif len(self.children) == 0:
             try:
@@ -143,7 +145,7 @@ class AST:
             elif right is None:
                 right = result
 
-        # Check whether the substrees where able to const fold succesfully
+        # Check whether the subtrees where able to const fold successfully
         if funct is not None and left is not None and left[0]:
             if binary:
                 if not right[0]:
