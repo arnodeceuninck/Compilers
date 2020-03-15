@@ -4,19 +4,20 @@
 
 
 class Node:
-    def __init__(self, value=""):
+    def __init__(self, value="", color="#9f9f9f"):
         self.value = value
+        self.color = color
 
     def __str__(self):
-        return '[label="{}", fillcolor="#9f9f9f"] \n'.format(self.value)
+        return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class Constant(Node):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Node.__init__(self, value, "#FFD885")
 
     def __str__(self):
-        return '[label="Constant {}", fillcolor="#FFD885"] \n'.format(self.value)
+        return '[label="Constant {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class CInt(Constant):
@@ -25,7 +26,7 @@ class CInt(Constant):
         self.type = "int"
 
     def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="#FFD885"] \n'.format(self.type, self.value)
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
 
 class CFloat(Constant):
@@ -34,7 +35,7 @@ class CFloat(Constant):
         self.type = "float"
 
     def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="#FFD885"] \n'.format(self.type, self.value)
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
 
 class CChar(Constant):
@@ -43,15 +44,15 @@ class CChar(Constant):
         self.type = "char"
 
     def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="#FFD885"] \n'.format(self.type, self.value)
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
 
 class Operator(Node):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Node.__init__(self, value, "#87f5ff")
 
     def __str__(self):
-        return '[label="Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
+        return '[label="Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class Unary(Operator):
@@ -59,31 +60,25 @@ class Unary(Operator):
         Operator.__init__(self, value)
 
     def __str__(self):
-        return '[label="Unary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
+        return '[label="Unary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class UPlus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Unary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class UMinus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Unary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
-
-class Binary(Node):
+class Binary(Operator):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Operator.__init__(self, value)
 
     def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
+        return '[label="Binary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class Compare(Binary):
@@ -91,119 +86,77 @@ class Compare(Binary):
         Binary.__init__(self, value)
 
     def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
+        return '[label="Binary Operator Compare: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class LessT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class MoreT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class LessOrEq(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class MoreOrEq(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class Equal(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class NotEqual(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class LogicAnd(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class LogicOr(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class Operate(Binary):
     def __init__(self, value=""):
         Binary.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class BMinus(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class BPlus(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class Div(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class Mult(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
-
 
 class Mod(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
 
 
 class Assign(Binary):
@@ -211,18 +164,18 @@ class Assign(Binary):
         Binary.__init__(self, value)
 
     def __str__(self):
-        return '[label="Assign", fillcolor="#87f5ff"] \n'.format(self.value)
+        return '[label="Assign", fillcolor="{}"] \n'.format(self.color)
 
 
 class Variable(Node):
     def __init__(self, value=""):
-        Node.__init__(self, value)
+        Node.__init__(self, value, "#af93ff")
         self.type = ""
         self.ptr = False
         self.const = False
 
     def __str__(self):
-        return '[label="Variable: {}", fillcolor="#af93ff"] \n'.format(self.value)
+        return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
 class VInt(Variable):
@@ -234,7 +187,7 @@ class VInt(Variable):
         var_type = "const " if self.const else ""
         var_type += self.type
         var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)
+        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
 
 
 class VFloat(Variable):
@@ -246,7 +199,7 @@ class VFloat(Variable):
         var_type = "const " if self.const else ""
         var_type += self.type
         var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)
+        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
 
 
 class VChar(Variable):
@@ -258,4 +211,4 @@ class VChar(Variable):
         var_type = "const " if self.const else ""
         var_type += self.type
         var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)
+        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
