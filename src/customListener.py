@@ -44,7 +44,6 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
         print("enter Start")
-        pass
 
     # Exit a parse tree produced by cParser#start_rule.
     def exitStart_rule(self, ctx: cParser.Start_ruleContext):
@@ -52,17 +51,14 @@ class customListener(ParseTreeListener):
         self.finalTree = self.previousTree
         # Will combine all the generated trees
         self.combine_trees()
-        pass
 
     # Enter a parse tree produced by cParser#operation.
     def enterOperation(self, ctx: cParser.OperationContext):
         print("Enter Operation")
-        pass
 
     # Exit a parse tree produced by cParser#operation.
     def exitOperation(self, ctx: cParser.OperationContext):
         print("Exit operation")
-        pass
 
         # Enter a parse tree produced by cParser#assignment.
 
@@ -77,7 +73,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Enter a parse tree produced by cParser#lvalue.
     def enterLvalue(self, ctx: cParser.LvalueContext):
@@ -107,7 +102,6 @@ class customListener(ParseTreeListener):
         node.const = const
         node.ptr = ptr
         self.trees.append(AST(value=value, node=node))
-        pass
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
         print("Exit Assignment")
@@ -116,7 +110,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "=":
                 self.binary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_logic_or.
     def enterOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
@@ -130,7 +123,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_logic_or.
     def exitOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
@@ -139,7 +131,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "||":
                 self.binary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_logic_and.
     def enterOperation_logic_and(self, ctx: cParser.Operation_logic_andContext):
@@ -153,7 +144,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_logic_and.
     def exitOperation_logic_and(self, ctx: cParser.Operation_logic_andContext):
@@ -162,7 +152,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "&&":
                 self.binary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_compare_eq_neq.
     def enterOperation_compare_eq_neq(self, ctx: cParser.Operation_compare_eq_neqContext):
@@ -179,7 +168,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_compare_eq_neq.
     def exitOperation_compare_eq_neq(self, ctx: cParser.Operation_compare_eq_neqContext):
@@ -188,7 +176,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "==" or symbol == "!=":
                 self.binary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_compare_leq_geq_l_g.
     def enterOperation_compare_leq_geq_l_g(self, ctx: cParser.Operation_compare_leq_geq_l_gContext):
@@ -211,7 +198,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_compare_leq_geq_l_g.
     def exitOperation_compare_leq_geq_l_g(self, ctx: cParser.Operation_compare_leq_geq_l_gContext):
@@ -220,7 +206,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "<=" or symbol == ">=" or symbol == "<" or symbol == ">":
                 self.binary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_plus_minus.
     def enterOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
@@ -237,7 +222,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_plus_minus.
     def exitOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
@@ -249,7 +233,6 @@ class customListener(ParseTreeListener):
                 self.binary_op_simplify()
         # self.finalTree.children.append(self.previousTree)
         # self.previousTree = None
-        pass
 
     # Enter a parse tree produced by cParser#operation_mult_div.
     def enterOperation_mult_div(self, ctx: cParser.Operation_mult_divContext):
@@ -269,7 +252,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_mult_div.
     def exitOperation_mult_div(self, ctx: cParser.Operation_mult_divContext):
@@ -279,7 +261,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "*" or symbol == "/" or symbol == "%":
                 self.binary_op_simplify()
-        pass
 
     def binary_op_simplify(self):
         tree = self.trees[len(self.trees) - 3]
@@ -317,7 +298,6 @@ class customListener(ParseTreeListener):
             else:
                 raise
             self.trees.append(AST(symbol, node))
-        pass
 
     # Exit a parse tree produced by cParser#operation_unary_plus_minus_not.
     def exitOperation_unary_plus_minus_not(self, ctx: cParser.Operation_unary_plus_minus_notContext):
@@ -326,7 +306,6 @@ class customListener(ParseTreeListener):
             symbol = tree.value
             if symbol == "+" or symbol == "-" or symbol == "!":
                 self.unary_op_simplify()
-        pass
 
     # Enter a parse tree produced by cParser#operation_brackets.
     def enterOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
@@ -352,5 +331,3 @@ class customListener(ParseTreeListener):
                 self.trees[len(self.trees) -
                            2] = self.trees[len(self.trees) - 1]
                 self.trees.pop()
-
-        pass

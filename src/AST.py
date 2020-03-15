@@ -3,6 +3,7 @@
 from src.Node import *
 from src.symbolTable import *
 
+
 class AST:
     symbol_table = SymbolTable()
 

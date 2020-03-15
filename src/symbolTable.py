@@ -27,7 +27,11 @@ class SymbolTable:
                 "\t\t\t\t\t<tr><td>location</td><td>type</td><td>value</td></tr>\n"
         # add all the row elements
         for key in self.elements:
-            table += "\t\t\t\t\t\t<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n".format(key, self.elements[key].type,
+            custom_type = self.elements[key].type
+            var_type = "const " if custom_type.const else ""
+            var_type += custom_type.type
+            var_type += "*" if custom_type.ptr else ""
+            table += "\t\t\t\t\t\t<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n".format(key, var_type,
                                                                                    self.elements[key].value)
         # finish the table node
         table += "\t\t\t\t</table>\n" \

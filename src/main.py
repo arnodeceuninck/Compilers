@@ -10,21 +10,27 @@ def assignment(ast):
     if ast.node.value == "=":
         # improve type without constant and ptr
         location = ast.children[0].node.value
-        type = ast.children[0].node.type
+        type = ast.children[0].node
         value = ast.children[1].node.value
         ast.symbol_table.insert(location, type, value)
 
 
 def convertVar(ast):
-    if type(ast.node) != type(Variable()):
+    if type(Variable()) != type(ast.node):
         return
-    element = ast.symbol_table.elements[ast.node.value]
+    element = ast.symbol_table.elements[ast.node.value].type
     if element.type == 'int':
         ast.node = VInt(ast.node.value)
+        ast.node.const = element.const
+        ast.node.ptr = element.ptr
     elif element.type == 'float':
         ast.node = VFloat(ast.node.value)
+        ast.node.const = element.const
+        ast.node.ptr = element.ptr
     elif element.type == 'char':
         ast.node = VChar(ast.node.value)
+        ast.node.const = element.const
+        ast.node.ptr = element.ptr
 
 
 def main(argv):
