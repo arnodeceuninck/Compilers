@@ -217,6 +217,8 @@ class Assign(Binary):
 class Variable(Node):
     def __init__(self, value=""):
         Node.__init__(self, value)
+        self.ptr = False
+        self.const = False
 
     def __str__(self):
         return '[label="Variable: {}", fillcolor="#af93ff"] \n'.format(self.value)
@@ -228,7 +230,10 @@ class VInt(Variable):
         self.type = "int"
 
     def __str__(self):
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)
+        var_type = "const " if self.const else ""
+        var_type += self.type
+        var_type += "*" if self.ptr else ""
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)
 
 
 class VFloat(Variable):
@@ -237,7 +242,10 @@ class VFloat(Variable):
         self.type = "float"
 
     def __str__(self):
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)
+        var_type = "const " if self.const else ""
+        var_type += self.type
+        var_type += "*" if self.ptr else ""
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)
 
 
 class VChar(Variable):
@@ -246,4 +254,7 @@ class VChar(Variable):
         self.type = "char"
 
     def __str__(self):
-        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)
+        var_type = "const " if self.const else ""
+        var_type += self.type
+        var_type += "*" if self.ptr else ""
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(var_type, self.value)

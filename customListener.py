@@ -73,7 +73,7 @@ class customListener(ParseTreeListener):
             node = None
             if ctx.ASSIGN():
                 symbol = "="
-                node = Node(symbol)
+                node = Assign(symbol)
             else:
                 raise
             self.trees.append(AST(symbol, node))
@@ -86,18 +86,26 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#lvalue.
     def exitLvalue(self, ctx: cParser.LvalueContext):
         value = ""
+        ptr = False
+        const = False
         node = None
         for child in ctx.getChildren():
             if child.symbol == ctx.variable:
                 print(child.getText())
                 value = child.getText()
-            elif str(child) == "int":
+            elif child.getText() == str(ctx.INT_TYPE()):
                 node = VInt()
-            elif str(child) == "float":
+            elif child.getText() == str(ctx.FLOAT_TYPE()):
                 node = VFloat()
-            elif str(child) == "char":
+            elif child.getText() == str(ctx.CHAR_TYPE()):
                 node = VChar()
+            elif child.getText() == "*":
+                ptr = True
+            elif child.getText() == str(ctx.CONST()):
+                const = True
         node.value = value
+        node.const = const
+        node.ptr = ptr
         self.trees.append(AST(value=value, node=node))
         pass
 

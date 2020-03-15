@@ -2,8 +2,6 @@ import sys
 from antlr4 import *
 from gen import cLexer
 from gen import cParser
-from AST import AST
-from customVisitor import customVisitor
 from customListener import customListener
 
 
