@@ -1,6 +1,8 @@
 class SymbolTableElement:
     def __init__(self, location=None, type=None, value=None):
-        self.location = None
+        self.location = location
+        self.type = type
+        self.value = value
 
 
 class SymbolTable:
