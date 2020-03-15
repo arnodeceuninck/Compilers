@@ -8,7 +8,7 @@ class Node:
         self.value = value
 
     def __str__(self):
-        return '[label="{}"] \n'.format(self.value)
+        return '[label="{}", fillcolor="#9f9f9f"] \n'.format(self.value)
 
 
 class Constant(Node):
@@ -204,3 +204,46 @@ class Mod(Operate):
 
     def __str__(self):
         return '[label="Binary Operator: {}", fillcolor="#87f5ff"] \n'.format(self.value)
+
+
+class Assign(Binary):
+    def __init__(self, value=""):
+        Binary.__init__(self, value)
+
+    def __str__(self):
+        return '[label="Assign", fillcolor="#87f5ff"] \n'.format(self.value)
+
+
+class Variable(Node):
+    def __init__(self, value=""):
+        Node.__init__(self, value)
+
+    def __str__(self):
+        return '[label="Variable: {}", fillcolor="#af93ff"] \n'.format(self.value)
+
+
+class VInt(Variable):
+    def __init__(self, value=""):
+        Node.__init__(self, value)
+        self.type = "int"
+
+    def __str__(self):
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)
+
+
+class VFloat(Variable):
+    def __init__(self, value=""):
+        Node.__init__(self, value)
+        self.type = "float"
+
+    def __str__(self):
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)
+
+
+class VChar(Variable):
+    def __init__(self, value=""):
+        Node.__init__(self, value)
+        self.type = "char"
+
+    def __str__(self):
+        return '[label="Variable Type: {}: {}", fillcolor="#af93ff"] \n'.format(self.type, self.value)

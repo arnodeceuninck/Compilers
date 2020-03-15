@@ -21,8 +21,8 @@ def main(argv):
 
     communismForLife.print_dot("c_tree.dot")
 
-    communismForLife.constant_folding()
-    communismForLife.print_dot("c_tree_folded.dot")
+    #communismForLife.constant_folding()
+    #communismForLife.print_dot("c_tree_folded.dot")
 
     print("Done")
 

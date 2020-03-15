@@ -34,7 +34,7 @@ class customListener(ParseTreeListener):
             return
 
         # If there are more trees link them with a root
-        newRoot = AST("Root", Node("Root"))
+        newRoot = AST("Statement Sequence", Node("Statement Sequence"))
         for tree in self.trees:
             tree.parent = newRoot
             newRoot.children.append(tree)
@@ -86,12 +86,19 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#lvalue.
     def exitLvalue(self, ctx: cParser.LvalueContext):
         value = ""
+        node = None
         for child in ctx.getChildren():
             if child.symbol == ctx.variable:
-                value += "| " + child.getText()
-            else:
-                value += child.getText() + " "
-        self.trees.append(AST(value=value, node=Node(value)))
+                print(child.getText())
+                value = child.getText()
+            elif str(child) == "int":
+                node = VInt()
+            elif str(child) == "float":
+                node = VFloat()
+            elif str(child) == "char":
+                node = VChar()
+        node.value = value
+        self.trees.append(AST(value=value, node=node))
         pass
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
@@ -323,9 +330,15 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         print("exit )")
-        if ctx.INT_ID() or ctx.VAR_NAME() or ctx.FLOAT_ID:
+        if ctx.INT_ID():
             print(ctx.getText())
             self.trees.append(AST(value=ctx.getText(), node=CInt(ctx.getText())))
+        elif ctx.FLOAT_ID():
+            print(ctx.getText())
+            self.trees.append(AST(value=ctx.getText(), node=CFloat(ctx.getText())))
+        elif ctx.VAR_NAME():
+            print(ctx.getText())
+            self.trees.append(AST(value=ctx.getText(), node=Variable(ctx.getText())))
         else:
             if len(self.trees) > 1:
                 self.trees[len(self.trees) -
