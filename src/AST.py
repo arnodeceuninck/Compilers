@@ -1,8 +1,6 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
 
-from antlr4 import *
-from Node import *
-from gen import cParser
+from src.Node import *
 
 
 class AST:

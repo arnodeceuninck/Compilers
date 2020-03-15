@@ -1,6 +1,6 @@
 # Generated from /home/basil/PycharmProject/Compilers/c.g4 by ANTLR 4.8
 from antlr4 import *
-from AST import AST
+from src.AST import AST
 from gen.cParser import cParser
 
 PREVIOUS_CTX = None

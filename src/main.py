@@ -2,7 +2,7 @@ import sys
 from antlr4 import *
 from gen import cLexer
 from gen import cParser
-from customListener import customListener
+from src.customListener import customListener
 
 
 def main(argv):
@@ -17,7 +17,7 @@ def main(argv):
 
     communismForLife = communismRules.trees[0]
 
-    communismForLife.print_dot("c_tree.dot")
+    communismForLife.print_dot("output/c_tree.dot")
 
     #communismForLife.constant_folding()
     #communismForLife.print_dot("c_tree_folded.dot")

@@ -1,5 +1,5 @@
 from antlr4 import *
-from AST import *
+from src.AST import *
 from gen.cParser import cParser
 
 
