@@ -4,6 +4,7 @@ from gen import cLexer
 from gen import cParser
 from src.Node import *
 from src.customListener import customListener
+from src.ErrorListener import CustomErrorListener
 
 
 def assignment(ast):
@@ -38,7 +39,10 @@ def main(argv):
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = cParser.cParser(stream)
+    parser.addErrorListener(CustomErrorListener())
     tree = parser.start_rule()
+
+
     communismRules = customListener()
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
