@@ -43,27 +43,30 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
-        print("enter Start")
+        #print("enter Start")
+        pass
 
     # Exit a parse tree produced by cParser#start_rule.
     def exitStart_rule(self, ctx: cParser.Start_ruleContext):
-        print("exit Start")
+        #print("exit Start")
         self.finalTree = self.previousTree
         # Will combine all the generated trees
         self.combine_trees()
 
     # Enter a parse tree produced by cParser#operation.
     def enterOperation(self, ctx: cParser.OperationContext):
-        print("Enter Operation")
+        #print("Enter Operation")
+        pass
 
     # Exit a parse tree produced by cParser#operation.
     def exitOperation(self, ctx: cParser.OperationContext):
-        print("Exit operation")
+        #print("Exit operation")
+        pass
 
         # Enter a parse tree produced by cParser#assignment.
 
     def enterAssignment(self, ctx: cParser.AssignmentContext):
-        print("Enter Assignment")
+        #print("Enter Assignment")
         if ctx.getChildCount() == 3:
             symbol = ""
             node = None
@@ -86,7 +89,7 @@ class customListener(ParseTreeListener):
         node = None
         for child in ctx.getChildren():
             if child.symbol == ctx.variable:
-                print(child.getText())
+                #print(child.getText())
                 value = child.getText()
             elif child.getText() == str(ctx.INT_TYPE()):
                 node = VInt()
@@ -104,7 +107,7 @@ class customListener(ParseTreeListener):
         self.trees.append(AST(node=node))
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
-        print("Exit Assignment")
+        #print("Exit Assignment")
         if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.node.value
@@ -225,7 +228,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_plus_minus.
     def exitOperation_plus_minus(self, ctx: cParser.Operation_plus_minusContext):
-        print("Exit +-")
+        #print("Exit +-")
         if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.node.value
@@ -236,7 +239,7 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#operation_mult_div.
     def enterOperation_mult_div(self, ctx: cParser.Operation_mult_divContext):
-        print("Enter */")
+        #print("Enter */")
         if ctx.getChildCount() == 3:
             symbol = ""
             node = None
@@ -255,7 +258,7 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#operation_mult_div.
     def exitOperation_mult_div(self, ctx: cParser.Operation_mult_divContext):
-        print("Exit */")
+        #print("Exit */")
         if len(self.trees) > 2 and ctx.getChildCount() == 3:
             tree = self.trees[len(self.trees) - 3]
             symbol = tree.node.value
@@ -309,22 +312,22 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#operation_brackets.
     def enterOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
-        print("enter (")
+        #print("enter (")
         if ctx.getChildCount() == 3:
             self.trees.append(AST(Node("[BRACKETS]")))
         pass
 
     # Exit a parse tree produced by cParser#operation_brackets.
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
-        print("exit )")
+        #print("exit )")
         if ctx.INT_ID():
-            print(ctx.getText())
+            #print(ctx.getText())
             self.trees.append(AST(node=CInt(ctx.getText())))
         elif ctx.FLOAT_ID():
-            print(ctx.getText())
+            #print(ctx.getText())
             self.trees.append(AST(node=CFloat(ctx.getText())))
         elif ctx.VAR_NAME():
-            print(ctx.getText())
+            #print(ctx.getText())
             self.trees.append(AST(node=Variable(ctx.getText())))
         else:
             if len(self.trees) > 1:

@@ -12,13 +12,13 @@ class CustomErrorListener( ErrorListener ):
         super(CustomErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        print("Oh no!!")
+        print("[ERROR] Oh no!! Something went wrong at line", line, ", column", column, ": ", msg)
 
     def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
-        print("Oh no!!")
+        print("[ERROR] Oh no!! Ambiguity!")
 
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
-        print("Oh no!!")
+        print("[ERROR] Oh no!! Attempting Full Context!")
 
     def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
-        print("Oh no!!")
+        print("[ERROR] Oh no!! Context Sensitivity!")
