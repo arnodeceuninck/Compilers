@@ -43,7 +43,6 @@ class SyntaxCompilerError(CompilerError):
             self.column) + ": " + self.msg
 
 
-class CustomErrorListener(ErrorListener):
 
 class CustomErrorListener(ErrorListener):
 
