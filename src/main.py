@@ -13,8 +13,7 @@ def assignment(ast):
         # improve type without constant and ptr
         location = ast.children[0].node.value
         type = ast.children[0].node
-        value = ast.children[1].node.value
-        ast.symbol_table.insert(location, type, value)
+        ast.symbol_table.insert(location, type)
 
 
 def convertVar(ast):

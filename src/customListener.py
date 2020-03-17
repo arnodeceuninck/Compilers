@@ -34,7 +34,7 @@ class customListener(ParseTreeListener):
             return
 
         # If there are more trees link them with a root
-        newRoot = AST(Node("Statement Sequence"))
+        newRoot = AST(StatementSequence())
         for tree in self.trees:
             tree.parent = newRoot
             newRoot.children.append(tree)
@@ -297,7 +297,7 @@ class customListener(ParseTreeListener):
                 node = UMinus(symbol)
             elif ctx.NOT():
                 symbol = "!"
-                node = Node(symbol)
+                node = UNot(symbol)
             else:
                 raise
             self.trees.append(AST(node))

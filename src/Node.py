@@ -12,6 +12,11 @@ class Node:
         return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
 
 
+class StatementSequence(Node):
+    def __init__(self):
+        Node.__init__(self, "Statement Sequence")
+
+
 class Constant(Node):
     def __init__(self, value=""):
         Node.__init__(self, value, "#FFD885")
@@ -69,6 +74,11 @@ class UPlus(Unary):
 
 
 class UMinus(Unary):
+    def __init__(self, value=""):
+        Unary.__init__(self, value)
+
+
+class UNot(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
 

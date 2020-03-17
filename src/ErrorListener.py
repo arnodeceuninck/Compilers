@@ -45,6 +45,8 @@ class SyntaxCompilerError(CompilerError):
 
 class CustomErrorListener(ErrorListener):
 
+class CustomErrorListener(ErrorListener):
+
     def __init__(self):
         super(CustomErrorListener, self).__init__()
 
