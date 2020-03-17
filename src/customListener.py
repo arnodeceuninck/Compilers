@@ -34,7 +34,7 @@ class customListener(ParseTreeListener):
             return
 
         # If there are more trees link them with a root
-        newRoot = AST(StatementSequence())
+        newRoot = AST(Node("Statement Sequence"))
         for tree in self.trees:
             tree.parent = newRoot
             newRoot.children.append(tree)
@@ -297,7 +297,7 @@ class customListener(ParseTreeListener):
                 node = UMinus(symbol)
             elif ctx.NOT():
                 symbol = "!"
-                node = UNot(symbol)
+                node = Node(symbol)
             else:
                 raise
             self.trees.append(AST(node))
@@ -321,13 +321,16 @@ class customListener(ParseTreeListener):
     def exitOperation_brackets(self, ctx: cParser.Operation_bracketsContext):
         #print("exit )")
         if ctx.INT_ID():
-            #print(ctx.getText())
+            # print(ctx.getText())
             self.trees.append(AST(node=CInt(ctx.getText())))
         elif ctx.FLOAT_ID():
-            #print(ctx.getText())
+            # print(ctx.getText())
             self.trees.append(AST(node=CFloat(ctx.getText())))
+        elif ctx.CHAR_ID():
+            # print(ctx.getText())
+            self.trees.append(AST(node=CChar(ctx.getText())))
         elif ctx.VAR_NAME():
-            #print(ctx.getText())
+            # print(ctx.getText())
             self.trees.append(AST(node=Variable(ctx.getText())))
         else:
             if len(self.trees) > 1:

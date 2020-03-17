@@ -4,7 +4,7 @@ start_rule: (operation ';')*;
 
 operation: (assignment | operation_logic_or);
 
-assignment: lvalue '=' operation;
+assignment: lvalue ('=' operation_logic_or)?;
 
 lvalue: (CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)? variable=VAR_NAME;
 
@@ -59,4 +59,7 @@ ASSIGN: '=';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
+CHAR_ID: '\'' . '\'';
 WS: [ \t\r\n]+ -> skip;
+MULTI_CMNT: '/*' .* '*/' -> skip;
+ONE_CMNT: '//' .* '\n' -> skip;
