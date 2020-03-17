@@ -70,26 +70,26 @@ class AST:
         outputFile = open(filename, "w")
         outputFile.write(output)
 
-    def plus(self, x, y):
-        return x + y
+    def plus(self, args):
+        return args[0] + args[1]
 
-    def min(self, x, y):
-        return x - y
+    def min(self, args):
+        return args[0] - args[1]
 
-    def mult(self, x, y):
-        return x * y
+    def mult(self, args):
+        return args[0] * args[1]
 
-    def div(self, x, y):
-        return x / y
+    def div(self, args):
+        return args[0] / args[1]
 
-    def mod(self, x, y):
-        return x % y
+    def mod(self, args):
+        return args[0] % args[1]
 
-    def minU(self, x):
-        return -x
+    def minU(self, args):
+        return -args[0]
 
-    def plusU(self, x):
-        return +x
+    def plusU(self, args):
+        return +args[0]
 
     def traverse(self, func):
         func(self)
@@ -99,64 +99,52 @@ class AST:
 
     # Does nothing with Comparison operators or logical operators
     def constant_folding(self):
-        binary = True
+        if isinstance(self.node, Variable):
+            # You can't fold variables
+            return False
+        if isinstance(self.node, (CInt, CFloat)):
+            # Ints and floats are already folded
+            return True
+
+        ready_to_continue_folding = True  # Only ready to continue if all children are
+        for i in range(len(self.children)):
+            # must iterate over i, because for child in self.children doesn't work by reference
+            ready_to_continue_folding = self.children[i].constant_folding() and ready_to_continue_folding
+
+        if not ready_to_continue_folding:
+            # Can only continue folding if all children have folded properly
+            return False
+
         funct = None
-        # Special case for when we are in the root
-        if self.node.value == "Statement Sequence" or self.node.value == "=" or isinstance(self.node, Variable):
-            for child in self.children:
-                child.constant_folding()
-            return
 
         if self.node.value == "+":
-            if len(self.children) == 1 and not isinstance(self.children[0], Variable):
+            if len(self.children) == 1:
                 funct = self.plusU
-                binary = False
-            elif len(self.children) == 1:
-                binary = False
-            elif not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
+            elif len(self.children) == 2:
                 funct = self.plus
         elif self.node.value == "-":
-            if len(self.children) == 1 and not isinstance(self.children[0], Variable):
+            if len(self.children) == 1:
                 funct = self.minU
-                binary = False
-            elif len(self.children) == 1:
-                binary = False
-            elif not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
+            elif len(self.children) == 2:
                 funct = self.min
-        elif self.node.value == "*" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
-                                                                                                      Variable):
+        elif self.node.value == "*":
             funct = self.mult
-        elif self.node.value == "/" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
-                                                                                                      Variable):
+        elif self.node.value == "/":
             funct = self.div
-        elif self.node.value == "%" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
-                                                                                                      Variable):
+        elif self.node.value == "%":
             funct = self.mod
-        elif len(self.children) == 0:
-            try:
-                return True, float(self.node.value)
-            except ValueError:
-                # The casting of value to float has failed
-                return False, None
 
-        left = None
-        right = None
+        if funct is None:
+            return False  # Can't continue folding if the function is unknown for folding
+
+        args = list()
         for child in self.children:
-            result = child.constant_folding()
-            if left is None:
-                left = result
-            elif right is None:
-                right = result
+            try:
+                args.append(float(child.node.value))
+            except ValueError:
+                return False  # Can't continue folding if one of the children isn't a float
 
-        # Check whether the subtrees where able to const fold successfully
-        if funct is not None and left is not None and left[0]:
-            if binary:
-                if not right[0]:
-                    return False
-                self.node = CInt(funct(left[1], right[1]))
-            elif not binary:
-                self.node = CInt(funct(left[1]))
-            self.children = []
-            return True, self.node.value
-        else:
-            return False
+        self.node.value = str(funct(args))
+        self.children = list()
+
+        return True

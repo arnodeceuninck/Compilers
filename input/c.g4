@@ -61,5 +61,5 @@ INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 CHAR_ID: '\'' . '\'';
 WS: [ \t\r\n]+ -> skip;
-MULTI_CMNT: '/*' .* '*/' -> skip;
-ONE_CMNT: '//' .* '\n' -> skip;
+MULTI_CMNT: '/*' .*? '*/' -> skip;
+ONE_CMNT: '//' .*? '\n' -> skip;

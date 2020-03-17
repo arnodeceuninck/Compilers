@@ -35,7 +35,6 @@ def convertVar(ast):
 
 
 def main(argv):
-
     input_stream = FileStream(argv[1])
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -56,8 +55,8 @@ def main(argv):
         # Apply symbol table to all the variables
         communismForLife.traverse(convertVar)
         communismForLife.print_dot("output/c_tree.dot")
-        # communismForLife.constant_folding()
-        # communismForLife.print_dot("c_tree_folded.dot")
+        communismForLife.constant_folding()
+        communismForLife.print_dot("output/c_tree_folded.dot")
     except CompilerError as e:
         print(str(e))
     print("Done")
