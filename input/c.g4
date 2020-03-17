@@ -32,7 +32,7 @@ operation_unary_plus_minus_not: '+' right=operation_brackets
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (INT_ID | FLOAT_ID | VAR_NAME);
+                  | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
 PLUS: '+';
 MIN: '-';
