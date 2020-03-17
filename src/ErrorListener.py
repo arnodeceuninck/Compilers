@@ -6,7 +6,8 @@ from gen.cLexer import cLexer
 from gen.cParser import cParser
 from antlr4.error.ErrorListener import ErrorListener
 
-class CustomErrorListener( ErrorListener ):
+
+class CustomErrorListener(ErrorListener):
 
     def __init__(self):
         super(CustomErrorListener, self).__init__()
