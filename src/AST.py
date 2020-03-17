@@ -94,7 +94,7 @@ class AST:
     def traverse(self, func):
         func(self)
         for child in self.children:
-            func(child)
+            # func(child) # Why would you do this? you'll already do a func(self) when calling the traverse function of child
             child.traverse(func)
 
     # Does nothing with Comparison operators or logical operators
@@ -123,11 +123,14 @@ class AST:
                 binary = False
             elif not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
                 funct = self.min
-        elif self.node.value == "*" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
+        elif self.node.value == "*" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
+                                                                                                      Variable):
             funct = self.mult
-        elif self.node.value == "/" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
+        elif self.node.value == "/" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
+                                                                                                      Variable):
             funct = self.div
-        elif self.node.value == "%" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1], Variable):
+        elif self.node.value == "%" and not isinstance(self.children[0], Variable) and not isinstance(self.children[1],
+                                                                                                      Variable):
             funct = self.mod
         elif len(self.children) == 0:
             try:
