@@ -1,3 +1,5 @@
+from src.ErrorListener import VariableRedeclarationError, UndeclaredVariableError
+
 class SymbolTableElement:
     def __init__(self, type=None, value=None):
         self.type = type
@@ -8,8 +10,19 @@ class SymbolTable:
     def __init__(self):
         self.elements = dict()
 
+    # Overloads the [] operator
+    def __getitem__(self, location) -> SymbolTableElement:
+        if location not in self.elements:
+            raise UndeclaredVariableError(location)
+        else:
+            return self.elements[location]
+
     def insert(self, location, type, value):
-        self.elements[location] = SymbolTableElement(type, value)
+        if location not in self.elements:
+            self.elements[location] = SymbolTableElement(type, value)
+        else:
+            raise VariableRedeclarationError(location)
+            # print("Variable", location, "already in the symbol table.")
 
     def update(self, location, value):
         self.elements[location].value = value
