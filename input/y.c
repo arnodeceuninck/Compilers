@@ -1,2 +1,2 @@
-int x = 0;
-printf(x);
+int y = 0;
+x = y;
