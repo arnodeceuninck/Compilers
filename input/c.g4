@@ -6,7 +6,7 @@ operation: (assignment | operation_logic_or);
 
 assignment: lvalue ('=' operation_logic_or)?;
 
-lvalue: (CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)? variable=VAR_NAME;
+lvalue: ((CONST)? (INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)?)? variable=VAR_NAME;
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
