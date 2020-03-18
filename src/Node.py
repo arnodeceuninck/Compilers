@@ -83,6 +83,11 @@ class UNot(Unary):
         Unary.__init__(self, value)
 
 
+class Print(Unary):
+    def __init__(self, value="printf"):
+        Unary.__init__(self, value)
+
+
 class Binary(Operator):
     def __init__(self, value=""):
         Operator.__init__(self, value)

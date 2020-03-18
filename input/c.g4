@@ -2,7 +2,9 @@ grammar c;
 
 start_rule: (operation ';')*;
 
-operation: (assignment | operation_logic_or);
+operation: (assignment | operation_logic_or | print_statement);
+
+print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME) ')';
 
 assignment: lvalue ('=' operation_logic_or)?;
 

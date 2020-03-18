@@ -42,6 +42,14 @@ class customListener(ParseTreeListener):
         self.trees.clear()
         self.trees.append(newRoot)
 
+
+    def unary_op_simplify(self):
+        tree = self.trees[len(self.trees) - 2]
+        sub_tree = self.trees[len(self.trees) - 1]
+        sub_tree.parent = tree
+        tree.children.append(sub_tree)
+        self.trees.pop()
+
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
         # print("enter Start")
@@ -175,6 +183,28 @@ class customListener(ParseTreeListener):
                 raise
             self.trees.append(AST(node))
 
+    # Enter a parse tree produced by cParser#print_statement.
+    def enterPrint_statement(self, ctx: cParser.Print_statementContext):
+        node = Print()
+        self.trees.append(AST(node))
+
+    # Exit a parse tree produced by cParser#print_statement.
+    def exitPrint_statement(self, ctx: cParser.Print_statementContext):
+        if ctx.INT_ID():
+            # print(ctx.getText())
+            self.trees.append(AST(node=CInt(ctx.INT_ID().getText())))
+        elif ctx.FLOAT_ID():
+            # print(ctx.getText())
+            self.trees.append(AST(node=CFloat(ctx.FLOAT_ID().getText())))
+        elif ctx.CHAR_ID():
+            # print(ctx.getText())
+            self.trees.append(AST(node=CChar(ctx.CHAR_ID().getText())))
+        elif ctx.VAR_NAME():
+            # print(ctx.getText())
+            self.trees.append(AST(node=Variable(ctx.VAR_NAME().getText())))
+        self.unary_op_simplify()
+
+
     # Exit a parse tree produced by cParser#operation_compare_eq_neq.
     def exitOperation_compare_eq_neq(self, ctx: cParser.Operation_compare_eq_neqContext):
         if len(self.trees) > 2 and ctx.getChildCount() == 3:
@@ -277,13 +307,6 @@ class customListener(ParseTreeListener):
         tree.children.append(left_tree)
         tree.children.append(right_tree)
         self.trees.pop()
-        self.trees.pop()
-
-    def unary_op_simplify(self):
-        tree = self.trees[len(self.trees) - 2]
-        sub_tree = self.trees[len(self.trees) - 1]
-        sub_tree.parent = tree
-        tree.children.append(sub_tree)
         self.trees.pop()
 
     # Enter a parse tree produced by cParser#operation_unary_plus_minus_not.

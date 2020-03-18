@@ -19,6 +19,8 @@ def assignment(ast):
 def convertVar(ast):
     if type(Variable()) != type(ast.node):
         return
+    if isinstance(ast.node, Print):
+        return
     element = ast.symbol_table[ast.node.value].type
     if element.type == 'int':
         ast.node = VInt(ast.node.value)
