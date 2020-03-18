@@ -6,7 +6,7 @@ from src.Node import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError
-
+from src.AST import AST
 
 def assignment(ast):
     if ast.node.value == "=":
@@ -35,9 +35,8 @@ def convertVar(ast):
         ast.node.const = element.const
         ast.node.ptr = element.ptr
 
-
-def main(argv):
-    input_stream = FileStream(argv[1])
+def compile(input_file: str) -> AST:
+    input_stream = FileStream(input_file)
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = cParser.cParser(stream)
@@ -56,11 +55,20 @@ def main(argv):
         communismForLife.traverse(assignment)
         # Apply symbol table to all the variables
         communismForLife.traverse(convertVar)
-        communismForLife.print_dot("output/c_tree.dot")
-        communismForLife.constant_folding()
-        communismForLife.print_dot("output/c_tree_folded.dot")
+
+        return communismForLife
+
     except CompilerError as e:
         print(str(e))
+
+
+def main(argv):
+    communismForLife = compile(argv[1])
+
+    communismForLife.print_dot("output/c_tree.dot")
+    communismForLife.constant_folding()
+    communismForLife.print_dot("output/c_tree_folded.dot")
+
     print("Done")
 
 

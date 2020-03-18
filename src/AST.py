@@ -69,6 +69,7 @@ class AST:
 
         outputFile = open(filename, "w")
         outputFile.write(output)
+        outputFile.close()
 
     def plus(self, args):
         return args[0] + args[1]
