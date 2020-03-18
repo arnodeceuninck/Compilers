@@ -65,9 +65,9 @@ def compile(input_file: str) -> AST:
 def main(argv):
     communismForLife = compile(argv[1])
 
-    communismForLife.print_dot("output/c_tree.dot")
+    communismForLife.to_dot("output/c_tree.dot")
     communismForLife.constant_folding()
-    communismForLife.print_dot("output/c_tree_folded.dot")
+    communismForLife.to_dot("output/c_tree_folded.dot")
 
     print("Done")
 

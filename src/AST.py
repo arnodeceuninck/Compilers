@@ -34,6 +34,9 @@ class AST:
             returnStr += "T"
         return returnStr
 
+    def to_LLVM(self, file):
+        file
+
     def dotNode(self):
         # The output needs to be the id + The label itself
         output = str(self)
@@ -53,7 +56,7 @@ class AST:
         return output
 
     # Print the tree in dot
-    def print_dot(self, filename):
+    def to_dot(self, filename):
         output = "Digraph G { \n"
         # Add symbol table
         output += str(self.symbol_table)
@@ -139,12 +142,18 @@ class AST:
             return False  # Can't continue folding if the function is unknown for folding
 
         args = list()
+        # We need the right type of node, because compiling wrong type can cause issues
+        node = None
         for child in self.children:
             try:
                 args.append(float(child.node.value))
+                # Set the type of the node to one of the children
+                node = child.node
             except ValueError:
                 return False  # Can't continue folding if one of the children isn't a float
 
+        # Set the node type to the correct value
+        self.node = node
         self.node.value = str(funct(args))
         self.children = list()
 
