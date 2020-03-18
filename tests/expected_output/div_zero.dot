@@ -1,0 +1,26 @@
+Digraph G { 
+	subgraph cluster_0 {
+		tbl [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td>location</td><td>type</td></tr>
+						<tr><td>y</td><td>float</td></tr>
+				</table>
+			>];
+		label = "Symbol Table";
+	}
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0T[label="Variable Type: float: y", fillcolor="#af93ff"] 
+N1T[label="Binary Operator: /", fillcolor="#87f5ff"] 
+N0N1T[label="Constant Type: int: 5", fillcolor="#FFD885"] 
+N1N1T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+T -> N0T
+T -> N1T
+N1T -> N0N1T
+N1T -> N1N1T
+label = "AST";
+}
+}

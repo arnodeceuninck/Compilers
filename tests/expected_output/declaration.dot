@@ -1,0 +1,31 @@
+Digraph G { 
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+T[label="Statement Sequence", fillcolor="#9f9f9f"] 
+N0T[label="Variable Type: int: a", fillcolor="#af93ff"] 
+N1T[label="Variable Type: float: b", fillcolor="#af93ff"] 
+N2T[label="Variable Type: char: c", fillcolor="#af93ff"] 
+N3T[label="Variable Type: const int: d", fillcolor="#af93ff"] 
+N4T[label="Variable Type: const float: e", fillcolor="#af93ff"] 
+N5T[label="Variable Type: const char: f", fillcolor="#af93ff"] 
+N6T[label="Variable Type: int*: g", fillcolor="#af93ff"] 
+N7T[label="Variable Type: float*: h", fillcolor="#af93ff"] 
+N8T[label="Variable Type: char*: i", fillcolor="#af93ff"] 
+N9T[label="Variable Type: const int*: j", fillcolor="#af93ff"] 
+N10T[label="Variable Type: const float*: k", fillcolor="#af93ff"] 
+N11T[label="Variable Type: const char*: l", fillcolor="#af93ff"] 
+T -> N0T
+T -> N1T
+T -> N2T
+T -> N3T
+T -> N4T
+T -> N5T
+T -> N6T
+T -> N7T
+T -> N8T
+T -> N9T
+T -> N10T
+T -> N11T
+label = "AST";
+}
+}
