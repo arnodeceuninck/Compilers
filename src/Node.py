@@ -177,8 +177,11 @@ class Mod(Operate):
 class Assign(Binary):
     def __init__(self, value=""):
         Binary.__init__(self, value)
+        self.declaration = True
 
-    def __str__(self):
+    def __str__(self): #TODO: Difference with declaration made, still have to test it
+        if self.declaration:
+            return '[label="Assign Declaration", fillcolor="{}"] \n'.format(self.color)
         return '[label="Assign", fillcolor="{}"] \n'.format(self.color)
 
 

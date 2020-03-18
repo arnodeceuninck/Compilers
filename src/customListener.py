@@ -83,6 +83,8 @@ class customListener(ParseTreeListener):
                 node = Assign(symbol)
             else:
                 raise
+            if ctx.children[0].getChildCount() == 1:
+                node.declaration = False
             self.trees.append(AST(node))
 
     def exitAssignment(self, ctx: cParser.AssignmentContext):
