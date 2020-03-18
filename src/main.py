@@ -5,11 +5,11 @@ from gen import cParser
 from src.Node import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
-from src.ErrorListener import CompilerError
+from src.ErrorListener import CompilerError, ConstError
 from src.AST import AST
 
 def assignment(ast):
-    if ast.node.value == "=":
+    if ast.node.value == "=" and ast.node.declaration:
         # improve type without constant and ptr
         location = ast.children[0].node.value
         type = ast.children[0].node
@@ -35,6 +35,11 @@ def convertVar(ast):
         ast.node.const = element.const
         ast.node.ptr = element.ptr
 
+def checkConstAssigns(ast: AST):
+    # On assignments that are declarations, but the leftmost child is a const variable
+    if ast.node.value == "=" and ast.children[0].node.const and not ast.node.declaration:
+        raise ConstError(ast.children[0].node.value)
+
 def compile(input_file: str) -> AST:
     input_stream = FileStream(input_file)
     lexer = cLexer.cLexer(input_stream)
@@ -55,22 +60,25 @@ def compile(input_file: str) -> AST:
         communismForLife.traverse(assignment)
         # Apply symbol table to all the variables
         communismForLife.traverse(convertVar)
+        communismForLife.traverse(checkConstAssigns)
 
         return communismForLife
 
     except CompilerError as e:
         print(str(e))
+        return None
 
 
 def main(argv):
     communismForLife = compile(argv[1])
+    if communismForLife:
+        communismForLife.to_dot("output/c_tree.dot")
+        communismForLife.constant_folding()
+        communismForLife.to_dot("output/c_tree_folded.dot")
 
-    communismForLife.to_dot("output/c_tree.dot")
-    communismForLife.constant_folding()
-    communismForLife.to_dot("output/c_tree_folded.dot")
-
-    print("Done")
-
+        print("Done")
+    else:
+        print("Had to stop because of an error")
 
 if __name__ == '__main__':
     main(sys.argv)

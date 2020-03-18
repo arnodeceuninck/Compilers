@@ -20,6 +20,13 @@ class VariableRedeclarationError(CompilerError):
     def __str__(self):
         return "Variable " + self.variable + " already declared"
 
+class ConstError(CompilerError):
+    def __init__(self, variable):
+        super().__init__()
+        self.variable = variable
+
+    def __str__(self):
+        return "Variable " + self.variable + " is const and can't be assigned after declaration"
 
 class UndeclaredVariableError(CompilerError):
     def __init__(self, variable):

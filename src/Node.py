@@ -179,7 +179,7 @@ class Assign(Binary):
         Binary.__init__(self, value)
         self.declaration = True
 
-    def __str__(self): #TODO: Difference with declaration made, still have to test it
+    def __str__(self):
         if self.declaration:
             return '[label="Assign Declaration", fillcolor="{}"] \n'.format(self.color)
         return '[label="Assign", fillcolor="{}"] \n'.format(self.color)
