@@ -99,7 +99,12 @@ class customListener(ParseTreeListener):
         const = False
         node = None
         for child in ctx.getChildren():
-            if child.symbol == ctx.variable:
+            # If there is only one child then it is an assignment and not a definition or declaration,
+            # so no need for explicitly giving the variable a type
+            if child.symbol == ctx.variable and ctx.getChildCount() == 1:
+                value = child.getText()
+                node = Variable()
+            elif child.symbol == ctx.variable:
                 # print(child.getText())
                 value = child.getText()
             elif child.getText() == str(ctx.INT_TYPE()):
@@ -115,7 +120,7 @@ class customListener(ParseTreeListener):
         node.value = value
         node.const = const
         node.ptr = ptr
-        self.trees.append(AST(node=node))
+        self.trees.append(AST(node))
 
     # Enter a parse tree produced by cParser#operation_logic_or.
     def enterOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
