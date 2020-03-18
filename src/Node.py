@@ -183,6 +183,7 @@ class Variable(Node):
         self.type = ""
         self.ptr = False
         self.const = False
+        self.defined = False
 
     def __str__(self):
         return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
