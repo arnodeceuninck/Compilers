@@ -18,7 +18,7 @@ class VariableRedeclarationError(CompilerError):
         self.variable = variable
 
     def __str__(self):
-        return "Variable " + self.variable + " already declared"
+        return "[ERROR] Variable " + self.variable + " already declared"
 
 class ConstError(CompilerError):
     def __init__(self, variable):
@@ -26,7 +26,7 @@ class ConstError(CompilerError):
         self.variable = variable
 
     def __str__(self):
-        return "Variable " + self.variable + " is const and can't be assigned after declaration"
+        return "[ERROR] Variable " + self.variable + " is const and can't be assigned after declaration"
 
 class UndeclaredVariableError(CompilerError):
     def __init__(self, variable):
@@ -34,7 +34,16 @@ class UndeclaredVariableError(CompilerError):
         self.variable = variable
 
     def __str__(self):
-        return "Variable " + self.variable + " hasn't been declared yet"
+        return "[ERROR] Variable " + self.variable + " hasn't been declared yet"
+
+class IncompatibleTypesError(CompilerError):
+    def __init__(self, ltype, rtype):
+        super().__init__()
+        self.ltype = ltype
+        self.rtype = rtype
+
+    def __str__(self):
+        return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
 
 
 class SyntaxCompilerError(CompilerError):

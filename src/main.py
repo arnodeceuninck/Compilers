@@ -5,7 +5,7 @@ from gen import cParser
 from src.Node import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
-from src.ErrorListener import CompilerError, ConstError
+from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
 from src.AST import AST
 
 def assignment(ast):
@@ -35,10 +35,20 @@ def convertVar(ast):
         ast.node.const = element.const
         ast.node.ptr = element.ptr
 
-def checkConstAssigns(ast: AST):
+def checkAssigns(ast: AST):
+    # Check for const assigns
     # On assignments that are declarations, but the leftmost child is a const variable
-    if ast.node.value == "=" and ast.children[0].node.const and not ast.node.declaration:
+    if isinstance(ast.node, Assign) and ast.children[0].node.const and not ast.node.declaration:
         raise ConstError(ast.children[0].node.value)
+    if isinstance(ast.node, Assign):
+        type_lvalue = ast.children[0].getType()
+        type_rvalue = ast.children[1].getType()
+        if type_lvalue == type_rvalue:
+            pass
+        elif type_lvalue == "float" and type_rvalue == "int":
+            pass
+        else:
+            raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
 def compile(input_file: str) -> AST:
     input_stream = FileStream(input_file)
@@ -60,7 +70,7 @@ def compile(input_file: str) -> AST:
         communismForLife.traverse(assignment)
         # Apply symbol table to all the variables
         communismForLife.traverse(convertVar)
-        communismForLife.traverse(checkConstAssigns)
+        communismForLife.traverse(checkAssigns)
 
         return communismForLife
 

@@ -33,6 +33,9 @@ class CInt(Constant):
     def __str__(self):
         return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
+    def getType(self, args):
+        return self.type
+
 
 class CFloat(Constant):
     def __init__(self, value=""):
@@ -42,6 +45,9 @@ class CFloat(Constant):
     def __str__(self):
         return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
+    def getType(self, args):
+        return self.type
+
 
 class CChar(Constant):
     def __init__(self, value=""):
@@ -50,6 +56,9 @@ class CChar(Constant):
 
     def __str__(self):
         return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
+
+    def getType(self, args):
+        return self.type
 
 
 class Operator(Node):
@@ -66,6 +75,9 @@ class Unary(Operator):
 
     def __str__(self):
         return '[label="Unary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+
+    def getType(self, args):
+        return args[0]  # Only one type as argument
 
 
 class UPlus(Unary):
@@ -87,6 +99,9 @@ class Print(Unary):
     def __init__(self, value="printf"):
         Unary.__init__(self, value)
 
+    def getType(self, args):
+        return "function"
+
 
 class Binary(Operator):
     def __init__(self, value=""):
@@ -102,6 +117,9 @@ class Compare(Binary):
 
     def __str__(self):
         return '[label="Binary Operator Compare: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+
+    def getType(self, args):
+        return "int"
 
 
 class LessT(Compare):
@@ -148,6 +166,14 @@ class Operate(Binary):
     def __init__(self, value=""):
         Binary.__init__(self, value)
 
+    def getType(self, args):
+        if args[0] == args[1]:
+            return args[0]
+        elif "float" in args and "int" in args:
+            return "float"
+        else:
+            return "unknown"
+
 
 class BMinus(Operate):
     def __init__(self, value=""):
@@ -173,6 +199,9 @@ class Mod(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
 
+    def getType(self, args):
+        return "int"
+
 
 class Assign(Binary):
     def __init__(self, value=""):
@@ -195,6 +224,9 @@ class Variable(Node):
 
     def __str__(self):
         return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+
+    def getType(self, args):
+        return self.type
 
 
 class VInt(Variable):

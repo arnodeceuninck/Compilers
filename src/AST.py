@@ -158,3 +158,14 @@ class AST:
         self.children = list()
 
         return True
+
+    def getType(self):
+        args = list()
+        for child in self.children:
+            args.append(child.getType())
+        return self.node.getType(args)
+        # if isinstance(self.node, Variable):
+        #     return self.symbol_table[self.node.value]
+        # elif isinstance(self.node, CFloat):
+        #     return "float"
+        # elif isi

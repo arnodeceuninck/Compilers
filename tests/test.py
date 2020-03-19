@@ -25,11 +25,11 @@ class MyTestCase(unittest.TestCase):
         self.assertListEqual(list(open(output_file_folded)), list(open(expected_output_file_folded)))
 
     def test_binop_folding(self):
-        # self.helper_test_c("binop_folding")
+        self.helper_test_c("binop_folding")
         pass
 
     def test_declaration(self):
-        # self.helper_test_c("declaration")
+        self.helper_test_c("declaration")
         pass
 
     def test_logicop(self):
@@ -37,11 +37,11 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def test_unop_num(self):
-        # self.helper_test_c("unop_num")
+        self.helper_test_c("unop_num")
         pass
 
     def test_declaration(self):
-        # self.helper_test_c("div_zero")
+        self.helper_test_c("div_zero")
         pass
 
 
