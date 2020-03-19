@@ -34,7 +34,9 @@ operation_unary_plus_minus_not: '+' right=operation_brackets
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+                  | (INT_ID | FLOAT_ID | CHAR_ID | var=rvalue_variable);
+
+rvalue_variable: (addr='&' | ptr='*')? name=VAR_NAME;
 
 PLUS: '+';
 MIN: '-';
@@ -53,6 +55,7 @@ MULT: '*';
 LAND: '&&';
 LOR: '||';
 SEMI: ';';
+REF: '&';
 INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';

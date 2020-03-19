@@ -234,9 +234,11 @@ class Variable(Node):
     def __init__(self, value=""):
         Node.__init__(self, value, "#af93ff")
         self.type = ""
-        self.ptr = False
+        self.ptr = False  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
         self.defined = False
+
+        self.reref = False  # e.g. *a
 
     def __str__(self):
         return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)

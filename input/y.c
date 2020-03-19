@@ -1,1 +1,2 @@
-const int x = 1 || 0;
+int y = 3;
+const int x = &y;
