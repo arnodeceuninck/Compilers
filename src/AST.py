@@ -11,6 +11,7 @@ class AST:
         self.node = node
         self.parent = None
         self.children = list()
+        AST.symbol_table = SymbolTable()  # symbol table must reset after each test
 
     def childIndex(self, ast):
         return self.children.index(ast)

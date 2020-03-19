@@ -21,6 +21,7 @@ class customListener(ParseTreeListener):
     trees = []  # This should be used as a stack
 
     def __init__(self):
+        self.trees = []
         self.previousTree = None
         self.finalTree = None
 
