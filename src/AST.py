@@ -119,24 +119,7 @@ class AST:
             # Can only continue folding if all children have folded properly
             return False
 
-        funct = None
-
-        if self.node.value == "+":
-            if len(self.children) == 1:
-                funct = self.plusU
-            elif len(self.children) == 2:
-                funct = self.plus
-        elif self.node.value == "-":
-            if len(self.children) == 1:
-                funct = self.minU
-            elif len(self.children) == 2:
-                funct = self.min
-        elif self.node.value == "*":
-            funct = self.mult
-        elif self.node.value == "/":
-            funct = self.div
-        elif self.node.value == "%":
-            funct = self.mod
+        funct = self.node.funct
 
         if funct is None:
             return False  # Can't continue folding if the function is unknown for folding

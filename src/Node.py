@@ -83,16 +83,19 @@ class Unary(Operator):
 class UPlus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
+        self.funct = lambda args: +args[0]
 
 
 class UMinus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
+        self.funct = lambda args: +args[0]
 
 
 class UNot(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
+        self.funct = lambda args: not args[0]
 
 
 class Print(Unary):
@@ -125,41 +128,49 @@ class Compare(Binary):
 class LessT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] < args[1]
+
 
 
 class MoreT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
-
+        self.funct = lambda args: args[0] > args[1]
 
 class LessOrEq(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] <= args[1]
 
 
 class MoreOrEq(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] >= args[1]
 
 
 class Equal(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] == args[1]
 
 
 class NotEqual(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] != args[1]
 
 
 class LogicAnd(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] and args[1]
 
 
 class LogicOr(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
+        self.funct = lambda args: args[0] or args[1]
 
 
 class Operate(Binary):
@@ -178,26 +189,31 @@ class Operate(Binary):
 class BMinus(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
+        self.funct = lambda args: args[0] - args[1]
 
 
 class BPlus(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
+        self.funct = lambda args: args[0] + args[1]
 
 
 class Div(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
+        self.funct = lambda args: args[0] / args[1]
 
 
 class Mult(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
+        self.funct = lambda args: args[0] * args[1]
 
 
 class Mod(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
+        self.funct = lambda args: args[0] % args[1]
 
     def getType(self, args):
         return "int"
