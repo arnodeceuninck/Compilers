@@ -1,6 +1,10 @@
 # Compilers
 ## Auteurs
 Arno Deceuninck & Basil Rommens
+## Quickstart
+```run.sh``` for running ```main.py``` with ```test.c```
+
+```test.sh``` for running unittests
 ## Opgave
 ### 1. Expressions
 #### Mandatory
