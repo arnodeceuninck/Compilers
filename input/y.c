@@ -1,3 +1,3 @@
-float x= 32.0;
-float y = 1+x;
+float y = 0.0;
+float x = 32.0 > y;
 printf(x);
