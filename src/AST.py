@@ -137,6 +137,10 @@ def generate_LLVM(ast):
             tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type_ + ", " + type_ + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
+            if type == "double":
+                tempvar2 = "t" + str(ast.node.get_id())
+                output += "%" + tempvar2 + " = fpext float %" + tempvar1 + " to double\n"
+                tempvar1 = tempvar2
             output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} %{})\n'.format(
                 formatType, type, tempvar1)
         else:
