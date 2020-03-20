@@ -34,10 +34,13 @@ class Constant(Node):
     def __str__(self):
         return '[label="Constant {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
+    def set_value(self, value):
+        self.value = value
+
 
 class CInt(Constant):
-    def __init__(self, value=""):
-        Constant.__init__(self, value)
+    def __init__(self, value=0):
+        Constant.__init__(self, int(round(value)))
         self.type = "int"
 
     def __str__(self):
@@ -46,10 +49,13 @@ class CInt(Constant):
     def getType(self, args):
         return self.type
 
+    def set_value(self, value):
+        self.value = int(round(value))
+
 
 class CFloat(Constant):
-    def __init__(self, value=""):
-        Constant.__init__(self, value)
+    def __init__(self, value=0):
+        Constant.__init__(self, float(value))
         self.type = "float"
 
     def __str__(self):
@@ -57,6 +63,9 @@ class CFloat(Constant):
 
     def getType(self, args):
         return self.type
+
+    def set_value(self, value):
+        self.value = float(value)
 
 
 class CChar(Constant):

@@ -31,6 +31,9 @@ Arno Deceuninck & Basil Rommens
 - [ ] Retaining comments in compilation process
 - [ ] Comment after every instruction that contains the statement from the input code
 
+## Opmerkingen
+Indien er een bewerking wordt gedaan op 2 integer getallen, wordt de uitkomst afgerond en omgezet naar een int
+
 ## Node klasse
 ### Structuur
 ![alt text](doc/NodeClass.png)
