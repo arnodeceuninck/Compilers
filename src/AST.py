@@ -21,12 +21,19 @@ def generate_LLVM(ast):
     # If the type is assignment then we need first calculate the right hand value of the assignment
     if isinstance(ast.node, Assign):
         output += generate_LLVM(ast.children[1])[0]
-        # If The left side is a variable then take the variable name not the node type
+        type = ""
+        if isinstance(ast.children[0].node, VChar):
+            type = "i8"
+        elif isinstance(ast.children[0].node, VInt):
+            type = "i32"
+        elif isinstance(ast.children[0].node, VFloat):
+            type = "float"
+        # If The right side is a variable then take the variable name not the node type
         if isinstance(ast.children[1].node, Variable):
-            output += ast.node.get_LLVM().format("i32*", "@", str(ast.children[1].node.value), "i32", "@",
+            output += ast.node.get_LLVM().format(type + "*", "@", str(ast.children[1].node.value), type, "@",
                                                  str(ast.children[0].node.value))
         else:  # If the node wasnt a variable take the node id
-            output += ast.node.get_LLVM().format("i32", "%", str(ast.children[1]), "i32", "@",
+            output += ast.node.get_LLVM().format(type, "%", str(ast.children[1]), type, "@",
                                                  str(ast.children[0].node.value))
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
@@ -35,7 +42,22 @@ def generate_LLVM(ast):
 
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
-        output += BPlus().get_LLVM().format("%", str(ast), "i32", "", str(ast.node.value), "", "0")
+        type = ""
+        val = ""
+        neutralval = ""
+        if isinstance(ast.node, CChar):
+            type = "i8"
+            val = str(ord(ast.node.value[1]))
+            neutralval = "0"
+        elif isinstance(ast.node, CInt):
+            type = "i32"
+            val = str(ast.node.value)
+            neutralval = "0"
+        elif isinstance(ast.node, CFloat):
+            type = "float"
+            val = str(ast.node.value)
+            neutralval = "0.0"
+        output += BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
 
     # If we encounter an operator then we need to operate on its children
     elif isinstance(ast.node, Binary):
@@ -44,29 +66,48 @@ def generate_LLVM(ast):
         output += tempret1[0]
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
-        retval = tempret1 + tempret2
+        retval = tempret1[1] + tempret2[1]
+        is_float = False
+        for formatType in tempret1[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
+        for formatType in tempret2[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
         # execute operator
+        type = ast.getType()
+        if type == "float":
+            type = "float"
+            is_float = True
+        elif type == "int":
+            type = "i32"
+        elif type == "char":
+            type = "i8"
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
-            tempvar1 = str(ast.node.get_id())
-            tempvar2 = str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
-            output += "%" + tempvar2 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
-            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
-                                                 "%", tempvar2)
+            tempvar1 = "t" + str(ast.node.get_id())
+            tempvar2 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1,
+                                                         "%", tempvar2)
         elif isinstance(ast.children[0].node, Variable):  # First variable
-            tempvar1 = str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
-            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
-                                                 "%", str(ast.children[1]))
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+            output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1,
+                                                         "%", str(ast.children[1]))
         elif isinstance(ast.children[1].node, Variable):  # Second variable
-            tempvar1 = str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
-            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", str(ast.children[0]),
-                                                 "%", tempvar1)
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", str(ast.children[0]),
+                                                         "%", tempvar1)
         else:  # No variable
-            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", ast.children[0],
-                                                 "%", str(ast.children[1]))
+            output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", ast.children[0],
+                                                         "%", str(ast.children[1]))
 
     if isinstance(ast.node, Print):
         tempvar1 = ""
@@ -76,12 +117,15 @@ def generate_LLVM(ast):
         if isinstance(ast.children[0].node, VInt) or isinstance(ast.children[0].node, CInt):
             formatType = "d"
             type = "i32"
+            type_ = "i32"
         elif isinstance(ast.children[0].node, VFloat) or isinstance(ast.children[0].node, CFloat):
             formatType = "f"
             type = "double"
+            type_ = "float"
         elif isinstance(ast.children[0].node, VChar) or isinstance(ast.children[0].node, CChar):
             formatType = "c"
-            type = "i32"
+            type = "i8"
+            type_ = "i8"
 
         if formatType not in formatTypes:
             formatTypes.append(formatType)
@@ -90,9 +134,10 @@ def generate_LLVM(ast):
             output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
                 formatType, type, ord(ast.children[0].node.value[1]))
         elif isinstance(ast.children[0].node, Variable):
-            tempvar1 = str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
-            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type_ + ", " + type_ + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} %{})\n'.format(
                 formatType, type, tempvar1)
         else:
             output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
