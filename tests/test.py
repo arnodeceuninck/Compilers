@@ -94,13 +94,13 @@ class MyTestCase(unittest.TestCase):
 
     def test_logicop(self):
         # Tests whether the folding has been done right
-        tree = self.helper_test_c("logicop")
-        self.assertEqual(int(tree.children[0].children[1].node.value), 0)  # Values must match
-        self.assertEqual(int(tree.children[1].children[1].node.value), 0)
-        self.assertEqual(int(tree.children[2].children[1].node.value), 1)
-        self.assertEqual(int(tree.children[3].children[1].node.value), 1)
-        self.assertEqual(int(tree.children[3].children[1].node.value), 1)
-        self.assertEqual(int(tree.children[3].children[1].node.value), 0)
+        tree = self.helper_test_c("logicop", fold=True)
+        self.assertEqual(float(tree.children[0].children[1].node.value), 0)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].node.value), 0)
+        self.assertEqual(float(tree.children[2].children[1].node.value), 1)
+        self.assertEqual(float(tree.children[3].children[1].node.value), 1)
+        self.assertEqual(float(tree.children[4].children[1].node.value), 1)
+        self.assertEqual(float(tree.children[5].children[1].node.value), 0)
         pass
 
     def test_unop_num(self):

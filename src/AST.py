@@ -527,7 +527,7 @@ class AST:
 
         # Set the node type to the correct value
         self.node = node
-        self.node.value = str(funct(args))
+        self.node.value = str(float(funct(args)))
         self.children = list()
 
         return True
