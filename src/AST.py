@@ -305,7 +305,7 @@ def generate_LLVM(ast):
             tempvar2 = "t" + str(ast.node.get_id())
             if type == "float":
                 output += UNot().get_LLVM(is_float).format("%", tempvar2, "i32", "%", tempvar1)
-                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float"\n
+                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float\n"
             else:
                 output += UNot().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
 
