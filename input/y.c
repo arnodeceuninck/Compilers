@@ -1,3 +1,5 @@
 int y = 3;
-const int x = y;
-const int* z = x;
+int x = y + y + y / y;
+x = 2;
+y = 1;
+printf(x);

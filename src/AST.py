@@ -6,14 +6,17 @@ from src.symbolTable import *
 
 def generate_LLVM(ast):
     output = ""
+    retval = False
     # If the ast node is a sequence then the nodes below it can be instructions but this node means nothing at the moment
     if isinstance(ast.node, StatementSequence):
         for child in ast.children:
-            output += generate_LLVM(child)
+            tempret = generate_LLVM(child)
+            output += tempret[0]
+            retval = tempret[1]
 
     # If the type is assignment then we need first calculate the right hand value of the assignment
     if isinstance(ast.node, Assign):
-        output += generate_LLVM(ast.children[1])
+        output += generate_LLVM(ast.children[1])[0]
         # If The left side is a variable then take the variable name not the node type
         if isinstance(ast.children[1].node, Variable):
             output += ast.node.get_LLVM().format("i32*", "@", str(ast.children[1].node.value), "i32", "@",
@@ -24,7 +27,7 @@ def generate_LLVM(ast):
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
     elif isinstance(ast.node, Variable):
-        return ""
+        return "", False
 
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
@@ -33,8 +36,11 @@ def generate_LLVM(ast):
     # If we encounter an operator then we need to operate on its children
     elif isinstance(ast.node, Binary):
         # generate LLVM for the left and right side of the operator
-        output += generate_LLVM(ast.children[0])
-        output += generate_LLVM(ast.children[1])
+        tempret1 = generate_LLVM(ast.children[0])
+        output += tempret1[0]
+        tempret2 = generate_LLVM(ast.children[1])
+        output += tempret2[0]
+        retval = tempret1 + tempret2
         # execute operator
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
@@ -55,10 +61,19 @@ def generate_LLVM(ast):
             output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", str(ast.children[0]),
                                                  "%", tempvar1)
         else:  # No variable
-            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", ast.children[0].node.value,
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", ast.children[0],
                                                  "%", str(ast.children[1]))
 
-    return output
+    if isinstance(ast.node, Print):
+        tempvar1 = ""
+        if isinstance(ast.children[0].node, Variable):
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += 'call void (i32) @print(i32 %{})\n'.format(tempvar1)
+        else:
+            output += 'call void (i32) @print(i32 {})\n'.format(321234141)
+        return output, True
+    return output, retval
 
 
 class AST:
@@ -117,9 +132,26 @@ class AST:
             output += LLVM_var_name + " = " + LLVM_type + ", " + LLVM_align + "\n"
         output += "\n"
         output += "define i32 @main() #0 {\n"
-        output += generate_LLVM(self)
+        retval = generate_LLVM(self)
+        output += retval[0]
+
         output += "ret i32 0\n"
         output += "}\n\n"
+
+        # If we need to print then create the print function
+        if retval[1]:
+            output += 'declare i32 @printf(i8*, ...)\n'
+            output += '@format = private constant [8 x i8] c"d = %d\\0A\\00"\n'
+            output += 'define void @print(i32 %a){\n'
+            output += '%p = call i32 (i8*, ...)\n'
+            output += '@printf(i8* getelementptr inbounds ([8 x i8],\n'
+            output += '[8 x i8]* @format,\n'
+            output += 'i32 0, i32 0),\n'
+            output += 'i32 %a)\n'
+            output += 'ret void\n'
+            output += '}\n\n'
+
+        # generate attributes of the function
         output += 'attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }\n'
         print(output)
 
