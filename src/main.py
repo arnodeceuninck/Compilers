@@ -10,7 +10,8 @@ from src.AST import AST
 
 def assignment(ast):
     # Check whether any other symbol is already in the symbol table
-    if isinstance(ast.node, Variable):
+
+    if isinstance(ast.node, Variable) and ast.parent and isinstance(ast.parent.node, Assign):
         # return not required here, but otherwise pycharm thinks the statement is useless
         return ast.symbol_table[ast.node.value]  # Raises an error if not yet declared
 
@@ -19,6 +20,11 @@ def assignment(ast):
         # improve type without constant and ptr
         location = ast.children[0].node.value
         type = ast.children[0].node
+        ast.symbol_table.insert(location, type)
+
+    if isinstance(ast.node, Variable) and ast.parent and not isinstance(ast.parent.node, Assign):
+        location = ast.node.value
+        type = ast.node
         ast.symbol_table.insert(location, type)
 
 
