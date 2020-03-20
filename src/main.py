@@ -9,6 +9,12 @@ from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
 from src.AST import AST
 
 def assignment(ast):
+    # Check whether any other symbol is already in the symbol table
+    if isinstance(ast.node, Variable):
+        # return not required here, but otherwise pycharm thinks the statement is useless
+        return ast.symbol_table[ast.node.value]  # Raises an error if not yet declared
+
+    # Add symbol to symbol table
     if ast.node.value == "=" and ast.node.declaration:
         # improve type without constant and ptr
         location = ast.children[0].node.value
