@@ -111,9 +111,9 @@ class UReref(Unary):
         Unary.__init__(self, value)
 
     def getType(self, args):
-        if args[len(args)-1] != "*":
+        if args[0][len(args[0])-1] != "*":
             raise RerefError()
-        return args[:len(args)-1]
+        return args[0][:len(args[0])-1]
 
 class Print(Unary):
     def __init__(self, value="printf"):
