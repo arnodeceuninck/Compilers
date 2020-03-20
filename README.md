@@ -41,3 +41,5 @@ Arno Deceuninck & Basil Rommens
 - ![#9f9f9f](https://placehold.it/15/9f9f9f/000000?text=+) Default Nodes
 
 ## Testen
+In de tests folder vind je een bestand ```test.py```. Als je dit runt, runnen er ineens een paar testen. De uitleg waarvoor
+welke test specifiek dient kan je terugvinden in het c bestand van de test zelf (in de folder ```tests/input```). Om specifiek te weten waarop de testen werken, kan je een kijkje nemen in het ```tests/test.py```. 
