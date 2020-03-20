@@ -62,7 +62,7 @@ def checkAssigns(ast: AST):
         else:
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
-def compile(input_file: str) -> AST:
+def compile(input_file: str, catch_error=True) -> AST:
     input_stream = FileStream(input_file)
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -70,25 +70,28 @@ def compile(input_file: str) -> AST:
     parser.addErrorListener(CustomErrorListener())
     tree = parser.start_rule()
 
-    try:
-        communismRules = customListener()
-        walker = ParseTreeWalker()
-        walker.walk(communismRules, tree)
+    if catch_error:
+        try:
+            return make_ast(tree)
+        except CompilerError as e:
+            print(str(e))
+            return None
+    else:
+        return make_ast(tree)
 
-        communismForLife = communismRules.trees[0]
 
-        # The two methods of below should be combined in order to make it one pass and apply error checking
-        # Create symbol table
-        communismForLife.traverse(assignment)
-        # Apply symbol table to all the variables
-        communismForLife.traverse(convertVar)
-        communismForLife.traverse(checkAssigns)
-
-        return communismForLife
-
-    except CompilerError as e:
-        print(str(e))
-        return None
+def make_ast(tree):
+    communismRules = customListener()
+    walker = ParseTreeWalker()
+    walker.walk(communismRules, tree)
+    communismForLife = communismRules.trees[0]
+    # The two methods of below should be combined in order to make it one pass and apply error checking
+    # Create symbol table
+    communismForLife.traverse(assignment)
+    # Apply symbol table to all the variables
+    communismForLife.traverse(convertVar)
+    communismForLife.traverse(checkAssigns)
+    return communismForLife
 
 
 def main(argv):

@@ -40,7 +40,7 @@ class Constant(Node):
 
 class CInt(Constant):
     def __init__(self, value=0):
-        Constant.__init__(self, int(round(value)))
+        Constant.__init__(self, int(round(int(value))))
         self.type = "int"
 
     def __str__(self):
@@ -113,7 +113,7 @@ class UPlus(Unary):
 class UMinus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
-        self.funct = lambda args: +args[0]
+        self.funct = lambda args: -args[0]
 
     def get_LLVM(self, is_float):
         if is_float:

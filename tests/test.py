@@ -3,6 +3,7 @@ import filecmp
 from src.main import compile
 from src.AST import AST
 from src.Node import *
+from src.ErrorListener import *
 
 
 class MyTestCase(unittest.TestCase):
@@ -14,14 +15,14 @@ class MyTestCase(unittest.TestCase):
         file1.close()
         file2.close()
 
-    def helper_test_c(self, test_name: str, cmp=False, fold=False):
+    def helper_test_c(self, test_name: str, cmp=False, fold=False, catch_errors=True):
         input_file: str = "input/" + test_name + ".c"
         output_file: str = "output/" + test_name + ".dot"
         output_file_folded: str = "output/" + test_name + ".folded.dot"
         expected_output_file: str = "expected_output/" + test_name + ".dot"
         expected_output_file_folded: str = "expected_output/" + test_name + ".folded.dot"
 
-        tree: AST = compile(input_file)
+        tree: AST = compile(input_file, catch_error=catch_errors)
         if tree:
             tree.to_dot(output_file)
             if fold:
@@ -104,8 +105,33 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def test_unop_num(self):
-        self.helper_test_c("unop_num")
+        # Tests whether the unary operations on numbers (not logical) are successfully folded
+        tree = self.helper_test_c("unop_num", fold=True)
+        self.assertEqual(float(tree.children[0].children[1].node.value), 1)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].node.value), -1)
         pass
+
+    def test_operator_precedence_folding(self):
+        # Tests whether the folding has been done right
+        tree = self.helper_test_c("operator_precedence_folding", fold=True)
+        self.assertEqual(float(tree.children[0].children[1].node.value), 6)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].node.value), 3)
+        self.assertEqual(float(tree.children[2].children[1].node.value), 13)
+        self.assertEqual(float(tree.children[3].children[1].node.value), 1)
+        self.assertEqual(float(tree.children[4].children[1].node.value), 69)
+        pass
+
+    def test_redeclaration_error(self):
+        # Tests whether the folding has been done right
+        error_given = False
+        try:
+            tree = self.helper_test_c("redeclaration_error", catch_errors=False)
+        except VariableRedeclarationError as e:
+            error_given = True
+            self.assertEqual(e.variable, "x")
+        self.assertTrue(error_given)
+        pass
+
 
     # def test_div_zero(self):
     #     self.helper_test_c("div_zero")

@@ -1,2 +1,2 @@
-float y = 0.0;
-printf(y);
+int x;
+int x = 420;
