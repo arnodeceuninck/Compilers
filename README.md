@@ -26,6 +26,7 @@ Arno Deceuninck & Basil Rommens
 #### Mandatory
 - [x] Comments (single line and multiline)
 - [x] Printf
+- [x] LLVM generation (niet mogelijk om pointers te gebruiken)
 #### Optional
 - [ ] Retaining comments in compilation process
 - [ ] Comment after every instruction that contains the statement from the input code

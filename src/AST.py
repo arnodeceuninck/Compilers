@@ -422,8 +422,6 @@ class AST:
                 output += '@.strf = private unnamed_addr constant [4 x i8] c"%f\\0A\\00", align 1\n'
             output += 'declare i32 @printf(i8*, ...)\n'
 
-        print(output)
-
         # Write output to the outputfile
         outputFile = open(filename, "w")
         outputFile.write(output)
