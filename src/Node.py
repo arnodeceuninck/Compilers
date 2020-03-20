@@ -10,6 +10,7 @@ class Node:
     def __init__(self, value="", color="#9f9f9f"):
         self.value = value
         self.color = color
+        self.funct = None
 
     @staticmethod
     def get_id():

@@ -305,7 +305,7 @@ def generate_LLVM(ast):
             tempvar2 = "t" + str(ast.node.get_id())
             if type == "float":
                 output += UNot().get_LLVM(is_float).format("%", tempvar2, "i32", "%", tempvar1)
-                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float"\n
+                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float\n"
             else:
                 output += UNot().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
 
@@ -421,8 +421,6 @@ class AST:
             if "f" in retval[2]:
                 output += '@.strf = private unnamed_addr constant [4 x i8] c"%f\\0A\\00", align 1\n'
             output += 'declare i32 @printf(i8*, ...)\n'
-
-        print(output)
 
         # Write output to the outputfile
         outputFile = open(filename, "w")
