@@ -22,7 +22,7 @@ def assignment(ast):
         type = ast.children[0].node
         ast.symbol_table.insert(location, type)
 
-    if isinstance(ast.node, Variable) and ast.parent and not isinstance(ast.parent.node, Assign):
+    if isinstance(ast.node, Variable) and ast.parent and not (isinstance(ast.parent.node, Assign) or isinstance(ast.parent.node, Print) or isinstance(ast.parent.node, Unary) or isinstance(ast.parent.node, Binary)):
         location = ast.node.value
         type = ast.node
         ast.symbol_table.insert(location, type)
