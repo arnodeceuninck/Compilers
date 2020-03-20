@@ -331,7 +331,13 @@ class customListener(ParseTreeListener):
                 node = UMinus(symbol)
             elif ctx.NOT():
                 symbol = "!"
-                node = Node(symbol)
+                node = UNot(symbol)
+            elif ctx.MULT():
+                symbol = "*"
+                node = UReref(symbol)
+            elif ctx.REF():
+                symbol = "&"
+                node = UDeref(symbol)
             else:
                 raise
             self.trees.append(AST(node))
@@ -341,7 +347,7 @@ class customListener(ParseTreeListener):
         if len(self.trees) > 1 and ctx.getChildCount() == 2:
             tree = self.trees[len(self.trees) - 2]
             symbol = tree.node.value
-            if symbol == "+" or symbol == "-" or symbol == "!":
+            if symbol == "+" or symbol == "-" or symbol == "!" or symbol == "&" or symbol == "*":
                 self.unary_op_simplify()
 
     # Enter a parse tree produced by cParser#operation_brackets.
@@ -363,24 +369,13 @@ class customListener(ParseTreeListener):
         elif ctx.CHAR_ID():
             # print(ctx.getText())
             self.trees.append(AST(node=CChar(ctx.getText())))
-        elif ctx.rvalue_variable():
-            pass
+        elif ctx.VAR_NAME():
+            # print(ctx.getText())
+            self.trees.append(AST(node=Variable(ctx.getText())))
         else:
             if len(self.trees) > 1:
                 self.trees[len(self.trees) -
                            2] = self.trees[len(self.trees) - 1]
                 self.trees.pop()
 
-    # Enter a parse tree produced by cParser#rvalue_variable.
-    def enterRvalue_variable(self, ctx: cParser.Rvalue_variableContext):
-        pass
-
-    # Exit a parse tree produced by cParser#rvalue_variable.
-    def exitRvalue_variable(self, ctx: cParser.Rvalue_variableContext):
-        node = Variable(ctx.name.text)
-        if ctx.addr:
-            node.ptr = True
-        if ctx.ptr:
-            node.reref = True
-        self.trees.append(AST(node=node))
 

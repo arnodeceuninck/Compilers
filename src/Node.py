@@ -1,7 +1,7 @@
 """
 !
 """
-
+from src.ErrorListener import RerefError
 
 class Node:
     def __init__(self, value="", color="#9f9f9f"):
@@ -98,6 +98,23 @@ class UNot(Unary):
         self.funct = lambda args: not args[0]
 
 
+class UDeref(Unary):
+    def __init__(self, value="&"):
+        Unary.__init__(self, value)
+
+    def getType(self, args):
+        return args[0] + "*"
+
+
+class UReref(Unary):
+    def __init__(self, value="*"):
+        Unary.__init__(self, value)
+
+    def getType(self, args):
+        if args[len(args)-1] != "*":
+            raise RerefError()
+        return args[:len(args)-1]
+
 class Print(Unary):
     def __init__(self, value="printf"):
         Unary.__init__(self, value)
@@ -131,11 +148,11 @@ class LessT(Compare):
         self.funct = lambda args: args[0] < args[1]
 
 
-
 class MoreT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] > args[1]
+
 
 class LessOrEq(Compare):
     def __init__(self, value=""):
@@ -244,7 +261,10 @@ class Variable(Node):
         return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
     def getType(self, args):
-        return self.type
+        ptr = ""
+        if self.ptr:
+            ptr = "*"
+        return self.type + ptr
 
 
 class VInt(Variable):

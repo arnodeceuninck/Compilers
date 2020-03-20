@@ -45,6 +45,13 @@ class IncompatibleTypesError(CompilerError):
     def __str__(self):
         return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
 
+class RerefError(CompilerError):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "[ERROR] trying to rereference something that's not a pointer"
+
 
 class SyntaxCompilerError(CompilerError):
     def __init__(self, row, column, offendingSymbol, msg):
@@ -57,6 +64,8 @@ class SyntaxCompilerError(CompilerError):
     def __str__(self):
         return "[ERROR] Oh no!! Something went wrong at line " + str(self.row) + ", column " + str(
             self.column) + ": " + self.msg
+
+
 
 
 

@@ -31,12 +31,12 @@ operation_mult_div: left=operation_mult_div ('*'|'/'|'%') right=operation_unary_
 operation_unary_plus_minus_not: '+' right=operation_brackets
                               | '-' right=operation_brackets
                               | '!' right=operation_brackets
+                              | '*' right=operation_brackets
+                              | '&' right=operation_brackets
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (INT_ID | FLOAT_ID | CHAR_ID | var=rvalue_variable);
-
-rvalue_variable: (addr='&' | ptr='*')? name=VAR_NAME;
+                  | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
 PLUS: '+';
 MIN: '-';
