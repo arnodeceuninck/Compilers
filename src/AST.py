@@ -4,6 +4,103 @@ from src.Node import *
 from src.symbolTable import *
 
 
+def generate_LLVM(ast):
+    output = ""
+    retval = False
+    formatTypes = list()
+    # If the ast node is a sequence then the nodes below it can be instructions but this node means nothing at the moment
+    if isinstance(ast.node, StatementSequence):
+        for child in ast.children:
+            tempret = generate_LLVM(child)
+            output += tempret[0]
+            retval = tempret[1]
+            for formatType in tempret[2]:
+                if formatType not in formatTypes:
+                    formatTypes.append(formatType)
+
+    # If the type is assignment then we need first calculate the right hand value of the assignment
+    if isinstance(ast.node, Assign):
+        output += generate_LLVM(ast.children[1])[0]
+        # If The left side is a variable then take the variable name not the node type
+        if isinstance(ast.children[1].node, Variable):
+            output += ast.node.get_LLVM().format("i32*", "@", str(ast.children[1].node.value), "i32", "@",
+                                                 str(ast.children[0].node.value))
+        else:  # If the node wasnt a variable take the node id
+            output += ast.node.get_LLVM().format("i32", "%", str(ast.children[1]), "i32", "@",
+                                                 str(ast.children[0].node.value))
+
+    # If we encounter a variable then we do not need to do anything because it is already assigned
+    elif isinstance(ast.node, Variable):
+        return "", retval, formatTypes
+
+    # If the node is a constant then we add the assignment of the constant
+    elif isinstance(ast.node, Constant):
+        output += BPlus().get_LLVM().format("%", str(ast), "i32", "", str(ast.node.value), "", "0")
+
+    # If we encounter an operator then we need to operate on its children
+    elif isinstance(ast.node, Binary):
+        # generate LLVM for the left and right side of the operator
+        tempret1 = generate_LLVM(ast.children[0])
+        output += tempret1[0]
+        tempret2 = generate_LLVM(ast.children[1])
+        output += tempret2[0]
+        retval = tempret1 + tempret2
+        # execute operator
+        # Both variable
+        if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
+            tempvar1 = str(ast.node.get_id())
+            tempvar2 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += "%" + tempvar2 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
+                                                 "%", tempvar2)
+        elif isinstance(ast.children[0].node, Variable):  # First variable
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
+                                                 "%", str(ast.children[1]))
+        elif isinstance(ast.children[1].node, Variable):  # Second variable
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", str(ast.children[0]),
+                                                 "%", tempvar1)
+        else:  # No variable
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", ast.children[0],
+                                                 "%", str(ast.children[1]))
+
+    if isinstance(ast.node, Print):
+        tempvar1 = ""
+        formatType = ""
+        type = ""
+        # Check the variable type of the node
+        if isinstance(ast.children[0].node, VInt) or isinstance(ast.children[0].node, CInt):
+            formatType = "d"
+            type = "i32"
+        elif isinstance(ast.children[0].node, VFloat) or isinstance(ast.children[0].node, CFloat):
+            formatType = "f"
+            type = "double"
+        elif isinstance(ast.children[0].node, VChar) or isinstance(ast.children[0].node, CChar):
+            formatType = "c"
+            type = "i32"
+
+        if formatType not in formatTypes:
+            formatTypes.append(formatType)
+
+        if isinstance(ast.children[0].node, CChar):
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, ord(ast.children[0].node.value[1]))
+        elif isinstance(ast.children[0].node, Variable):
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, tempvar1)
+        else:
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, ast.children[0].node.value)
+        return output, True, formatTypes
+    return output, retval, formatTypes
+
+
 class AST:
     symbol_table = SymbolTable()
 
@@ -35,8 +132,55 @@ class AST:
             returnStr += "T"
         return returnStr
 
-    def to_LLVM(self, file):
-        file
+    def to_LLVM(self, filename):
+        output = ""
+        symbol_table = self.symbol_table.elements
+        # generate variable declarations from the symbol table
+        for var in symbol_table:
+            # define all the variables
+            LLVM_var_name = "@" + var
+            LLVM_type = ""
+            LLVM_align = "align"
+            if symbol_table[var].type.const:
+                LLVM_type = "constant"
+            else:
+                LLVM_type = "global"
+            if symbol_table[var].type.type == "int":
+                LLVM_type += " i32 0"
+                LLVM_align += " 4"
+            elif symbol_table[var].type.type == "float":
+                LLVM_type += " float 0.0"
+                LLVM_align += " 4"
+            elif symbol_table[var].type.type == "char":
+                LLVM_type += " i8 0"
+                LLVM_align += " 1"
+            output += LLVM_var_name + " = " + LLVM_type + ", " + LLVM_align + "\n"
+        output += "\n"
+        output += "define i32 @main() #0 {\n"
+        retval = generate_LLVM(self)
+        output += retval[0]
+
+        output += "ret i32 0\n"
+        output += "}\n\n"
+
+        # If we need to print then create the print function
+        if retval[1]:
+            if "c" in retval[2]:
+                output += '@.strc = private unnamed_addr constant [4 x i8] c"%c\\0A\\00", align 1\n'
+            if "d" in retval[2]:
+                output += '@.strd = private unnamed_addr constant [4 x i8] c"%d\\0A\\00", align 1\n'
+            if "f" in retval[2]:
+                output += '@.strf = private unnamed_addr constant [4 x i8] c"%f\\0A\\00", align 1\n'
+            output += 'declare i32 @printf(i8*, ...)\n'
+
+        # generate attributes of the function
+        output += 'attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }\n'
+        print(output)
+
+        # Write output to the outputfile
+        outputFile = open(filename, "w")
+        outputFile.write(output)
+        outputFile.close()
 
     def dotNode(self):
         # The output needs to be the id + The label itself

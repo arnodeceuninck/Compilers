@@ -1,5 +1,6 @@
 from src.ErrorListener import VariableRedeclarationError, UndeclaredVariableError
 
+
 class SymbolTableElement:
     def __init__(self, type=None):
         self.type = type

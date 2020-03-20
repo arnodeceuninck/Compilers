@@ -36,7 +36,7 @@ class customListener(ParseTreeListener):
             return
 
         # If there are more trees link them with a root
-        newRoot = AST(Node("Statement Sequence"))
+        newRoot = AST(StatementSequence())
         for tree in self.trees:
             tree.parent = newRoot
             newRoot.children.append(tree)

@@ -85,6 +85,7 @@ def main(argv):
         communismForLife.to_dot("output/c_tree.dot")
         communismForLife.constant_folding()
         communismForLife.to_dot("output/c_tree_folded.dot")
+        communismForLife.to_LLVM("output/communismForLife.ll")
 
         print("Done")
     else:
