@@ -27,6 +27,7 @@ class StatementSequence(Node):
 class Constant(Node):
     def __init__(self, value=""):
         Node.__init__(self, value, "#FFD885")
+        self.funct = None
 
     def __str__(self):
         return '[label="Constant {}", fillcolor="{}"] \n'.format(self.value, self.color)
@@ -79,6 +80,7 @@ class Operator(Node):
 class Unary(Operator):
     def __init__(self, value=""):
         Operator.__init__(self, value)
+        self.funct = None
 
     def __str__(self):
         return '[label="Unary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)

@@ -7,12 +7,16 @@ from src.symbolTable import *
 def generate_LLVM(ast):
     output = ""
     retval = False
+    formatTypes = list()
     # If the ast node is a sequence then the nodes below it can be instructions but this node means nothing at the moment
     if isinstance(ast.node, StatementSequence):
         for child in ast.children:
             tempret = generate_LLVM(child)
             output += tempret[0]
             retval = tempret[1]
+            for formatType in tempret[2]:
+                if formatType not in formatTypes:
+                    formatTypes.append(formatType)
 
     # If the type is assignment then we need first calculate the right hand value of the assignment
     if isinstance(ast.node, Assign):
@@ -27,7 +31,7 @@ def generate_LLVM(ast):
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
     elif isinstance(ast.node, Variable):
-        return "", False
+        return "", retval, formatTypes
 
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
@@ -66,14 +70,35 @@ def generate_LLVM(ast):
 
     if isinstance(ast.node, Print):
         tempvar1 = ""
-        if isinstance(ast.children[0].node, Variable):
+        formatType = ""
+        type = ""
+        # Check the variable type of the node
+        if isinstance(ast.children[0].node, VInt) or isinstance(ast.children[0].node, CInt):
+            formatType = "d"
+            type = "i32"
+        elif isinstance(ast.children[0].node, VFloat) or isinstance(ast.children[0].node, CFloat):
+            formatType = "f"
+            type = "double"
+        elif isinstance(ast.children[0].node, VChar) or isinstance(ast.children[0].node, CChar):
+            formatType = "c"
+            type = "i32"
+
+        if formatType not in formatTypes:
+            formatTypes.append(formatType)
+
+        if isinstance(ast.children[0].node, CChar):
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, ord(ast.children[0].node.value[1]))
+        elif isinstance(ast.children[0].node, Variable):
             tempvar1 = str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
-            output += 'call void (i32) @print(i32 %{})\n'.format(tempvar1)
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, tempvar1)
         else:
-            output += 'call void (i32) @print(i32 {})\n'.format(321234141)
-        return output, True
-    return output, retval
+            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
+                formatType, type, ast.children[0].node.value)
+        return output, True, formatTypes
+    return output, retval, formatTypes
 
 
 class AST:
@@ -140,16 +165,13 @@ class AST:
 
         # If we need to print then create the print function
         if retval[1]:
+            if "c" in retval[2]:
+                output += '@.strc = private unnamed_addr constant [4 x i8] c"%c\\0A\\00", align 1\n'
+            if "d" in retval[2]:
+                output += '@.strd = private unnamed_addr constant [4 x i8] c"%d\\0A\\00", align 1\n'
+            if "f" in retval[2]:
+                output += '@.strf = private unnamed_addr constant [4 x i8] c"%f\\0A\\00", align 1\n'
             output += 'declare i32 @printf(i8*, ...)\n'
-            output += '@format = private constant [8 x i8] c"d = %d\\0A\\00"\n'
-            output += 'define void @print(i32 %a){\n'
-            output += '%p = call i32 (i8*, ...)\n'
-            output += '@printf(i8* getelementptr inbounds ([8 x i8],\n'
-            output += '[8 x i8]* @format,\n'
-            output += 'i32 0, i32 0),\n'
-            output += 'i32 %a)\n'
-            output += 'ret void\n'
-            output += '}\n\n'
 
         # generate attributes of the function
         output += 'attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }\n'
