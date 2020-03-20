@@ -1,2 +1,2 @@
-float x= 1.0;
+float x= 32.0;
 printf(x);
