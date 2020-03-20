@@ -4,9 +4,16 @@
 from src.ErrorListener import RerefError
 
 class Node:
+    id = 0
+
     def __init__(self, value="", color="#9f9f9f"):
         self.value = value
         self.color = color
+
+    @staticmethod
+    def get_id():
+        Node.id += 1
+        return Node.id
 
     def __str__(self):
         return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
@@ -208,11 +215,17 @@ class BMinus(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] - args[1]
 
+    def get_LLVM(self):
+        return "{}{} = sub {} {}{}, {}{}\n"
+
 
 class BPlus(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] + args[1]
+
+    def get_LLVM(self):
+        return "{}{} = add {} {}{}, {}{}\n"
 
 
 class Div(Operate):
@@ -220,11 +233,17 @@ class Div(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] / args[1]
 
+    def get_LLVM(self):
+        return "{}{} = sdiv {} {}{}, {}{}\n"
+
 
 class Mult(Operate):
     def __init__(self, value=""):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] * args[1]
+
+    def get_LLVM(self):
+        return "{}{} = mul {} {}{}, {}{}\n"
 
 
 class Mod(Operate):
@@ -234,6 +253,9 @@ class Mod(Operate):
 
     def getType(self, args):
         return "int"
+
+    def get_LLVM(self):
+        return "{}{} = srem {} {}{}, {}{}\n"
 
 
 class Assign(Binary):
@@ -245,6 +267,9 @@ class Assign(Binary):
         if self.declaration:
             return '[label="Assign Declaration", fillcolor="{}"] \n'.format(self.color)
         return '[label="Assign", fillcolor="{}"] \n'.format(self.color)
+
+    def get_LLVM(self):
+        return "store {} {}{}, {}* {}{}\n"
 
 
 class Variable(Node):

@@ -4,6 +4,63 @@ from src.Node import *
 from src.symbolTable import *
 
 
+def generate_LLVM(ast):
+    output = ""
+    # If the ast node is a sequence then the nodes below it can be instructions but this node means nothing at the moment
+    if isinstance(ast.node, StatementSequence):
+        for child in ast.children:
+            output += generate_LLVM(child)
+
+    # If the type is assignment then we need first calculate the right hand value of the assignment
+    if isinstance(ast.node, Assign):
+        output += generate_LLVM(ast.children[1])
+        # If The left side is a variable then take the variable name not the node type
+        if isinstance(ast.children[1].node, Variable):
+            output += ast.node.get_LLVM().format("i32*", "@", str(ast.children[1].node.value), "i32", "@",
+                                                 str(ast.children[0].node.value))
+        else:  # If the node wasnt a variable take the node id
+            output += ast.node.get_LLVM().format("i32", "%", str(ast.children[1]), "i32", "@",
+                                                 str(ast.children[0].node.value))
+
+    # If we encounter a variable then we do not need to do anything because it is already assigned
+    elif isinstance(ast.node, Variable):
+        return ""
+
+    # If the node is a constant then we add the assignment of the constant
+    elif isinstance(ast.node, Constant):
+        output += BPlus().get_LLVM().format("%", str(ast), "i32", "", str(ast.node.value), "", "0")
+
+    # If we encounter an operator then we need to operate on its children
+    elif isinstance(ast.node, Binary):
+        # generate LLVM for the left and right side of the operator
+        output += generate_LLVM(ast.children[0])
+        output += generate_LLVM(ast.children[1])
+        # execute operator
+        # Both variable
+        if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
+            tempvar1 = str(ast.node.get_id())
+            tempvar2 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += "%" + tempvar2 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
+                                                 "%", tempvar2)
+        elif isinstance(ast.children[0].node, Variable):  # First variable
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[0].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", tempvar1,
+                                                 "%", str(ast.children[1]))
+        elif isinstance(ast.children[1].node, Variable):  # Second variable
+            tempvar1 = str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + "i32, " + "i32* " + "@" + str(ast.children[1].node.value) + "\n"
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", str(ast.children[0]),
+                                                 "%", tempvar1)
+        else:  # No variable
+            output += ast.node.get_LLVM().format("%", str(ast), "i32", "%", ast.children[0].node.value,
+                                                 "%", str(ast.children[1]))
+
+    return output
+
+
 class AST:
     symbol_table = SymbolTable()
 
@@ -35,8 +92,41 @@ class AST:
             returnStr += "T"
         return returnStr
 
-    def to_LLVM(self, file):
-        file
+    def to_LLVM(self, filename):
+        output = ""
+        symbol_table = self.symbol_table.elements
+        # generate variable declarations from the symbol table
+        for var in symbol_table:
+            # define all the variables
+            LLVM_var_name = "@" + var
+            LLVM_type = ""
+            LLVM_align = "align"
+            if symbol_table[var].type.const:
+                LLVM_type = "constant"
+            else:
+                LLVM_type = "global"
+            if symbol_table[var].type.type == "int":
+                LLVM_type += " i32 0"
+                LLVM_align += " 4"
+            elif symbol_table[var].type.type == "float":
+                LLVM_type += " float 0.0"
+                LLVM_align += " 4"
+            elif symbol_table[var].type.type == "char":
+                LLVM_type += " i8 0"
+                LLVM_align += " 1"
+            output += LLVM_var_name + " = " + LLVM_type + ", " + LLVM_align + "\n"
+        output += "\n"
+        output += "define i32 @main() #0 {\n"
+        output += generate_LLVM(self)
+        output += "ret i32 0\n"
+        output += "}\n\n"
+        output += 'attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }\n'
+        print(output)
+
+        # Write output to the outputfile
+        outputFile = open(filename, "w")
+        outputFile.write(output)
+        outputFile.close()
 
     def dotNode(self):
         # The output needs to be the id + The label itself
