@@ -249,6 +249,66 @@ def generate_LLVM(ast):
                                                      "%", tempvar2)
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
 
+    elif isinstance(ast.node, UPlus):
+        is_float = False
+        type = "i32"
+        if "float" == ast.getType():
+            is_float = True
+            type = "float"
+        elif ast.getType() == "char":
+            type = "i8"
+        tempvar1 = str(ast.children[0])
+        if isinstance(ast.children[0], Variable):
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+        output += UPlus().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
+
+    elif isinstance(ast.node, UMinus):
+        is_float = False
+        type = "i32"
+        if "float" == ast.getType():
+            is_float = True
+            type = "float"
+        elif ast.getType() == "char":
+            type = "i8"
+
+        tempvar1 = str(ast.children[0])
+        if isinstance(ast.children[0], Variable):
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+        output += UMinus().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
+
+    elif isinstance(ast.node, UNot):
+        is_float = False
+        type = "i32"
+        tempvar = "t" + str(ast.node.get_id())
+        if "float" == ast.getType():
+            is_float = True
+            type = "float"
+        elif ast.getType() == "char":
+            type = "i8"
+
+        tempvar = str(ast.node.get_id())
+        if isinstance(ast.node, Variable):
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+            if type == "float":
+                tempvar1_ = "t" + str(ast.node.get_id())
+                output += "%" + tempvar1_ + " = fptosi float %" + tempvar1 + " to i32\n"
+                tempvar1 = tempvar1_
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += UNot().get_LLVM(is_float).format("%", tempvar2, "i32", "%", tempvar1)
+                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float"\n
+            else:
+                output += UNot().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
+
     if isinstance(ast.node, Print):
         tempvar1 = ""
         formatType = ""

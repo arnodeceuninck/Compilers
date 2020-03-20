@@ -3,6 +3,7 @@
 """
 from src.ErrorListener import RerefError
 
+
 class Node:
     id = 0
 
@@ -94,17 +95,29 @@ class UPlus(Unary):
         Unary.__init__(self, value)
         self.funct = lambda args: +args[0]
 
+    def get_LLVM(self, is_float):
+        if is_float:
+            return "{}{} = fadd {} {}{}, 0.0\n"
+        return "{}{} = add {} {}{}, 0\n"
 
 class UMinus(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
         self.funct = lambda args: +args[0]
 
+    def get_LLVM(self, is_float):
+        if is_float:
+            return "{}{} = fsub {} 0.0, {}{}\n"
+        return "{}{} = sub {} 0, {}{}\n"
+
 
 class UNot(Unary):
     def __init__(self, value=""):
         Unary.__init__(self, value)
         self.funct = lambda args: not args[0]
+
+    def get_LLVM(self, is_float):
+        return "{}{} = icmp eq {} {}{}, 0\n"
 
 
 class UDeref(Unary):
@@ -120,9 +133,10 @@ class UReref(Unary):
         Unary.__init__(self, value)
 
     def getType(self, args):
-        if args[0][len(args[0])-1] != "*":
+        if args[0][len(args[0]) - 1] != "*":
             raise RerefError()
-        return args[0][:len(args[0])-1]
+        return args[0][:len(args[0]) - 1]
+
 
 class Print(Unary):
     def __init__(self, value="printf"):
@@ -164,6 +178,7 @@ class LessT(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp slt {} {}{}, {}{}\n"
 
+
 class MoreT(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
@@ -171,6 +186,7 @@ class MoreT(Compare):
 
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp sgt {} {}{}, {}{}\n"
+
 
 class LessOrEq(Compare):
     def __init__(self, value=""):
@@ -180,6 +196,7 @@ class LessOrEq(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp sle {} {}{}, {}{}\n"
 
+
 class MoreOrEq(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
@@ -188,6 +205,7 @@ class MoreOrEq(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp sge {} {}{}, {}{}\n"
 
+
 class Equal(Compare):
     def __init__(self, value=""):
         Compare.__init__(self, value)
@@ -195,6 +213,7 @@ class Equal(Compare):
 
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp eq {} {}{}, {}{}\n"
+
 
 class NotEqual(Compare):
     def __init__(self, value=""):
@@ -212,6 +231,7 @@ class LogicAnd(Compare):
 
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp and {} {}{}, {}{}\n"
+
 
 class LogicOr(Compare):
     def __init__(self, value=""):
