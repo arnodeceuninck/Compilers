@@ -15,17 +15,17 @@ Arno Deceuninck & Basil Rommens
 - [x] Logical operators &&, ||, and !
 ### 2. Variables
 #### Mandatory
-- [ ] Types (char, float, int and pointer)
-- [ ] Reserved words (const)
-- [ ] Variables
-- [ ] AST
+- [x] Types (char, float, int and pointer)
+- [x] Reserved words (const)
+- [x] Variables
+- [x] AST
 #### Optional
 - [ ] Identifier operations (++ and --)
 - [ ] Conversions
 ### 3. LLVM
 #### Mandatory
-- [ ] Comments (single line and multiline)
-- [ ] Printf
+- [x] Comments (single line and multiline)
+- [x] Printf
 #### Optional
 - [ ] Retaining comments in compilation process
 - [ ] Comment after every instruction that contains the statement from the input code
