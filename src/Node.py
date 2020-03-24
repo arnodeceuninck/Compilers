@@ -186,6 +186,8 @@ class LessT(Compare):
         self.funct = lambda args: args[0] < args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp olt {} {}{}, {}{}\n"
         return "{}{} = icmp slt {} {}{}, {}{}\n"
 
 
@@ -195,6 +197,8 @@ class MoreT(Compare):
         self.funct = lambda args: args[0] > args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp ogt {} {}{}, {}{}\n"
         return "{}{} = icmp sgt {} {}{}, {}{}\n"
 
 
@@ -204,6 +208,8 @@ class LessOrEq(Compare):
         self.funct = lambda args: args[0] <= args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp ole {} {}{}, {}{}\n"
         return "{}{} = icmp sle {} {}{}, {}{}\n"
 
 
@@ -213,6 +219,8 @@ class MoreOrEq(Compare):
         self.funct = lambda args: args[0] >= args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp oge {} {}{}, {}{}\n"
         return "{}{} = icmp sge {} {}{}, {}{}\n"
 
 
@@ -222,6 +230,8 @@ class Equal(Compare):
         self.funct = lambda args: args[0] == args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp eq {} {}{}, {}{}\n"
         return "{}{} = icmp eq {} {}{}, {}{}\n"
 
 
@@ -231,6 +241,8 @@ class NotEqual(Compare):
         self.funct = lambda args: args[0] != args[1]
 
     def get_LLVM(self, is_float=False):
+        if is_float:
+            return "{}{} = fcmp ne {} {}{}, {}{}"
         return "{}{} = icmp ne {} {}{}, {}{}\n"
 
 

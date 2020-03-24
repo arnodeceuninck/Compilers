@@ -1,2 +1,2 @@
-int x;
-int x = 420;
+int x = 0;
+int y = x || 1;

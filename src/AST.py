@@ -137,53 +137,35 @@ def generate_LLVM(ast):
             tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
-            if type == "float":
-                tempvar1_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar1_ + " = fptosi float %" + tempvar1 + " to i32\n"
-                tempvar1 = tempvar1_
 
             tempvar2 = "t" + str(ast.node.get_id())
             output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[1].node.value) + "\n"
-            if type == "float":
-                tempvar2_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar2_ + " = fptosi float %" + tempvar2 + " to i32\n"
-                tempvar2 = tempvar2_
 
             tempSave = "t" + str(ast.node.get_id())
             if type == "float":
-                output += ast.node.get_LLVM().format("%", tempSave, "i32", "%", tempvar1,
-                                                     "%", tempvar2)
+                output += ast.node.get_LLVM(True).format("%", tempSave, "float", "%", tempvar1,
+                                                         "%", tempvar2)
                 output += "%" + str(ast) + " = uitofp i1 %" + tempSave + " to float\n"
             else:
-                output += ast.node.get_LLVM().format("%", tempSave, type, "%", tempvar1,
-                                                     "%", tempvar2)
+                output += ast.node.get_LLVM(False).format("%", tempSave, type, "%", tempvar1,
+                                                          "%", tempvar2)
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
 
         elif isinstance(ast.children[0].node, Variable):  # First variable
             tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
-            if type == "float":
-                tempvar1_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar1_ + " = fptosi float %" + tempvar1 + " to i32\n"
-                tempvar1 = tempvar1_
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = ""
+            neutralVal = "0"
             if type == "float":
                 neutralVal = "0.0"
-            else:
-                neutralVal = "0"
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
-            if type == "float":
-                tempvar2_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar2_ + " = fptosi float %" + tempvar2 + " to i32\n"
-                tempvar2 = tempvar2_
 
             tempSave = "t" + str(ast.node.get_id())
             if type == "float":
-                output += ast.node.get_LLVM().format("%", tempSave, "i32", "%", tempvar1,
+                output += ast.node.get_LLVM().format("%", tempSave, "float", "%", tempvar1,
                                                      "%", tempvar2)
                 output += "%" + str(ast) + " = uitofp i1 %" + tempSave + " to float\n"
             else:
@@ -195,10 +177,6 @@ def generate_LLVM(ast):
             tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[1].node.value) + "\n"
-            if type == "float":
-                tempvar1_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar1_ + " = fptosi float %" + tempvar1 + " to i32\n"
-                tempvar1 = tempvar1_
 
             tempvar2 = "t" + str(ast.node.get_id())
             neutralVal = "0"
@@ -206,19 +184,15 @@ def generate_LLVM(ast):
                 neutralVal = "0.0"
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[0]), "", neutralVal)
-            if type == "float":
-                tempvar2_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar2_ + " = fptosi float %" + tempvar2 + " to i32\n"
-                tempvar2 = tempvar2_
 
             tempSave = "t" + str(ast.node.get_id())
             if type == "float":
-                output += ast.node.get_LLVM().format("%", tempSave, "i32", "%", tempvar2,
-                                                     "%", tempvar1)
+                output += ast.node.get_LLVM(True).format("%", tempSave, "float", "%", tempvar2,
+                                                         "%", tempvar1)
                 output += "%" + str(ast) + " = uitofp i1 %" + tempSave + " to float\n"
             else:
-                output += ast.node.get_LLVM().format("%", tempSave, type, "%", tempvar2,
-                                                     "%", tempvar1)
+                output += ast.node.get_LLVM(False).format("%", tempSave, type, "%", tempvar2,
+                                                          "%", tempvar1)
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
         else:  # No variable
             tempvar1 = "t" + str(ast.node.get_id())
@@ -227,21 +201,13 @@ def generate_LLVM(ast):
                 neutralVal = "0.0"
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
-            if type == "float":
-                tempvar1_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar1_ + " = fptosi float %" + tempvar1 + " to i32\n"
-                tempvar1 = tempvar1_
 
             tempvar2 = "t" + str(ast.node.get_id())
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
-            if type == "float":
-                tempvar2_ = "t" + str(ast.node.get_id())
-                output += "%" + tempvar2_ + " = fptosi float %" + tempvar2 + " to i32\n"
-                tempvar2 = tempvar2_
 
             tempSave = "t" + str(ast.node.get_id())
             if type == "float":
-                output += ast.node.get_LLVM().format("%", tempSave, "i32", "%", tempvar1,
+                output += ast.node.get_LLVM().format("%", tempSave, "float", "%", tempvar1,
                                                      "%", tempvar2)
                 output += "%" + str(ast) + " = uitofp i1 %" + tempSave + " to float\n"
             else:
@@ -488,7 +454,6 @@ class AST:
     def traverse(self, func):
         func(self)
         for child in self.children:
-            # func(child) # Why would you do this? you'll already do a func(self) when calling the traverse function of child
             child.traverse(func)
 
     # Does nothing with Comparison operators or logical operators
