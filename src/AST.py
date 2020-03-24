@@ -108,6 +108,258 @@ def generate_LLVM(ast):
         else:  # No variable
             output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", ast.children[0],
                                                          "%", str(ast.children[1]))
+    # If we encounter an and then we need to do special operations
+    elif isinstance(ast.node, LogicAnd):
+        # generate LLVM for the left and right side of the operator
+        tempret1 = generate_LLVM(ast.children[0])
+        output += tempret1[0]
+        tempret2 = generate_LLVM(ast.children[1])
+        output += tempret2[0]
+        retval = tempret1[1] + tempret2[1]
+        is_float = False
+        for formatType in tempret1[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
+        for formatType in tempret2[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
+        # execute operator
+        type = ast.getType()
+        if type == "float":
+            type = "float"
+            is_float = True
+        elif type == "int":
+            type = "i32"
+        elif type == "char":
+            type = "i8"
+        # Both variable
+        if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += Mult().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                       "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += Mult().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+
+        elif isinstance(ast.children[0].node, Variable):  # First variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += Mult().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                       "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += Mult().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+
+        elif isinstance(ast.children[1].node, Variable):  # Second variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[0]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += Mult().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar2,
+                                                       "%", tempvar1)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += Mult().get_LLVM(False).format("%", tempSave1, type, "%", tempvar2,
+                                                        "%", tempvar1)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+        else:  # No variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+
+            output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += Mult().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                       "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += Mult().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+    # If we encounter an or then we need to do special operations
+    elif isinstance(ast.node, LogicOr):
+        # generate LLVM for the left and right side of the operator
+        tempret1 = generate_LLVM(ast.children[0])
+        output += tempret1[0]
+        tempret2 = generate_LLVM(ast.children[1])
+        output += tempret2[0]
+        retval = tempret1[1] + tempret2[1]
+        is_float = False
+        for formatType in tempret1[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
+        for formatType in tempret2[2]:
+            if formatType not in formatTypes:
+                formatTypes.append(formatType)
+        # execute operator
+        type = ast.getType()
+        if type == "float":
+            type = "float"
+            is_float = True
+        elif type == "int":
+            type = "i32"
+        elif type == "char":
+            type = "i8"
+        # Both variable
+        if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += BPlus().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += BPlus().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                         "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+
+        elif isinstance(ast.children[0].node, Variable):  # First variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[0].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += BPlus().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += BPlus().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                         "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+
+        elif isinstance(ast.children[1].node, Variable):  # Second variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
+                ast.children[1].node.value) + "\n"
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[0]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += BPlus().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar2,
+                                                        "%", tempvar1)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += BPlus().get_LLVM(False).format("%", tempSave1, type, "%", tempvar2,
+                                                         "%", tempvar1)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
+        else:  # No variable
+            tempvar1 = "t" + str(ast.node.get_id())
+            neutralVal = "0"
+            if type == "float":
+                neutralVal = "0.0"
+
+            output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
+
+            tempvar2 = "t" + str(ast.node.get_id())
+            output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
+
+            tempSave1 = "t" + str(ast.node.get_id())
+            tempSave2 = "t" + str(ast.node.get_id())
+            if type == "float":
+                output += BPlus().get_LLVM(True).format("%", tempSave1, "float", "%", tempvar1,
+                                                        "%", tempvar2)
+                output += NotEqual().get_LLVM(True).format("%", tempSave2, "float", "%", tempSave1,
+                                                           "", "0.0")
+                output += "%" + str(ast) + " = uitofp i1 %" + tempSave2 + " to float\n"
+            else:
+                output += BPlus().get_LLVM(False).format("%", tempSave1, type, "%", tempvar1,
+                                                         "%", tempvar2)
+                output += NotEqual().get_LLVM(False).format("%", tempSave2, type, "%", tempSave1,
+                                                            "", "0")
+                output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
     # If we encounter an operator operate then we need to operate on its children
     elif isinstance(ast.node, Compare):
         # generate LLVM for the left and right side of the operator
