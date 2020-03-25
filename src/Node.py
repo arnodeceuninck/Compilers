@@ -127,6 +127,8 @@ class UNot(Unary):
         self.funct = lambda args: not args[0]
 
     def get_LLVM(self, is_float):
+        if is_float:
+            return "{}{} = fcmp oeq {} {}{}, 0.0\n"
         return "{}{} = icmp eq {} {}{}, 0\n"
 
 
@@ -231,7 +233,7 @@ class Equal(Compare):
 
     def get_LLVM(self, is_float=False):
         if is_float:
-            return "{}{} = fcmp eq {} {}{}, {}{}\n"
+            return "{}{} = fcmp oeq {} {}{}, {}{}\n"
         return "{}{} = icmp eq {} {}{}, {}{}\n"
 
 
@@ -242,7 +244,7 @@ class NotEqual(Compare):
 
     def get_LLVM(self, is_float=False):
         if is_float:
-            return "{}{} = fcmp ne {} {}{}, {}{}"
+            return "{}{} = fcmp one {} {}{}, {}{}"
         return "{}{} = icmp ne {} {}{}, {}{}\n"
 
 
