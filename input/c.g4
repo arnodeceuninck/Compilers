@@ -28,11 +28,11 @@ operation_plus_minus: left=operation_plus_minus ('+'|'-') right=operation_mult_d
 operation_mult_div: left=operation_mult_div ('*'|'/'|'%') right=operation_unary_plus_minus_not
                   | operation_unary_plus_minus_not;
 
-operation_unary_plus_minus_not: '+' right=operation_brackets
-                              | '-' right=operation_brackets
-                              | '!' right=operation_brackets
-                              | '*' right=operation_brackets
-                              | '&' right=operation_brackets
+operation_unary_plus_minus_not: '+' right=operation_unary_plus_minus_not
+                              | '-' right=operation_unary_plus_minus_not
+                              | '!' right=operation_unary_plus_minus_not
+                              | '*' right=operation_unary_plus_minus_not
+                              | '&' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
