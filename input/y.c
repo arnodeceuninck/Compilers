@@ -1,3 +1,5 @@
-float x = 64.0;
-float y = !x && 1.0;
-printf(y);
+int x = 2;
+int* y = &x;
+x = 3;
+int z = *y;
+printf(z);

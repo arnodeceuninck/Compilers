@@ -32,6 +32,10 @@ def generate_LLVM(ast):
         if isinstance(ast.children[1].node, Variable):
             output += ast.node.get_LLVM().format(type + "*", "@", str(ast.children[1].node.value), type, "@",
                                                  str(ast.children[0].node.value))
+        if isinstance(ast.children[1].node, UDeref):
+            output += ast.node.get_LLVM().format(type + "*", "@", str(ast.children[1].children[0].node.value),
+                                                 type + "*",
+                                                 "@", str(ast.children[0].node.value))
         else:  # If the node wasnt a variable take the node id
             output += ast.node.get_LLVM().format(type, "%", str(ast.children[1]), type, "@",
                                                  str(ast.children[0].node.value))
@@ -466,7 +470,21 @@ def generate_LLVM(ast):
                 output += ast.node.get_LLVM().format("%", tempSave, type, "%", tempvar1,
                                                      "%", tempvar2)
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
+    elif isinstance(ast.node, UReref):
+        type = ast.getType()
+        if type == "int":
+            type = "i32"
+        elif type == "char":
+            type = "i8"
+        tempvar1 = "t" + str(ast.node.get_id())
+        # Extra load step for loading pointer values
+        output += "%" + tempvar1 + " = load " + type + "*, " + type + "** " + "@" + str(
+            ast.children[0].node.value) + "\n"
+        # Load the value into the ast node
+        output += "%" + str(ast) + " = load " + type + ", " + type + "* " + "%" + tempvar1 + "\n"
 
+    elif isinstance(ast.node, UDeref):
+        pass
     elif isinstance(ast.node, UPlus):
         is_float = False
         type = "i32"
@@ -597,26 +615,36 @@ class AST:
     def to_LLVM(self, filename):
         output = ""
         symbol_table = self.symbol_table.elements
+        ptr_types = list()
         # generate variable declarations from the symbol table
         for var in symbol_table:
             # define all the variables
             LLVM_var_name = "@" + var
             LLVM_type = ""
+            ptr = "*" if symbol_table[var].type.ptr else ""
+            value = "undef"
             LLVM_align = "align"
             if symbol_table[var].type.const:
                 LLVM_type = "constant"
             else:
                 LLVM_type = "global"
             if symbol_table[var].type.type == "int":
-                LLVM_type += " i32 0"
+                if ptr != "*":
+                    value = "0"
+                LLVM_type += " i32{} {}".format(ptr, value)
                 LLVM_align += " 4"
             elif symbol_table[var].type.type == "float":
-                LLVM_type += " float 0.0"
+                if ptr != "*":
+                    value = "0.0"
+                LLVM_type += " float{} {}".format(ptr, value)
                 LLVM_align += " 4"
             elif symbol_table[var].type.type == "char":
-                LLVM_type += " i8 0"
+                if ptr != "*":
+                    value = "0"
+                LLVM_type += " i8{} {}".format(ptr, value)
                 LLVM_align += " 1"
-            output += LLVM_var_name + " = " + LLVM_type + ", " + LLVM_align + "\n"
+            # We need to align by 8 if we have pointer types
+            output += LLVM_var_name + " = " + LLVM_type + ", " + ("align 8" if ptr == "*" else LLVM_align) + "\n"
         output += "\n"
         output += "define i32 @main() {\n"
         retval = generate_LLVM(self)
