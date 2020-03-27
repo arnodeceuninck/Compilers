@@ -70,6 +70,16 @@ class customListener(ParseTreeListener):
         self.simplify(2)
         pass
 
+    # Enter a parse tree produced by cParser#for_statement.
+    def enterFor_statement(self, ctx: cParser.For_statementContext):
+        self.add(For())
+        pass
+
+    # Exit a parse tree produced by cParser#for_statement.
+    def exitFor_statement(self, ctx: cParser.For_statementContext):
+        self.simplify(4)
+        pass
+
     # Enter a parse tree produced by cParser#operation.
     def enterOperation(self, ctx: cParser.OperationContext):
         pass

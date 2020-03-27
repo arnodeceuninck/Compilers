@@ -29,6 +29,10 @@ class If(Node):
     def __init__(self):
         Node.__init__(self, "if")
 
+class For(Node):
+    def __init__(self):
+        Node.__init__(self, "for")
+
 class Constant(Node):
     def __init__(self, value=""):
         Node.__init__(self, value, "#FFD885")
