@@ -67,22 +67,19 @@ class MyTestCase(unittest.TestCase):
             self.assertTrue(isinstance(child.node, Variable))
 
         # Check all int types
-        self.assertTrue(isinstance(tree.children[0].node, VInt))
-        self.assertTrue(isinstance(tree.children[3].node, VInt))
-        self.assertTrue(isinstance(tree.children[6].node, VInt))
-        self.assertTrue(isinstance(tree.children[9].node, VInt))
+        int_type = [i * 3 for i in range(4)]
+        for i in int_type:
+            self.assertTrue(isinstance(tree.children[i].node, VInt))
 
         # Check all float types
-        self.assertTrue(isinstance(tree.children[1].node, VFloat))
-        self.assertTrue(isinstance(tree.children[4].node, VFloat))
-        self.assertTrue(isinstance(tree.children[7].node, VFloat))
-        self.assertTrue(isinstance(tree.children[10].node, VFloat))
+        float_type = [i + 1 for i in int_type]
+        for i in float_type:
+            self.assertTrue(isinstance(tree.children[i].node, VFloat))
 
         # Check all char types
-        self.assertTrue(isinstance(tree.children[2].node, VChar))
-        self.assertTrue(isinstance(tree.children[5].node, VChar))
-        self.assertTrue(isinstance(tree.children[8].node, VChar))
-        self.assertTrue(isinstance(tree.children[11].node, VChar))
+        char_type = [i + 2 for i in int_type]
+        for i in char_type:
+            self.assertTrue(isinstance(tree.children[i].node, VChar))
 
         const = [3, 4, 5, 9, 10, 11]
         ptr = [6, 7, 8, 9, 10, 11]
