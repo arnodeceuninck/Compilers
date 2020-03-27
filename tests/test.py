@@ -1,5 +1,4 @@
 import unittest
-import filecmp
 from src.main import compile
 from src.AST import AST
 from src.Node import *
@@ -50,13 +49,12 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(len(child.children), 2)
             self.assertEqual(len(child.children[0].children), 0)  # Must be removed after folding
             self.assertEqual(len(child.children[1].children), 0)
-            self.assertEqual(child.children[0].node.type, "float")  # Must stay the same after folding
+            self.assertEqual(child.children[0].node.type, "int")  # Must stay the same after folding
             self.assertTrue(isinstance(child.children[1].node, CInt))  # Type must be changed
-        self.assertEqual(float(tree.children[0].children[1].node.value), 5)  # Values must match
-        self.assertEqual(float(tree.children[1].children[1].node.value), 63)
-        self.assertEqual(float(tree.children[2].children[1].node.value), 2)
-        self.assertEqual(float(tree.children[3].children[1].node.value), 2)
-        pass
+        self.assertEqual(tree.children[0].children[1].node.value, 5)  # Values must match
+        self.assertEqual(tree.children[1].children[1].node.value, 63)
+        self.assertEqual(tree.children[2].children[1].node.value, 2)
+        self.assertEqual(tree.children[3].children[1].node.value, 2)
 
     def test_declaration(self):
         # Test whether all info from the declaration has been kept

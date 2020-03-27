@@ -1,5 +1,5 @@
 // Tests for binary operations on numbers and folding them
-float x = 2+3;
-float y = 7*9;
-float z = 8/4;
-float a = 8%3;
+int x = 2+3;
+int y = 7*9;
+int z = 8/4;
+int a = 8%3;
