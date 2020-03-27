@@ -132,6 +132,45 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(error_given)
         pass
 
+    def test_ptr_test(self):
+        # Tests whether the folding has been done right
+        try:
+            tree = self.helper_test_c("ptr_test", catch_errors=False)
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
+
+    def test_comparisions(self):
+        # Tests whether the folding has been done right
+        try:
+            tree = self.helper_test_c("comparisions", catch_errors=False)
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
+
+    def test_types(self):
+        # Tests whether the folding has been done right
+        try:
+            tree = self.helper_test_c("types", catch_errors=False)
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
+
+    def test_const_printf(self):
+        # Tests whether the folding has been done right
+        try:
+            tree = self.helper_test_c("const_printf", catch_errors=False)
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
+
+    def test_if(self):
+        # Tests whether the folding has been done right
+        try:
+            tree = self.helper_test_c("if", catch_errors=False)
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
 
     # def test_div_zero(self):
     #     self.helper_test_c("div_zero")
