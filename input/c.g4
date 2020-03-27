@@ -34,7 +34,9 @@ operation_plus_minus: left=operation_plus_minus ('+'|'-') right=operation_mult_d
 operation_mult_div: left=operation_mult_div ('*'|'/'|'%') right=operation_unary_plus_minus_not
                   | operation_unary_plus_minus_not;
 
-operation_unary_plus_minus_not: '+' right=operation_unary_plus_minus_not
+operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
+                              | '--' right=operation_unary_plus_minus_not
+                              | '+' right=operation_unary_plus_minus_not
                               | '-' right=operation_unary_plus_minus_not
                               | '!' right=operation_unary_plus_minus_not
                               | '*' right=operation_unary_plus_minus_not
@@ -44,6 +46,8 @@ operation_unary_plus_minus_not: '+' right=operation_unary_plus_minus_not
 operation_brackets: '(' operation ')'
                   | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
+DOUBLE_PLUS: '++';
+DOUBLE_MIN: '--';
 PLUS: '+';
 MIN: '-';
 NOT: '!';

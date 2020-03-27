@@ -117,6 +117,16 @@ class UPlus(Unary):
             return "{}{} = fadd {} {}{}, 0.0\n"
         return "{}{} = add {} {}{}, 0\n"
 
+class UDMinus(Unary):
+    def __init__(self, value="--"):
+        Unary.__init__(self, value)
+        self.funct = lambda args: args[0]-1
+
+class UDPlus(Unary):
+    def __init__(self, value="++"):
+        Unary.__init__(self, value)
+        self.funct = lambda args: args[0]-1
+
 class UMinus(Unary):
     def __init__(self, value="-"):
         Unary.__init__(self, value)

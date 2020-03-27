@@ -247,7 +247,11 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_unary_plus_minus_not.
     def enterOperation_unary_plus_minus_not(self, ctx: cParser.Operation_unary_plus_minus_notContext):
         if has_children(ctx):
-            if ctx.PLUS():
+            if ctx.DOUBLE_PLUS():
+                self.add(UDPlus())
+            if ctx.DOUBLE_MIN():
+                self.add(UDMinus())
+            elif ctx.PLUS():
                 self.add(UPlus())
             elif ctx.MIN():
                 self.add(UMinus())
