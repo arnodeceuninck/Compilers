@@ -22,6 +22,7 @@ def generate_LLVM(ast):
     if isinstance(ast.node, Assign):
         output += generate_LLVM(ast.children[1])[0]
         type = ""
+        # TODO: Dit allemaal in de node klasse zetten?
         if isinstance(ast.children[0].node, VChar):
             type = "i8"
         elif isinstance(ast.children[0].node, VInt):
@@ -624,6 +625,9 @@ class AST:
             ptr = "*" if symbol_table[var].type.ptr else ""
             value = "undef"
             LLVM_align = "align"
+            # TODO: @Basil: Zou het mogelijk zijn om in de symbol table de nodes bij te houden en die een extra functie
+            #  to_llvm te geven voor hun type? (Verwijder deze lijn indien niet mogelijk, zet het anders op trello, dan
+            #  doe ik het wel)
             if symbol_table[var].type.const:
                 LLVM_type = "constant"
             else:

@@ -1,6 +1,8 @@
 grammar c;
 
-start_rule: (operation ';')*;
+start_rule: operation_sequence;
+
+operation_sequence: (operation ';')*;
 
 operation: (assignment | operation_logic_or | print_statement);
 

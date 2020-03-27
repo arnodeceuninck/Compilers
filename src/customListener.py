@@ -1,7 +1,7 @@
 from antlr4 import *
 from src.AST import *
 from gen.cParser import cParser
-
+from src.ErrorListener import CompilerError
 
 # This class defines a complete listener for a parse tree produced by cParser.
 class customListener(ParseTreeListener):
@@ -30,18 +30,18 @@ class customListener(ParseTreeListener):
     It also changes the ids of every child with the position it is normally in
     """
 
-    def combine_trees(self):
-        # If there is 1 tree left set no root
-        if len(self.trees) == 1:
-            return
-
-        # If there are more trees link them with a root
-        newRoot = AST(StatementSequence())
-        for tree in self.trees:
-            tree.parent = newRoot
-            newRoot.children.append(tree)
-        self.trees.clear()
-        self.trees.append(newRoot)
+    # def combine_trees(self):
+    #     # If there is 1 tree left set no root
+    #     if len(self.trees) == 1:
+    #         return
+    #
+    #     # If there are more trees link them with a root
+    #     newRoot = AST(StatementSequence())
+    #     for tree in self.trees:
+    #         tree.parent = newRoot
+    #         newRoot.children.append(tree)
+    #     self.trees.clear()
+    #     self.trees.append(newRoot)
 
 
     def unary_op_simplify(self):
@@ -59,9 +59,34 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#start_rule.
     def exitStart_rule(self, ctx: cParser.Start_ruleContext):
         # print("exit Start")
-        self.finalTree = self.previousTree
+        # self.finalTree = self.previousTree
         # Will combine all the generated trees
-        self.combine_trees()
+        # self.combine_trees()
+        if len(self.trees) != 1:
+            # print("Oh no!")
+            raise CompilerError
+        pass
+
+    # Enter a parse tree produced by cParser#operation_sequence.
+    def enterOperation_sequence(self, ctx: cParser.Operation_sequenceContext):
+        self.trees.append(AST(StatementSequence()))
+
+    # Exit a parse tree produced by cParser#operation_sequence.
+    def exitOperation_sequence(self, ctx: cParser.Operation_sequenceContext):
+        # Find the first operation sequence on the stack, everything above it are children
+        children = list()
+
+        tree = self.trees[len(self.trees)-1]
+        while not isinstance(tree.node, StatementSequence):
+            children.insert(0, tree)  # Not a StatementSequence, so this is a child of the first statement sequence
+            self.trees.pop()
+            tree = self.trees[len(self.trees) - 1]
+
+        for i in range(len(children)):
+            children[i].parent = tree
+
+        tree.children = children
+        pass
 
     # Enter a parse tree produced by cParser#operation.
     def enterOperation(self, ctx: cParser.OperationContext):
