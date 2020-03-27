@@ -2,9 +2,11 @@ grammar c;
 
 start_rule: operation_sequence;
 
-operation_sequence: (operation ';')*;
+operation_sequence: (operation ';' |  if_statement)*;
 
 operation: (assignment | operation_logic_or | print_statement);
+
+if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}';
 
 print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME) ')';
 

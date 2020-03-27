@@ -25,6 +25,9 @@ class StatementSequence(Node):
     def __init__(self):
         Node.__init__(self, "Statement Sequence")
 
+class If(Node):
+    def __init__(self):
+        Node.__init__(self, "if")
 
 class Constant(Node):
     def __init__(self, value=""):
@@ -101,7 +104,7 @@ class Unary(Operator):
 
 
 class UPlus(Unary):
-    def __init__(self, value=""):
+    def __init__(self, value="+"):
         Unary.__init__(self, value)
         self.funct = lambda args: +args[0]
 
@@ -111,7 +114,7 @@ class UPlus(Unary):
         return "{}{} = add {} {}{}, 0\n"
 
 class UMinus(Unary):
-    def __init__(self, value=""):
+    def __init__(self, value="-"):
         Unary.__init__(self, value)
         self.funct = lambda args: -args[0]
 
@@ -122,7 +125,7 @@ class UMinus(Unary):
 
 
 class UNot(Unary):
-    def __init__(self, value=""):
+    def __init__(self, value="!"):
         Unary.__init__(self, value)
         self.funct = lambda args: not args[0]
 
@@ -183,7 +186,7 @@ class Compare(Binary):
 
 
 class LessT(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="<"):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] < args[1]
 
@@ -194,7 +197,7 @@ class LessT(Compare):
 
 
 class MoreT(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value=">"):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] > args[1]
 
@@ -205,7 +208,7 @@ class MoreT(Compare):
 
 
 class LessOrEq(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="<="):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] <= args[1]
 
@@ -216,7 +219,7 @@ class LessOrEq(Compare):
 
 
 class MoreOrEq(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value=">="):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] >= args[1]
 
@@ -227,7 +230,7 @@ class MoreOrEq(Compare):
 
 
 class Equal(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="=="):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] == args[1]
 
@@ -238,7 +241,7 @@ class Equal(Compare):
 
 
 class NotEqual(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="!="):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] != args[1]
 
@@ -249,7 +252,7 @@ class NotEqual(Compare):
 
 
 class LogicAnd(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="&&"):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] and args[1]
 
@@ -258,7 +261,7 @@ class LogicAnd(Compare):
 
 
 class LogicOr(Compare):
-    def __init__(self, value=""):
+    def __init__(self, value="||"):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] or args[1]
 
@@ -280,7 +283,7 @@ class Operate(Binary):
 
 
 class BMinus(Operate):
-    def __init__(self, value=""):
+    def __init__(self, value="-"):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] - args[1]
 
@@ -291,7 +294,7 @@ class BMinus(Operate):
 
 
 class BPlus(Operate):
-    def __init__(self, value=""):
+    def __init__(self, value="+"):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] + args[1]
 
@@ -302,7 +305,7 @@ class BPlus(Operate):
 
 
 class Div(Operate):
-    def __init__(self, value=""):
+    def __init__(self, value="/"):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] / args[1]
 
@@ -313,7 +316,7 @@ class Div(Operate):
 
 
 class Mult(Operate):
-    def __init__(self, value=""):
+    def __init__(self, value="*"):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] * args[1]
 
@@ -324,7 +327,7 @@ class Mult(Operate):
 
 
 class Mod(Operate):
-    def __init__(self, value=""):
+    def __init__(self, value="%"):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] % args[1]
 
@@ -338,7 +341,7 @@ class Mod(Operate):
 
 
 class Assign(Binary):
-    def __init__(self, value=""):
+    def __init__(self, value="="):
         Binary.__init__(self, value)
         self.declaration = True
 
