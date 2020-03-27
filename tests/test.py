@@ -231,5 +231,14 @@ class MyTestCase(unittest.TestCase):
     #     self.helper_test_c("div_zero")
     #     pass
 
+    def test_binop_folding_llvm(self):
+        # Just an llvm test so I can fill up at least some of these lines
+        try:
+            tree = self.helper_test_c("binop_folding", catch_errors=False, fold=True)
+            tree.to_LLVM("output/binop_folding.ll")
+        except CompilerError:
+            # There shouldn't be any errors
+            self.assertTrue(False)
+
 if __name__ == '__main__':
     unittest.main()

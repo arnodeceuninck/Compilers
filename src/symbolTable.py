@@ -24,9 +24,6 @@ class SymbolTable:
             raise VariableRedeclarationError(location)
             # print("Variable", location, "already in the symbol table.")
 
-    def update(self, location, value):
-        self.elements[location].value = value
-
     def __str__(self):
         # If there is no symbol table to construct then return the empty string
         if not len(self.elements):
