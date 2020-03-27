@@ -129,6 +129,7 @@ class MyTestCase(unittest.TestCase):
         except VariableRedeclarationError as e:
             error_given = True
             self.assertEqual(e.variable, "x")
+            self.assertEqual(str(e), "[ERROR] Variable x already declared")
         self.assertTrue(error_given)
         pass
 
@@ -172,10 +173,63 @@ class MyTestCase(unittest.TestCase):
             # There shouldn't be any errors
             self.assertTrue(False)
 
+    def test_const_error(self):
+        error = False
+        try:
+            tree = self.helper_test_c("const_error", catch_errors=False)
+        except ConstError as e:
+            self.assertEqual(str(e), "[ERROR] Variable x is const and can't be assigned after declaration")
+            error = True
+        self.assertTrue(error)
+
+    def test_error_undeclared(self):
+        # Tests whether the folding has been done right
+        error_given = False
+        try:
+            tree = self.helper_test_c("error_undeclared", catch_errors=False)
+        except UndeclaredVariableError as e:
+            error_given = True
+            self.assertEqual(e.variable, "x")
+            self.assertEqual(str(e), "[ERROR] Variable x hasn't been declared yet")
+        self.assertTrue(error_given)
+        pass
+
+    def test_error_incompatible_types(self):
+        # Tests whether the folding has been done right
+        error_given = False
+        try:
+            tree = self.helper_test_c("error_incompatible_types", catch_errors=False)
+        except IncompatibleTypesError as e:
+            error_given = True
+            self.assertEqual(e.ltype, "int")
+            self.assertEqual(e.rtype, "float")
+            self.assertEqual(str(e), "[ERROR] Type int is incompatible with float")
+        self.assertTrue(error_given)
+        pass
+
+    def test_error_reref(self):
+        # Tests whether the folding has been done right
+        error_given = False
+        try:
+            tree = self.helper_test_c("error_reref", catch_errors=False)
+        except RerefError as e:
+            error_given = True
+            self.assertEqual(str(e), "[ERROR] trying to rereference something that's not a pointer")
+        self.assertTrue(error_given)
+
+    def test_error_grammar(self):
+        # Tests whether the folding has been done right
+        error_given = False
+        try:
+            tree = self.helper_test_c("error_grammar", catch_errors=False)
+        except SyntaxCompilerError as e:
+            error_given = True
+            self.assertEqual(str(e), "[ERROR] Oh no!! Something went wrong at line 1, column 4: missing ';' at '<EOF>'")
+        self.assertTrue(error_given)
+
     # def test_div_zero(self):
     #     self.helper_test_c("div_zero")
     #     pass
-
 
 if __name__ == '__main__':
     unittest.main()

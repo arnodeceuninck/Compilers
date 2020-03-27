@@ -20,6 +20,7 @@ class VariableRedeclarationError(CompilerError):
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " already declared"
 
+
 class ConstError(CompilerError):
     def __init__(self, variable):
         super().__init__()
@@ -27,6 +28,7 @@ class ConstError(CompilerError):
 
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " is const and can't be assigned after declaration"
+
 
 class UndeclaredVariableError(CompilerError):
     def __init__(self, variable):
@@ -36,6 +38,7 @@ class UndeclaredVariableError(CompilerError):
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " hasn't been declared yet"
 
+
 class IncompatibleTypesError(CompilerError):
     def __init__(self, ltype, rtype):
         super().__init__()
@@ -44,6 +47,7 @@ class IncompatibleTypesError(CompilerError):
 
     def __str__(self):
         return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
+
 
 class RerefError(CompilerError):
     def __init__(self):
@@ -64,9 +68,6 @@ class SyntaxCompilerError(CompilerError):
     def __str__(self):
         return "[ERROR] Oh no!! Something went wrong at line " + str(self.row) + ", column " + str(
             self.column) + ": " + self.msg
-
-
-
 
 
 class CustomErrorListener(ErrorListener):
