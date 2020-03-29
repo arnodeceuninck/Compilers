@@ -40,11 +40,11 @@ N0N1N3T[label="Constant Type: int: 0", fillcolor="#FFD885"]
 N1N1N3T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
 N4T[label="Assign Declaration", fillcolor="#87f5ff"] 
 N0N4T[label="Variable Type: float: z1", fillcolor="#af93ff"] 
-N1N4T[label="!", fillcolor="#9f9f9f"] 
+N1N4T[label="Unary Operator: !", fillcolor="#87f5ff"] 
 N0N1N4T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
 N5T[label="Assign Declaration", fillcolor="#87f5ff"] 
 N0N5T[label="Variable Type: float: z2", fillcolor="#af93ff"] 
-N1N5T[label="!", fillcolor="#9f9f9f"] 
+N1N5T[label="Unary Operator: !", fillcolor="#87f5ff"] 
 N0N1N5T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
 T -> N0T
 N0T -> N0N0T

@@ -15,25 +15,37 @@ class MyTestCase(unittest.TestCase):
         file2.close()
 
     def helper_test_c(self, test_name: str, cmp=False, fold=False, catch_errors=True):
+        # Reset node id because it causes errors in llvm creation
+        Node.id = 0
         input_file: str = "input/" + test_name + ".c"
         output_file: str = "output/" + test_name + ".dot"
+        output_file_ll: str = "output/" + test_name + ".ll"
         output_file_folded: str = "output/" + test_name + ".folded.dot"
+        output_file_folded_ll: str = "output/" + test_name + ".folded.ll"
         expected_output_file: str = "expected_output/" + test_name + ".dot"
+        expected_output_file_ll: str = "expected_output/" + test_name + ".ll"
         expected_output_file_folded: str = "expected_output/" + test_name + ".folded.dot"
+        expected_output_file_folded_ll: str = "expected_output/" + test_name + ".folded.ll"
 
         tree: AST = compile(input_file, catch_error=catch_errors)
         if tree:
             tree.to_dot(output_file)
-            if fold:
+            if fold and not cmp:
                 tree.constant_folding()
                 tree.to_dot(output_file_folded)
         else:
             print("No tree generated")
 
         if cmp:
+            tree.to_LLVM(output_file_ll)
             self.compare(output_file, expected_output_file)
+            self.compare(output_file_ll, expected_output_file_ll)
             if fold:
+                tree.constant_folding()
+                tree.to_dot(output_file_folded)
                 self.compare(output_file_folded, expected_output_file_folded)
+                tree.to_LLVM(output_file_folded_ll)
+                self.compare(output_file_folded_ll, expected_output_file_folded_ll)
 
         return tree
 
@@ -93,7 +105,7 @@ class MyTestCase(unittest.TestCase):
     # TODO add LLVM test
     def test_logicop(self):
         # Tests whether the folding has been done right
-        tree = self.helper_test_c("logicop", fold=True)
+        tree = self.helper_test_c("logicop", fold=True, cmp=True)
         self.assertEqual(float(tree.children[0].children[1].node.value), 0)  # Values must match
         self.assertEqual(float(tree.children[1].children[1].node.value), 0)
         self.assertEqual(float(tree.children[2].children[1].node.value), 1)
@@ -105,7 +117,7 @@ class MyTestCase(unittest.TestCase):
     # TODO add LLVM test
     def test_unop_num(self):
         # Tests whether the unary operations on numbers (not logical) are successfully folded
-        tree = self.helper_test_c("unop_num", fold=True)
+        tree = self.helper_test_c("unop_num", fold=True, cmp=True)
         self.assertEqual(float(tree.children[0].children[1].node.value), 1)  # Values must match
         self.assertEqual(float(tree.children[1].children[1].node.value), -1)
         pass
@@ -113,7 +125,7 @@ class MyTestCase(unittest.TestCase):
     # TODO add LLVM test
     def test_operator_precedence_folding(self):
         # Tests whether the folding has been done right
-        tree = self.helper_test_c("operator_precedence_folding", fold=True)
+        tree = self.helper_test_c("operator_precedence_folding", fold=True, cmp=True)
         self.assertEqual(float(tree.children[0].children[1].node.value), 6)  # Values must match
         self.assertEqual(float(tree.children[1].children[1].node.value), 3)
         self.assertEqual(float(tree.children[2].children[1].node.value), 13)
@@ -121,7 +133,6 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(float(tree.children[4].children[1].node.value), 69)
         pass
 
-    # TODO add LLVM test
     def test_redeclaration_error(self):
         # Tests whether the folding has been done right
         error_given = False
@@ -138,7 +149,7 @@ class MyTestCase(unittest.TestCase):
     def test_ptr_test(self):
         # Tests whether the folding has been done right
         try:
-            tree = self.helper_test_c("ptr_test", catch_errors=False)
+            tree = self.helper_test_c("ptr_test", catch_errors=False, cmp=True)
         except CompilerError:
             # There shouldn't be any errors
             self.assertTrue(False)
@@ -147,7 +158,7 @@ class MyTestCase(unittest.TestCase):
     def test_comparisions(self):
         # Tests whether the folding has been done right
         try:
-            tree = self.helper_test_c("comparisions", catch_errors=False)
+            tree = self.helper_test_c("comparisions", catch_errors=False, cmp=True)
         except CompilerError:
             # There shouldn't be any errors
             self.assertTrue(False)
@@ -156,7 +167,7 @@ class MyTestCase(unittest.TestCase):
     def test_types(self):
         # Tests whether the folding has been done right
         try:
-            tree = self.helper_test_c("types", catch_errors=False)
+            tree = self.helper_test_c("types", catch_errors=False, cmp=True)
         except CompilerError:
             # There shouldn't be any errors
             self.assertTrue(False)
@@ -165,7 +176,7 @@ class MyTestCase(unittest.TestCase):
     def test_const_printf(self):
         # Tests whether the folding has been done right
         try:
-            tree = self.helper_test_c("const_printf", catch_errors=False)
+            tree = self.helper_test_c("const_printf", catch_errors=False, cmp=True)
         except CompilerError:
             # There shouldn't be any errors
             self.assertTrue(False)
@@ -174,7 +185,7 @@ class MyTestCase(unittest.TestCase):
     def test_if(self):
         # Tests whether the folding has been done right
         try:
-            tree = self.helper_test_c("if", catch_errors=False)
+            tree = self.helper_test_c("if", catch_errors=False, cmp=True)
         except CompilerError:
             # There shouldn't be any errors
             self.assertTrue(False)
@@ -235,46 +246,42 @@ class MyTestCase(unittest.TestCase):
 
     # TODO fix test
     def test_div_zero(self):
-        self.helper_test_c("div_zero")
+        self.helper_test_c("div_zero", cmp=True)
         pass
 
     # TODO add LLVM test
-    def test_binop_folding_llvm(self):
-        # Just an llvm test so I can fill up at least some of these lines
-        try:
-            tree = self.helper_test_c("binop_folding", catch_errors=False, fold=True)
-            tree.to_LLVM("output/binop_folding.ll")
-        except CompilerError:
-            # There shouldn't be any errors
-            self.assertTrue(False)
-
-    # TODO add LLVM test
     def test_really_long_var(self):
-        tree = self.helper_test_c("long_var")
+        tree = self.helper_test_c("long_var", cmp=True)
         # Values must match
         self.assertEqual(tree.children[0].children[0].node.value, "i_am_a_really_long_variable_withCamelCaseInBetween")
         self.assertEqual(tree.children[0].children[1].node.value, 0)
 
     # TODO add LLVM test
     def test_reref_mult_handling(self):
-        tree = self.helper_test_c("mixing_reref_and_mult")
+        tree = self.helper_test_c("mixing_reref_and_mult", cmp=True)
         # Values must match
         self.assertIsInstance(tree.children[2].children[1].node, Mult)
         self.assertIsInstance(tree.children[2].children[1].children[1].node, UReref)
 
     # TODO add LLVM test
-    def test_multiline_code(self):
-        tree = self.helper_test_c("multiline_code")
+    def test_reref_in_the_mix(self):
+        tree = self.helper_test_c("reref_in_the_mix", cmp=True)
         # Values must match
-        self.assertEqual(tree.children[2].children[1].node, Mult)
+        self.assertIsInstance(tree.children[2].children[1].node, BPlus)
+        self.assertIsInstance(tree.children[2].children[1].children[1].node, UReref)
+
+    # TODO add LLVM test
+    def test_multiline_code(self):
+        tree = self.helper_test_c("multiline_code", cmp=True)
+        # Values must match
+        self.assertIsInstance(tree.children[0].node, Assign)
 
     # TODO add LLVM test
     def test_comments(self):
-        pass
+        tree = self.helper_test_c("comments", cmp=True)
+        # Values must match
+        self.assertIsInstance(tree.children[0].node, Assign)
 
-    # TODO add LLVM test
-    def test_reref_in_the_mix(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()

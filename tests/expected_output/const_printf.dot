@@ -1,0 +1,19 @@
+Digraph G { 
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+T[label="Statement Sequence", fillcolor="#9f9f9f"] 
+N0T[label="Unary Operator: printf", fillcolor="#87f5ff"] 
+N0N0T[label="Constant Type: float: 42.0", fillcolor="#FFD885"] 
+N1T[label="Unary Operator: printf", fillcolor="#87f5ff"] 
+N0N1T[label="Constant Type: int: 42", fillcolor="#FFD885"] 
+N2T[label="Unary Operator: printf", fillcolor="#87f5ff"] 
+N0N2T[label="Constant Type: char: 'b'", fillcolor="#FFD885"] 
+T -> N0T
+N0T -> N0N0T
+T -> N1T
+N1T -> N0N1T
+T -> N2T
+N2T -> N0N2T
+label = "AST";
+}
+}

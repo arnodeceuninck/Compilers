@@ -1,0 +1,215 @@
+Digraph G { 
+	subgraph cluster_0 {
+		tbl [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td>location</td><td>type</td></tr>
+						<tr><td>x1</td><td>int</td></tr>
+						<tr><td>x2</td><td>int</td></tr>
+						<tr><td>x3</td><td>int</td></tr>
+						<tr><td>y1</td><td>int</td></tr>
+						<tr><td>y2</td><td>int</td></tr>
+						<tr><td>y3</td><td>int</td></tr>
+						<tr><td>z1</td><td>int</td></tr>
+						<tr><td>z2</td><td>int</td></tr>
+						<tr><td>z3</td><td>int</td></tr>
+						<tr><td>a1</td><td>int</td></tr>
+						<tr><td>a2</td><td>int</td></tr>
+						<tr><td>a3</td><td>int</td></tr>
+						<tr><td>b1</td><td>int</td></tr>
+						<tr><td>b2</td><td>int</td></tr>
+						<tr><td>b3</td><td>int</td></tr>
+						<tr><td>c1</td><td>int</td></tr>
+						<tr><td>c2</td><td>int</td></tr>
+						<tr><td>c3</td><td>int</td></tr>
+				</table>
+			>];
+		label = "Symbol Table";
+	}
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+T[label="Statement Sequence", fillcolor="#9f9f9f"] 
+N0T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N0T[label="Variable Type: int: x1", fillcolor="#af93ff"] 
+N1N0T[label="Binary Operator Compare: <=", fillcolor="#87f5ff"] 
+N0N1N0T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N0T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N1T[label="Variable Type: int: x2", fillcolor="#af93ff"] 
+N1N1T[label="Binary Operator Compare: <=", fillcolor="#87f5ff"] 
+N0N1N1T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N1T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N2T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N2T[label="Variable Type: int: x3", fillcolor="#af93ff"] 
+N1N2T[label="Binary Operator Compare: <=", fillcolor="#87f5ff"] 
+N0N1N2T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N2T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N3T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N3T[label="Variable Type: int: y1", fillcolor="#af93ff"] 
+N1N3T[label="Binary Operator Compare: >=", fillcolor="#87f5ff"] 
+N0N1N3T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N3T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N4T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N4T[label="Variable Type: int: y2", fillcolor="#af93ff"] 
+N1N4T[label="Binary Operator Compare: >=", fillcolor="#87f5ff"] 
+N0N1N4T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N4T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N5T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N5T[label="Variable Type: int: y3", fillcolor="#af93ff"] 
+N1N5T[label="Binary Operator Compare: >=", fillcolor="#87f5ff"] 
+N0N1N5T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N5T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N6T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N6T[label="Variable Type: int: z1", fillcolor="#af93ff"] 
+N1N6T[label="Binary Operator Compare: ==", fillcolor="#87f5ff"] 
+N0N1N6T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N6T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N7T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N7T[label="Variable Type: int: z2", fillcolor="#af93ff"] 
+N1N7T[label="Binary Operator Compare: ==", fillcolor="#87f5ff"] 
+N0N1N7T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N7T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N8T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N8T[label="Variable Type: int: z3", fillcolor="#af93ff"] 
+N1N8T[label="Binary Operator Compare: ==", fillcolor="#87f5ff"] 
+N0N1N8T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N8T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N9T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N9T[label="Variable Type: int: a1", fillcolor="#af93ff"] 
+N1N9T[label="Binary Operator Compare: !=", fillcolor="#87f5ff"] 
+N0N1N9T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N9T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N10T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N10T[label="Variable Type: int: a2", fillcolor="#af93ff"] 
+N1N10T[label="Binary Operator Compare: !=", fillcolor="#87f5ff"] 
+N0N1N10T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N10T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N11T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N11T[label="Variable Type: int: a3", fillcolor="#af93ff"] 
+N1N11T[label="Binary Operator Compare: !=", fillcolor="#87f5ff"] 
+N0N1N11T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N11T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N12T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N12T[label="Variable Type: int: b1", fillcolor="#af93ff"] 
+N1N12T[label="Binary Operator Compare: <", fillcolor="#87f5ff"] 
+N0N1N12T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N12T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N13T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N13T[label="Variable Type: int: b2", fillcolor="#af93ff"] 
+N1N13T[label="Binary Operator Compare: <", fillcolor="#87f5ff"] 
+N0N1N13T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N13T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N14T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N14T[label="Variable Type: int: b3", fillcolor="#af93ff"] 
+N1N14T[label="Binary Operator Compare: <", fillcolor="#87f5ff"] 
+N0N1N14T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N14T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N15T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N15T[label="Variable Type: int: c1", fillcolor="#af93ff"] 
+N1N15T[label="Binary Operator Compare: >", fillcolor="#87f5ff"] 
+N0N1N15T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N15T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N16T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N16T[label="Variable Type: int: c2", fillcolor="#af93ff"] 
+N1N16T[label="Binary Operator Compare: >", fillcolor="#87f5ff"] 
+N0N1N16T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N1N1N16T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+N17T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N17T[label="Variable Type: int: c3", fillcolor="#af93ff"] 
+N1N17T[label="Binary Operator Compare: >", fillcolor="#87f5ff"] 
+N0N1N17T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N17T[label="Constant Type: int: 0", fillcolor="#FFD885"] 
+T -> N0T
+N0T -> N0N0T
+N0T -> N1N0T
+N1N0T -> N0N1N0T
+N1N0T -> N1N1N0T
+T -> N1T
+N1T -> N0N1T
+N1T -> N1N1T
+N1N1T -> N0N1N1T
+N1N1T -> N1N1N1T
+T -> N2T
+N2T -> N0N2T
+N2T -> N1N2T
+N1N2T -> N0N1N2T
+N1N2T -> N1N1N2T
+T -> N3T
+N3T -> N0N3T
+N3T -> N1N3T
+N1N3T -> N0N1N3T
+N1N3T -> N1N1N3T
+T -> N4T
+N4T -> N0N4T
+N4T -> N1N4T
+N1N4T -> N0N1N4T
+N1N4T -> N1N1N4T
+T -> N5T
+N5T -> N0N5T
+N5T -> N1N5T
+N1N5T -> N0N1N5T
+N1N5T -> N1N1N5T
+T -> N6T
+N6T -> N0N6T
+N6T -> N1N6T
+N1N6T -> N0N1N6T
+N1N6T -> N1N1N6T
+T -> N7T
+N7T -> N0N7T
+N7T -> N1N7T
+N1N7T -> N0N1N7T
+N1N7T -> N1N1N7T
+T -> N8T
+N8T -> N0N8T
+N8T -> N1N8T
+N1N8T -> N0N1N8T
+N1N8T -> N1N1N8T
+T -> N9T
+N9T -> N0N9T
+N9T -> N1N9T
+N1N9T -> N0N1N9T
+N1N9T -> N1N1N9T
+T -> N10T
+N10T -> N0N10T
+N10T -> N1N10T
+N1N10T -> N0N1N10T
+N1N10T -> N1N1N10T
+T -> N11T
+N11T -> N0N11T
+N11T -> N1N11T
+N1N11T -> N0N1N11T
+N1N11T -> N1N1N11T
+T -> N12T
+N12T -> N0N12T
+N12T -> N1N12T
+N1N12T -> N0N1N12T
+N1N12T -> N1N1N12T
+T -> N13T
+N13T -> N0N13T
+N13T -> N1N13T
+N1N13T -> N0N1N13T
+N1N13T -> N1N1N13T
+T -> N14T
+N14T -> N0N14T
+N14T -> N1N14T
+N1N14T -> N0N1N14T
+N1N14T -> N1N1N14T
+T -> N15T
+N15T -> N0N15T
+N15T -> N1N15T
+N1N15T -> N0N1N15T
+N1N15T -> N1N1N15T
+T -> N16T
+N16T -> N0N16T
+N16T -> N1N16T
+N1N16T -> N0N1N16T
+N1N16T -> N1N1N16T
+T -> N17T
+N17T -> N0N17T
+N17T -> N1N17T
+N1N17T -> N0N1N17T
+N1N17T -> N1N1N17T
+label = "AST";
+}
+}

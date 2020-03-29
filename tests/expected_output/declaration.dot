@@ -1,4 +1,26 @@
 Digraph G { 
+	subgraph cluster_0 {
+		tbl [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td>location</td><td>type</td></tr>
+						<tr><td>a</td><td>int</td></tr>
+						<tr><td>b</td><td>float</td></tr>
+						<tr><td>c</td><td>char</td></tr>
+						<tr><td>d</td><td>const int</td></tr>
+						<tr><td>e</td><td>const float</td></tr>
+						<tr><td>f</td><td>const char</td></tr>
+						<tr><td>g</td><td>int*</td></tr>
+						<tr><td>h</td><td>float*</td></tr>
+						<tr><td>i</td><td>char*</td></tr>
+						<tr><td>j</td><td>const int*</td></tr>
+						<tr><td>k</td><td>const float*</td></tr>
+						<tr><td>l</td><td>const char*</td></tr>
+				</table>
+			>];
+		label = "Symbol Table";
+	}
 subgraph cluster_1 {
 node [style=filled, shape=rectangle, penwidth=2];
 T[label="Statement Sequence", fillcolor="#9f9f9f"] 

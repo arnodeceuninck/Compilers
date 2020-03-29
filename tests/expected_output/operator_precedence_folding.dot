@@ -1,0 +1,100 @@
+Digraph G { 
+	subgraph cluster_0 {
+		tbl [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td>location</td><td>type</td></tr>
+						<tr><td>x</td><td>int</td></tr>
+						<tr><td>y</td><td>int</td></tr>
+						<tr><td>z</td><td>int</td></tr>
+						<tr><td>a</td><td>int</td></tr>
+						<tr><td>b</td><td>int</td></tr>
+				</table>
+			>];
+		label = "Symbol Table";
+	}
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+T[label="Statement Sequence", fillcolor="#9f9f9f"] 
+N0T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N0T[label="Variable Type: int: x", fillcolor="#af93ff"] 
+N1N0T[label="Binary Operator: -", fillcolor="#87f5ff"] 
+N0N1N0T[label="Binary Operator: +", fillcolor="#87f5ff"] 
+N0N0N1N0T[label="Binary Operator: *", fillcolor="#87f5ff"] 
+N0N0N0N1N0T[label="Constant Type: int: 4", fillcolor="#FFD885"] 
+N1N0N0N1N0T[label="Constant Type: int: 2", fillcolor="#FFD885"] 
+N1N0N1N0T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N0T[label="Constant Type: int: 3", fillcolor="#FFD885"] 
+N1T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N1T[label="Variable Type: int: y", fillcolor="#af93ff"] 
+N1N1T[label="Binary Operator: /", fillcolor="#87f5ff"] 
+N0N1N1T[label="Binary Operator: %", fillcolor="#87f5ff"] 
+N0N0N1N1T[label="Constant Type: int: 42", fillcolor="#FFD885"] 
+N1N0N1N1T[label="Constant Type: int: 30", fillcolor="#FFD885"] 
+N1N1N1T[label="Constant Type: int: 4", fillcolor="#FFD885"] 
+N2T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N2T[label="Variable Type: int: z", fillcolor="#af93ff"] 
+N1N2T[label="Binary Operator: +", fillcolor="#87f5ff"] 
+N0N1N2T[label="Constant Type: int: 8", fillcolor="#FFD885"] 
+N1N1N2T[label="Constant Type: int: 5", fillcolor="#FFD885"] 
+N3T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N3T[label="Variable Type: int: a", fillcolor="#af93ff"] 
+N1N3T[label="Binary Operator Compare: &&", fillcolor="#87f5ff"] 
+N0N1N3T[label="Constant Type: int: 1", fillcolor="#FFD885"] 
+N1N1N3T[label="Binary Operator: -", fillcolor="#87f5ff"] 
+N0N1N1N3T[label="Constant Type: int: 5", fillcolor="#FFD885"] 
+N1N1N1N3T[label="Binary Operator: *", fillcolor="#87f5ff"] 
+N0N1N1N1N3T[label="Constant Type: int: 2", fillcolor="#FFD885"] 
+N1N1N1N1N3T[label="Constant Type: int: 2", fillcolor="#FFD885"] 
+N4T[label="Assign Declaration", fillcolor="#87f5ff"] 
+N0N4T[label="Variable Type: int: b", fillcolor="#af93ff"] 
+N1N4T[label="Binary Operator: -", fillcolor="#87f5ff"] 
+N0N1N4T[label="Binary Operator: *", fillcolor="#87f5ff"] 
+N0N0N1N4T[label="Constant Type: int: 3", fillcolor="#FFD885"] 
+N1N0N1N4T[label="Binary Operator: +", fillcolor="#87f5ff"] 
+N0N1N0N1N4T[label="Constant Type: int: 20", fillcolor="#FFD885"] 
+N1N1N0N1N4T[label="Constant Type: int: 100", fillcolor="#FFD885"] 
+N1N1N4T[label="Constant Type: int: 291", fillcolor="#FFD885"] 
+T -> N0T
+N0T -> N0N0T
+N0T -> N1N0T
+N1N0T -> N0N1N0T
+N0N1N0T -> N0N0N1N0T
+N0N0N1N0T -> N0N0N0N1N0T
+N0N0N1N0T -> N1N0N0N1N0T
+N0N1N0T -> N1N0N1N0T
+N1N0T -> N1N1N0T
+T -> N1T
+N1T -> N0N1T
+N1T -> N1N1T
+N1N1T -> N0N1N1T
+N0N1N1T -> N0N0N1N1T
+N0N1N1T -> N1N0N1N1T
+N1N1T -> N1N1N1T
+T -> N2T
+N2T -> N0N2T
+N2T -> N1N2T
+N1N2T -> N0N1N2T
+N1N2T -> N1N1N2T
+T -> N3T
+N3T -> N0N3T
+N3T -> N1N3T
+N1N3T -> N0N1N3T
+N1N3T -> N1N1N3T
+N1N1N3T -> N0N1N1N3T
+N1N1N3T -> N1N1N1N3T
+N1N1N1N3T -> N0N1N1N1N3T
+N1N1N1N3T -> N1N1N1N1N3T
+T -> N4T
+N4T -> N0N4T
+N4T -> N1N4T
+N1N4T -> N0N1N4T
+N0N1N4T -> N0N0N1N4T
+N0N1N4T -> N1N0N1N4T
+N1N0N1N4T -> N0N1N0N1N4T
+N1N0N1N4T -> N1N1N0N1N4T
+N1N4T -> N1N1N4T
+label = "AST";
+}
+}
