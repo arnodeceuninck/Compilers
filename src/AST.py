@@ -1,8 +1,9 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
-
 from src.Node import *
 from src.symbolTable import *
 
+def get_LLVM_load():
+    return
 
 def generate_LLVM(ast):
     output = ""
@@ -21,25 +22,15 @@ def generate_LLVM(ast):
     # If the type is assignment then we need first calculate the right hand value of the assignment
     if isinstance(ast.node, Assign):
         output += generate_LLVM(ast.children[1])[0]
-        type = ""
-        # TODO: Dit allemaal in de node klasse zetten?
-        if isinstance(ast.children[0].node, VChar):
-            type = "i8"
-        elif isinstance(ast.children[0].node, VInt):
-            type = "i32"
-        elif isinstance(ast.children[0].node, VFloat):
-            type = "float"
         # If The right side is a variable then take the variable name not the node type
-        if isinstance(ast.children[1].node, Variable):
-            output += ast.node.get_LLVM().format(type + "*", "@", str(ast.children[1].node.value), type, "@",
-                                                 str(ast.children[0].node.value))
-        if isinstance(ast.children[1].node, UDeref):
-            output += ast.node.get_LLVM().format(type + "*", "@", str(ast.children[1].children[0].node.value),
-                                                 type + "*",
-                                                 "@", str(ast.children[0].node.value))
+        if isinstance(ast.children[1].node, Variable) or isinstance(ast.children[1].node, UDeref):
+            output += ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "@",
+                                                 str(ast.children[1].getNodeInfo()), ast.children[0].getLLVMType(),
+                                                 "@", str(ast.children[0].getNodeInfo()))
         else:  # If the node wasnt a variable take the node id
-            output += ast.node.get_LLVM().format(type, "%", str(ast.children[1]), type, "@",
-                                                 str(ast.children[0].node.value))
+            output += ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "%", str(ast.children[1]),
+                                                 ast.children[0].getLLVMType(), "@",
+                                                 str(ast.children[0].getNodeInfo()))
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
     elif isinstance(ast.node, Variable):
@@ -48,8 +39,8 @@ def generate_LLVM(ast):
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
         type = ""
-        val = ""
-        neutralval = ""
+        val = ast.getValue()
+        neutralval = ast.node.getNeutral()
         if isinstance(ast.node, CChar):
             type = "i8"
             val = str(ord(ast.node.value[1]))
@@ -73,21 +64,12 @@ def generate_LLVM(ast):
         output += tempret2[0]
         retval = tempret1[1] + tempret2[1]
         is_float = False
-        for formatType in tempret1[2]:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
-        for formatType in tempret2[2]:
+        retList = tempret1[2] + tempret2[2]
+        for formatType in retList:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
-        type = ast.getType()
-        if type == "float":
-            type = "float"
-            is_float = True
-        elif type == "int":
-            type = "i32"
-        elif type == "char":
-            type = "i8"
+        type = ast.getLLVMType()
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
@@ -542,42 +524,30 @@ def generate_LLVM(ast):
                 output += "%" + str(ast) + " = zext i1 %" + tempvar2 + " to " + type + "\n"
 
     if isinstance(ast.node, Print):
-        tempvar1 = ""
-        formatType = ""
-        type = ""
-        # Check the variable type of the node
-        if isinstance(ast.children[0].node, VInt) or isinstance(ast.children[0].node, CInt):
-            formatType = "d"
-            type = "i32"
-            type_ = "i32"
-        elif isinstance(ast.children[0].node, VFloat) or isinstance(ast.children[0].node, CFloat):
-            formatType = "f"
-            type = "double"
-            type_ = "float"
-        elif isinstance(ast.children[0].node, VChar) or isinstance(ast.children[0].node, CChar):
-            formatType = "c"
-            type = "i8"
-            type_ = "i8"
-
+        formatType = ast.children[0].node.getFormatType()
         if formatType not in formatTypes:
             formatTypes.append(formatType)
 
+        printType = ast.children[0].node.getLLVMPrintType()
+        type = ast.children[0].getLLVMType()
+
+        printString = 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {}{})\n'
         if isinstance(ast.children[0].node, CChar):
-            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
-                formatType, type, ord(ast.children[0].node.value[1]))
+            output += printString.format(
+                formatType, printType, "", ord(ast.children[0].node.value[1]))
         elif isinstance(ast.children[0].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type_ + ", " + type_ + "* " + "@" + str(
+            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
-            if type == "double":
+            if printType == "double":
                 tempvar2 = "t" + str(ast.node.get_id())
                 output += "%" + tempvar2 + " = fpext float %" + tempvar1 + " to double\n"
                 tempvar1 = tempvar2
-            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} %{})\n'.format(
-                formatType, type, tempvar1)
+            output += printString.format(
+                formatType, printType, "%", tempvar1)
         else:
-            output += 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {})\n'.format(
-                formatType, type, ast.children[0].node.value)
+            output += printString.format(
+                formatType, printType, "", ast.children[0].node.value)
         return output, True, formatTypes
     return output, retval, formatTypes
 
@@ -632,23 +602,9 @@ class AST:
                 LLVM_type = "constant"
             else:
                 LLVM_type = "global"
-            if symbol_table[var].type.type == "int":
-                if ptr != "*":
-                    value = "0"
-                LLVM_type += " i32{} {}".format(ptr, value)
-                LLVM_align += " 4"
-            elif symbol_table[var].type.type == "float":
-                if ptr != "*":
-                    value = "0.0"
-                LLVM_type += " float{} {}".format(ptr, value)
-                LLVM_align += " 4"
-            elif symbol_table[var].type.type == "char":
-                if ptr != "*":
-                    value = "0"
-                LLVM_type += " i8{} {}".format(ptr, value)
-                LLVM_align += " 1"
-            # We need to align by 8 if we have pointer types
-            output += LLVM_var_name + " = " + LLVM_type + ", " + ("align 8" if ptr == "*" else LLVM_align) + "\n"
+            LLVM_type += " {} undef".format(symbol_table[var].type.getLLVMType())
+            LLVM_align += " {}".format(symbol_table[var].type.getAlign())
+            output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
         output += "\n"
         output += "define i32 @main() {\n"
         retval = generate_LLVM(self)
@@ -659,12 +615,9 @@ class AST:
 
         # If we need to print then create the print function
         if retval[1]:
-            if "c" in retval[2]:
-                output += '@.strc = private unnamed_addr constant [4 x i8] c"%c\\0A\\00", align 1\n'
-            if "d" in retval[2]:
-                output += '@.strd = private unnamed_addr constant [4 x i8] c"%d\\0A\\00", align 1\n'
-            if "f" in retval[2]:
-                output += '@.strf = private unnamed_addr constant [4 x i8] c"%f\\0A\\00", align 1\n'
+            for char in retval[2]:
+                output += '@.str{formatType} = private unnamed_addr constant [4 x i8] c"%{formatType}\\0A\\00"' \
+                          ', align 1\n'.format(formatType=char)
             output += 'declare i32 @printf(i8*, ...)\n'
 
         # Write output to the outputfile
@@ -786,3 +739,22 @@ class AST:
         # elif isinstance(self.node, CFloat):
         #     return "float"
         # elif isi
+
+    def getLLVMType(self):
+        # Return the type of the child if it is UDeref
+        if isinstance(self.node, UDeref):
+            return self.children[0].node.getLLVMType()
+        return self.node.getLLVMType()
+
+    # Returns the expected value
+    def getNodeInfo(self):
+        if isinstance(self.node, Variable):
+            return self.node.value
+        elif isinstance(self.node, UDeref) or isinstance(self.node, UReref):
+            return self.children[0].node.value
+        return str(self)
+
+    def getValue(self):
+        if isinstance(self.node, CChar):
+            return ord(self.node.value[0])
+        return self.node.value

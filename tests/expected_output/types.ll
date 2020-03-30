@@ -1,6 +1,6 @@
-@x = global float 0.0, align 4
-@y = global i32 0, align 4
-@c = global i8 0, align 1
+@x = global float undef, align 4
+@y = global i32 undef, align 4
+@c = global i8 undef, align 1
 
 define i32 @main() {
 %N1N0T = fadd float 42.0, 0.0

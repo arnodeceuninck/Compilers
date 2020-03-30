@@ -1,9 +1,9 @@
-@x1 = global float 0.0, align 4
-@x2 = global float 0.0, align 4
-@x3 = global float 0.0, align 4
-@y = global float 0.0, align 4
-@z1 = global float 0.0, align 4
-@z2 = global float 0.0, align 4
+@x1 = global float undef, align 4
+@x2 = global float undef, align 4
+@x3 = global float undef, align 4
+@y = global float undef, align 4
+@z1 = global float undef, align 4
+@z2 = global float undef, align 4
 
 define i32 @main() {
 %N1N0T = add i32 0, 0

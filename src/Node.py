@@ -20,18 +20,24 @@ class Node:
     def __str__(self):
         return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
 
+    def getLLVMType(self):
+        return ""
+
 
 class StatementSequence(Node):
     def __init__(self):
         Node.__init__(self, "Statement Sequence")
 
+
 class If(Node):
     def __init__(self):
         Node.__init__(self, "if")
 
+
 class For(Node):
     def __init__(self):
         Node.__init__(self, "for")
+
 
 class Constant(Node):
     def __init__(self, value=""):
@@ -43,6 +49,18 @@ class Constant(Node):
 
     def set_value(self, value):
         self.value = value
+
+    def getLLVMType(self):
+        return ""
+
+    def getLLVMPrintType(self):
+        return self.getLLVMType()
+
+    def getFormatType(self):
+        return ""
+
+    def getNeutral(self):
+        return "0"
 
 
 class CInt(Constant):
@@ -59,6 +77,12 @@ class CInt(Constant):
     def set_value(self, value):
         self.value = int(round(value))
 
+    def getLLVMType(self):
+        return "i32"
+
+    def getFormatType(self):
+        return "d"
+
 
 class CFloat(Constant):
     def __init__(self, value=0):
@@ -74,6 +98,18 @@ class CFloat(Constant):
     def set_value(self, value):
         self.value = float(value)
 
+    def getLLVMType(self):
+        return "float"
+
+    def getLLVMPrintType(self):
+        return "double"
+
+    def getFormatType(self):
+        return "f"
+
+    def getNeutral(self):
+        return "0.0"
+
 
 class CChar(Constant):
     def __init__(self, value=""):
@@ -85,6 +121,12 @@ class CChar(Constant):
 
     def getType(self, args):
         return self.type
+
+    def getLLVMType(self):
+        return "i8"
+
+    def getFormatType(self):
+        return "c"
 
 
 class Operator(Node):
@@ -117,15 +159,18 @@ class UPlus(Unary):
             return "{}{} = fadd {} {}{}, 0.0\n"
         return "{}{} = add {} {}{}, 0\n"
 
+
 class UDMinus(Unary):
     def __init__(self, value="--"):
         Unary.__init__(self, value)
-        self.funct = lambda args: args[0]-1
+        self.funct = lambda args: args[0] - 1
+
 
 class UDPlus(Unary):
     def __init__(self, value="++"):
         Unary.__init__(self, value)
-        self.funct = lambda args: args[0]-1
+        self.funct = lambda args: args[0] - 1
+
 
 class UMinus(Unary):
     def __init__(self, value="-"):
@@ -382,10 +427,13 @@ class Variable(Node):
         return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
 
     def getType(self, args):
-        ptr = ""
-        if self.ptr:
-            ptr = "*"
-        return self.type + ptr
+        return self.type + ("*" if self.ptr else "")
+
+    def getLLVMType(self):
+        return ""
+
+    def getFormatType(self):
+        return ""
 
 
 class VInt(Variable):
@@ -399,17 +447,17 @@ class VInt(Variable):
         var_type += "*" if self.ptr else ""
         return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
 
+    def getLLVMType(self):
+        return "i32" + ("*" if self.ptr else "")
 
-class VFloat(Variable):
-    def __init__(self, value=""):
-        Variable.__init__(self, value)
-        self.type = "float"
+    def getLLVMPrintType(self):
+        return "i32"
 
-    def __str__(self):
-        var_type = "const " if self.const else ""
-        var_type += self.type
-        var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
+    def getFormatType(self):
+        return "d"
+
+    def getAlign(self):
+        return 4 + 4 * self.ptr
 
 
 class VChar(Variable):
@@ -422,3 +470,39 @@ class VChar(Variable):
         var_type += self.type
         var_type += "*" if self.ptr else ""
         return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
+
+    def getLLVMType(self):
+        return "i8" + ("*" if self.ptr else "")
+
+    def getLLVMPrintType(self):
+        return "i8"
+
+    def getFormatType(self):
+        return "c"
+
+    def getAlign(self):
+        return 1 + 7 * self.ptr
+
+
+class VFloat(Variable):
+    def __init__(self, value=""):
+        Variable.__init__(self, value)
+        self.type = "float"
+
+    def __str__(self):
+        var_type = "const " if self.const else ""
+        var_type += self.type
+        var_type += "*" if self.ptr else ""
+        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
+
+    def getLLVMType(self):
+        return "float" + ("*" if self.ptr else "")
+
+    def getLLVMPrintType(self):
+        return "double"
+
+    def getFormatType(self):
+        return "f"
+
+    def getAlign(self):
+        return 4 + 4 * self.ptr

@@ -6,7 +6,7 @@ call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.st
 ret i32 0
 }
 
-@.strc = private unnamed_addr constant [4 x i8] c"%c\0A\00", align 1
-@.strd = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 @.strf = private unnamed_addr constant [4 x i8] c"%f\0A\00", align 1
+@.strd = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@.strc = private unnamed_addr constant [4 x i8] c"%c\0A\00", align 1
 declare i32 @printf(i8*, ...)

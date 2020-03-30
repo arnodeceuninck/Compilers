@@ -1,7 +1,7 @@
-@x = global i32 0, align 4
-@y = global i32 0, align 4
-@z = global i32 0, align 4
-@a = global i32 0, align 4
+@x = global i32 undef, align 4
+@y = global i32 undef, align 4
+@z = global i32 undef, align 4
+@a = global i32 undef, align 4
 
 define i32 @main() {
 %N1N0T = add i32 5, 0

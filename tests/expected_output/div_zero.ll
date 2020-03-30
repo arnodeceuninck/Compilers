@@ -1,4 +1,4 @@
-@y = global float 0.0, align 4
+@y = global float undef, align 4
 
 define i32 @main() {
 %N0N1N0T = add i32 5, 0
