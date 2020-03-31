@@ -76,3 +76,4 @@ from src.Node.constant import *
 from src.Node.Unary import *
 from src.Node.Compare import *
 from src.Node.Operate import *
+from src.Node.Comments import *
