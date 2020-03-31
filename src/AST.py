@@ -54,15 +54,12 @@ def generate_LLVM(ast):
     # If we encounter an operator operate then we need to operate on its children
     elif isinstance(ast.node, Operate):
         # generate LLVM for the left and right side of the operator
-        tempret1 = generate_LLVM(ast.children[0])
-        output += tempret1[0]
-        tempret2 = generate_LLVM(ast.children[1])
-        output += tempret2[0]
-        is_float = False
-        retList = tempret1[1] + tempret2[1]
-        for formatType in retList:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
+        for i in range(2):
+            tempret = generate_LLVM(ast.children[i])
+            output = handle_return(tempret, output, formatTypes)
+
+        is_float = ast.getType() == "float"
+
         # execute operator
         type = ast.getLLVMType()
         # Both variable
@@ -89,17 +86,13 @@ def generate_LLVM(ast):
     # If we encounter an and then we need to do special operations
     elif isinstance(ast.node, LogicAnd):
         # generate LLVM for the left and right side of the operator
-        tempret1 = generate_LLVM(ast.children[0])
-        output += tempret1[0]
-        tempret2 = generate_LLVM(ast.children[1])
-        output += tempret2[0]
-        is_float = False
-        templist = tempret1[1] + tempret2[1]
-        for formatType in templist:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
+        for i in range(2):
+            tempret = generate_LLVM(ast.children[i])
+            output = handle_return(tempret, output, formatTypes)
+
         # execute operator
         type = ast.getLLVMType()
+        is_float = ast.getType() == "float"
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
@@ -195,14 +188,10 @@ def generate_LLVM(ast):
     # If we encounter an or then we need to do special operations
     elif isinstance(ast.node, LogicOr):
         # generate LLVM for the left and right side of the operator
-        tempret1 = generate_LLVM(ast.children[0])
-        output += tempret1[0]
-        tempret2 = generate_LLVM(ast.children[1])
-        output += tempret2[0]
-        templist = tempret1[1] + tempret2[1]
-        for formatType in templist:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
+        for i in range(2):
+            tempret = generate_LLVM(ast.children[i])
+            output = handle_return(tempret, output, formatTypes)
+
         # execute operator
         type = ast.getLLVMType()
         is_float = ast.getType() == "float"
@@ -304,17 +293,13 @@ def generate_LLVM(ast):
     # If we encounter an operator operate then we need to operate on its children
     elif isinstance(ast.node, Compare):
         # generate LLVM for the left and right side of the operator
-        tempret1 = generate_LLVM(ast.children[0])
-        output += tempret1[0]
-        tempret2 = generate_LLVM(ast.children[1])
-        output += tempret2[0]
-        is_float = False
-        templist = tempret1[1] + tempret2[1]
-        for formatType in templist:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
+        for i in range(2):
+            tempret = generate_LLVM(ast.children[i])
+            output = handle_return(tempret, output, formatTypes)
+
         # execute operator
         type = ast.getLLVMType()
+        is_float = ast.getType() == "float"
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
