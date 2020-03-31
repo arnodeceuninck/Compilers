@@ -1,7 +1,7 @@
 import unittest
 from src.main import compile
 from src.AST import AST
-from src.Node import *
+from src.Node.Node import *
 from src.ErrorListener import *
 
 

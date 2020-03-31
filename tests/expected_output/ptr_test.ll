@@ -3,7 +3,7 @@
 @z = global i32 undef, align 4
 
 define i32 @main() {
-%N1N0T = add i32 2, undef
+%N1N0T = add i32 2, 0
 store i32 %N1N0T, i32* @x
 store i32* @x, i32** @y
 %N1N2T = add i32 3, 0

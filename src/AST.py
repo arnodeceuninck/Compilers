@@ -1,15 +1,18 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
-from src.Node import *
+from src.Node.Node import *
 from src.symbolTable import *
 
+
 def get_LLVM_load():
-    return
+    return "{}{} = load {}, {}* {}{}\n"
+
 
 def generate_LLVM(ast):
     output = ""
     retval = False
     formatTypes = list()
-    # If the ast node is a sequence then the nodes below it can be instructions but this node means nothing at the moment
+    # If the ast node is a sequence then the nodes below it can be instructions,
+    # but this node means nothing in code generation
     if isinstance(ast.node, StatementSequence):
         for child in ast.children:
             tempret = generate_LLVM(child)
@@ -38,7 +41,7 @@ def generate_LLVM(ast):
 
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
-        type = ""
+        type = ast.getLLVMType()
         val = ast.getValue()
         neutralval = ast.node.getNeutral()
         if isinstance(ast.node, CChar):
@@ -111,14 +114,7 @@ def generate_LLVM(ast):
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
-        type = ast.getType()
-        if type == "float":
-            type = "float"
-            is_float = True
-        elif type == "int":
-            type = "i32"
-        elif type == "char":
-            type = "i8"
+        type = ast.getLLVMType()
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
@@ -150,9 +146,7 @@ def generate_LLVM(ast):
                 ast.children[0].node.value) + "\n"
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
 
             tempSave1 = "t" + str(ast.node.get_id())
@@ -176,9 +170,7 @@ def generate_LLVM(ast):
                 ast.children[1].node.value) + "\n"
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[0]), "", neutralVal)
 
@@ -198,9 +190,7 @@ def generate_LLVM(ast):
                 output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
         else:  # No variable
             tempvar1 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
 
@@ -363,14 +353,7 @@ def generate_LLVM(ast):
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
-        type = ast.getType()
-        if type == "float":
-            type = "float"
-            is_float = True
-        elif type == "int":
-            type = "i32"
-        elif type == "char":
-            type = "i8"
+        type = ast.getLLVMType()
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
@@ -418,7 +401,7 @@ def generate_LLVM(ast):
                 ast.children[1].node.value) + "\n"
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
+            neutralVal = ast.getNeutral()
             if type == "float":
                 neutralVal = "0.0"
 
@@ -454,64 +437,31 @@ def generate_LLVM(ast):
                                                      "%", tempvar2)
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
     elif isinstance(ast.node, UReref):
-        type = ast.getType()
-        if type == "int":
-            type = "i32"
-        elif type == "char":
-            type = "i8"
+        type = ast.getLLVMType()
         tempvar1 = "t" + str(ast.node.get_id())
         # Extra load step for loading pointer values
-        output += "%" + tempvar1 + " = load " + type + "*, " + type + "** " + "@" + str(
+        output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
             ast.children[0].node.value) + "\n"
         # Load the value into the ast node
-        output += "%" + str(ast) + " = load " + type + ", " + type + "* " + "%" + tempvar1 + "\n"
-
+        output += "%" + str(ast) + " = load " + type[:-1] + ", " + type + " %" + tempvar1 + "\n"
     elif isinstance(ast.node, UDeref):
         pass
-    elif isinstance(ast.node, UPlus):
-        is_float = False
-        type = "i32"
-        if "float" == ast.getType():
-            is_float = True
-            type = "float"
-        elif ast.getType() == "char":
-            type = "i8"
+    elif isinstance(ast.node, UPlus) or isinstance(ast.node, UMinus):
+        is_float = ast.getType() == "float"
+        type = ast.getLLVMType()
         tempvar1 = str(ast.children[0])
         if isinstance(ast.children[0].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
 
-        output += UPlus().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
-
-    elif isinstance(ast.node, UMinus):
-        is_float = False
-        type = "i32"
-        if "float" == ast.getType():
-            is_float = True
-            type = "float"
-        elif ast.getType() == "char":
-            type = "i8"
-
-        tempvar1 = str(ast.children[0])
-        if isinstance(ast.children[0].node, Variable):
-            tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
-
-        output += UMinus().get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
+        output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
 
     elif isinstance(ast.node, UNot):
-        is_float = False
-        type = "i32"
-        if "float" == ast.getType():
-            is_float = True
-            type = "float"
-        elif ast.getType() == "char":
-            type = "i8"
-
+        is_float = ast.getType() == "float"
+        type = ast.getLLVMType()
+        tempvar1 = "t" + str(ast.node.get_id())
         if isinstance(ast.children[0].node, Variable):
-            tempvar1 = "t" + str(ast.node.get_id())
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
 
@@ -591,9 +541,7 @@ class AST:
         for var in symbol_table:
             # define all the variables
             LLVM_var_name = "@" + var
-            LLVM_type = ""
             ptr = "*" if symbol_table[var].type.ptr else ""
-            value = "undef"
             LLVM_align = "align"
             # TODO: @Basil: Zou het mogelijk zijn om in de symbol table de nodes bij te houden en die een extra functie
             #  to_llvm te geven voor hun type? (Verwijder deze lijn indien niet mogelijk, zet het anders op trello, dan
@@ -741,10 +689,20 @@ class AST:
         # elif isi
 
     def getLLVMType(self):
-        # Return the type of the child if it is UDeref
-        if isinstance(self.node, UDeref):
-            return self.children[0].node.getLLVMType()
-        return self.node.getLLVMType()
+        this = self
+        # If this is an operator or statement sequence then we can't deduce its type so we need
+        # to assign the left most child since it is always the correct type
+        while isinstance(this.node, Operator) or isinstance(this.node, StatementSequence):
+            this = this.children[0]
+        return this.node.getLLVMType()
+
+    def getNeutral(self):
+        this = self
+        # If this is an operator or statement sequence then we can't deduce its type so we need
+        # to assign the left most child since it is always the correct type
+        while isinstance(this.node, Operator) or isinstance(this.node, StatementSequence):
+            this = this.children[0]
+        return this.node.getNeutral()
 
     # Returns the expected value
     def getNodeInfo(self):
@@ -756,5 +714,5 @@ class AST:
 
     def getValue(self):
         if isinstance(self.node, CChar):
-            return ord(self.node.value[0])
+            return ord(self.node.value[1])
         return self.node.value

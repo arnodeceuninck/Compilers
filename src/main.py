@@ -2,7 +2,7 @@ import sys
 from antlr4 import *
 from gen import cLexer
 from gen import cParser
-from src.Node import *
+from src.Node.Node import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
