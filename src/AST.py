@@ -43,19 +43,7 @@ def generate_LLVM(ast):
     elif isinstance(ast.node, Constant):
         type = ast.getLLVMType()
         val = ast.getValue()
-        neutralval = ast.node.getNeutral()
-        if isinstance(ast.node, CChar):
-            type = "i8"
-            val = str(ord(ast.node.value[1]))
-            neutralval = "0"
-        elif isinstance(ast.node, CInt):
-            type = "i32"
-            val = str(ast.node.value)
-            neutralval = "0"
-        elif isinstance(ast.node, CFloat):
-            type = "float"
-            val = str(ast.node.value)
-            neutralval = "0.0"
+        neutralval = ast.getNeutral()
         output += BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
 
     # If we encounter an operator operate then we need to operate on its children
@@ -76,23 +64,19 @@ def generate_LLVM(ast):
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
+            get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
             tempvar2 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
-            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            get_LLVM_load().format("%", tempvar2, type, type, "@", str(ast.children[1].node.value))
             output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1,
                                                          "%", tempvar2)
         elif isinstance(ast.children[0].node, Variable):  # First variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
             output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1,
                                                          "%", str(ast.children[1]))
         elif isinstance(ast.children[1].node, Variable):  # Second variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[1].node.value))
             output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", str(ast.children[0]),
                                                          "%", tempvar1)
         else:  # No variable
@@ -118,12 +102,10 @@ def generate_LLVM(ast):
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar2, type, type, "@", str(ast.children[1].node.value))
 
             tempSave1 = "t" + str(ast.node.get_id())
             tempSave2 = "t" + str(ast.node.get_id())
@@ -142,8 +124,7 @@ def generate_LLVM(ast):
 
         elif isinstance(ast.children[0].node, Variable):  # First variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
             neutralVal = ast.getNeutral()
@@ -166,8 +147,7 @@ def generate_LLVM(ast):
 
         elif isinstance(ast.children[1].node, Variable):  # Second variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[1].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
             neutralVal = ast.getNeutral()
@@ -219,31 +199,22 @@ def generate_LLVM(ast):
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
         retval = tempret1[1] + tempret2[1]
-        is_float = False
-        for formatType in tempret1[2]:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
-        for formatType in tempret2[2]:
+        templist = tempret1[2] + tempret2[2]
+        for formatType in templist:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
-        type = ast.getType()
-        if type == "float":
-            type = "float"
-            is_float = True
-        elif type == "int":
-            type = "i32"
-        elif type == "char":
-            type = "i8"
+        type = ast.getLLVMType()
+        is_float = ast.getType() == "float"
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
             output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
                 ast.children[0].node.value) + "\n"
 
             tempvar2 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar2, type, type, "@", str(ast.children[1].node.value))
 
             tempSave1 = "t" + str(ast.node.get_id())
             tempSave2 = "t" + str(ast.node.get_id())
@@ -266,9 +237,7 @@ def generate_LLVM(ast):
                 ast.children[0].node.value) + "\n"
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[1]), "", neutralVal)
 
             tempSave1 = "t" + str(ast.node.get_id())
@@ -288,13 +257,10 @@ def generate_LLVM(ast):
 
         elif isinstance(ast.children[1].node, Variable):  # Second variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[1].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar2, type, "%", str(ast.children[0]), "", neutralVal)
 
@@ -314,9 +280,7 @@ def generate_LLVM(ast):
                 output += "%" + str(ast) + " = zext i1 %" + tempSave2 + " to " + type + "\n"
         else:  # No variable
             tempvar1 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
 
@@ -346,10 +310,8 @@ def generate_LLVM(ast):
         output += tempret2[0]
         retval = tempret1[1] + tempret2[1]
         is_float = False
-        for formatType in tempret1[2]:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
-        for formatType in tempret2[2]:
+        templist = tempret1[2] + tempret2[2]
+        for formatType in templist:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
@@ -357,12 +319,10 @@ def generate_LLVM(ast):
         # Both variable
         if isinstance(ast.children[0].node, Variable) and isinstance(ast.children[1].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar2 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar2, type, type, "@", str(ast.children[1].node.value))
 
             tempSave = "t" + str(ast.node.get_id())
             if type == "float":
@@ -376,8 +336,7 @@ def generate_LLVM(ast):
 
         elif isinstance(ast.children[0].node, Variable):  # First variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
             neutralVal = "0"
@@ -397,8 +356,7 @@ def generate_LLVM(ast):
 
         elif isinstance(ast.children[1].node, Variable):  # Second variable
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[1].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[1].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
             neutralVal = ast.getNeutral()
@@ -440,10 +398,9 @@ def generate_LLVM(ast):
         type = ast.getLLVMType()
         tempvar1 = "t" + str(ast.node.get_id())
         # Extra load step for loading pointer values
-        output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-            ast.children[0].node.value) + "\n"
+        output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
         # Load the value into the ast node
-        output += "%" + str(ast) + " = load " + type[:-1] + ", " + type + " %" + tempvar1 + "\n"
+        output += get_LLVM_load().format("%", str(ast), type[:-1], type[:-1], "%", tempvar1)
     elif isinstance(ast.node, UDeref):
         pass
     elif isinstance(ast.node, UPlus) or isinstance(ast.node, UMinus):
@@ -452,8 +409,7 @@ def generate_LLVM(ast):
         tempvar1 = str(ast.children[0])
         if isinstance(ast.children[0].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
         output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
 
@@ -462,8 +418,7 @@ def generate_LLVM(ast):
         type = ast.getLLVMType()
         tempvar1 = "t" + str(ast.node.get_id())
         if isinstance(ast.children[0].node, Variable):
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
 
             tempvar2 = "t" + str(ast.node.get_id())
             if type == "float":
@@ -487,8 +442,7 @@ def generate_LLVM(ast):
                 formatType, printType, "", ord(ast.children[0].node.value[1]))
         elif isinstance(ast.children[0].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += "%" + tempvar1 + " = load " + type + ", " + type + "* " + "@" + str(
-                ast.children[0].node.value) + "\n"
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
             if printType == "double":
                 tempvar2 = "t" + str(ast.node.get_id())
                 output += "%" + tempvar2 + " = fpext float %" + tempvar1 + " to double\n"
