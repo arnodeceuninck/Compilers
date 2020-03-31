@@ -3,24 +3,28 @@ from src.Node.Node import *
 from src.symbolTable import *
 
 
+# TODO make meaning of retval clear
+def handle_return(retVal, output, formatTypes):
+    output += retVal[0]
+    for formatType in retVal[1]:
+        if formatType not in formatTypes:
+            formatTypes.append(formatType)
+    return output
+
+
 def get_LLVM_load():
     return "{}{} = load {}, {}* {}{}\n"
 
 
 def generate_LLVM(ast):
     output = ""
-    retval = False
     formatTypes = list()
     # If the ast node is a sequence then the nodes below it can be instructions,
     # but this node means nothing in code generation
     if isinstance(ast.node, StatementSequence):
         for child in ast.children:
             tempret = generate_LLVM(child)
-            output += tempret[0]
-            retval = tempret[1]
-            for formatType in tempret[2]:
-                if formatType not in formatTypes:
-                    formatTypes.append(formatType)
+            output = handle_return(tempret, output, formatTypes)
 
     # If the type is assignment then we need first calculate the right hand value of the assignment
     if isinstance(ast.node, Assign):
@@ -37,7 +41,7 @@ def generate_LLVM(ast):
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
     elif isinstance(ast.node, Variable):
-        return "", retval, formatTypes
+        return "", formatTypes
 
     # If the node is a constant then we add the assignment of the constant
     elif isinstance(ast.node, Constant):
@@ -53,9 +57,8 @@ def generate_LLVM(ast):
         output += tempret1[0]
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
-        retval = tempret1[1] + tempret2[1]
         is_float = False
-        retList = tempret1[2] + tempret2[2]
+        retList = tempret1[1] + tempret2[1]
         for formatType in retList:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
@@ -89,12 +92,9 @@ def generate_LLVM(ast):
         output += tempret1[0]
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
-        retval = tempret1[1] + tempret2[1]
         is_float = False
-        for formatType in tempret1[2]:
-            if formatType not in formatTypes:
-                formatTypes.append(formatType)
-        for formatType in tempret2[2]:
+        templist = tempret1[1] + tempret2[1]
+        for formatType in templist:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
         # execute operator
@@ -198,8 +198,7 @@ def generate_LLVM(ast):
         output += tempret1[0]
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
-        retval = tempret1[1] + tempret2[1]
-        templist = tempret1[2] + tempret2[2]
+        templist = tempret1[1] + tempret2[1]
         for formatType in templist:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
@@ -308,9 +307,8 @@ def generate_LLVM(ast):
         output += tempret1[0]
         tempret2 = generate_LLVM(ast.children[1])
         output += tempret2[0]
-        retval = tempret1[1] + tempret2[1]
         is_float = False
-        templist = tempret1[2] + tempret2[2]
+        templist = tempret1[1] + tempret2[1]
         for formatType in templist:
             if formatType not in formatTypes:
                 formatTypes.append(formatType)
@@ -376,9 +374,7 @@ def generate_LLVM(ast):
                 output += "%" + str(ast) + " = zext i1 %" + tempSave + " to " + type + "\n"
         else:  # No variable
             tempvar1 = "t" + str(ast.node.get_id())
-            neutralVal = "0"
-            if type == "float":
-                neutralVal = "0.0"
+            neutralVal = ast.getNeutral()
 
             output += BPlus().get_LLVM(is_float).format("%", tempvar1, type, "%", str(ast.children[0]), "", neutralVal)
 
@@ -452,8 +448,8 @@ def generate_LLVM(ast):
         else:
             output += printString.format(
                 formatType, printType, "", ast.children[0].node.value)
-        return output, True, formatTypes
-    return output, retval, formatTypes
+        return output, formatTypes
+    return output, formatTypes
 
 
 class AST:
@@ -516,8 +512,8 @@ class AST:
         output += "}\n\n"
 
         # If we need to print then create the print function
-        if retval[1]:
-            for char in retval[2]:
+        if len(retval[1]):
+            for char in retval[1]:
                 output += '@.str{formatType} = private unnamed_addr constant [4 x i8] c"%{formatType}\\0A\\00"' \
                           ', align 1\n'.format(formatType=char)
             output += 'declare i32 @printf(i8*, ...)\n'
