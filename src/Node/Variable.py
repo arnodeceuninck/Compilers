@@ -23,6 +23,9 @@ class Variable(Node):
     def getFormatType(self):
         return ""
 
+    def convertString(self, type):
+        return ""
+
 
 class VInt(Variable):
     def __init__(self, value=""):
@@ -46,6 +49,16 @@ class VInt(Variable):
 
     def getAlign(self):
         return 4 + 4 * self.ptr
+
+    def convertString(self, type):
+        if type == "int":
+            return ""
+        elif type == "char":
+            return "{}{} = trunc i32 {}{} to i8"
+        elif type == "float":
+            return "{}{} = sitofp i32 {}{} to float"
+        elif type == "double":
+            return "{}{} = sitofp i32 {}{} to double"
 
 
 class VChar(Variable):
@@ -71,6 +84,16 @@ class VChar(Variable):
     def getAlign(self):
         return 1 + 7 * self.ptr
 
+    def convertString(self, type):
+        if type == "int":
+            return "{}{} = zext i8 {}{} to i32"
+        elif type == "char":
+            return ""
+        elif type == "float":
+            return "{}{} = uitofp i8 {}{} to float"
+        elif type == "double":
+            return "{}{} = uitofp i8 {}{} to double"
+
 
 class VFloat(Variable):
     def __init__(self, value=""):
@@ -94,3 +117,13 @@ class VFloat(Variable):
 
     def getAlign(self):
         return 4 + 4 * self.ptr
+
+    def convertString(self, type):
+        if type == "int":
+            return "{}{} = fptosi float {}{} to i32"
+        elif type == "char":
+            return "{}{} = fptoui float {}{} to i8"
+        elif type == "float":
+            return ""
+        elif type == "double":
+            return "{}{} = fpext float {}{} to double"

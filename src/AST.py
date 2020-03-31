@@ -3,13 +3,14 @@ from src.Node.Node import *
 from src.symbolTable import *
 from src.Operations import *
 
+printString = 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {}{})\n'
+
 
 # TODO make meaning of retval clear
 def handle_return(retVal, output, formatTypes):
     output += retVal[0]
     for formatType in retVal[1]:
-        if formatType not in formatTypes:
-            formatTypes.append(formatType)
+        formatTypes.add(formatType)
     return output
 
 
@@ -19,7 +20,7 @@ def get_LLVM_load():
 
 def generate_LLVM(ast):
     output = ""
-    formatTypes = list()
+    formatTypes = set()
     # If the ast node is a sequence then the nodes below it can be instructions,
     # but this node means nothing in code generation
     if isinstance(ast.node, StatementSequence):
@@ -412,28 +413,22 @@ def generate_LLVM(ast):
 
     if isinstance(ast.node, Print):
         formatType = ast.children[0].node.getFormatType()
-        if formatType not in formatTypes:
-            formatTypes.append(formatType)
+        formatTypes.add(formatType)
 
         printType = ast.children[0].node.getLLVMPrintType()
         type = ast.children[0].getLLVMType()
+        value = ast.children[0].getValue()
 
-        printString = 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {}{})\n'
-        if isinstance(ast.children[0].node, CChar):
-            output += printString.format(
-                formatType, printType, "", ord(ast.children[0].node.value[1]))
-        elif isinstance(ast.children[0].node, Variable):
+        if isinstance(ast.children[0].node, Variable):
             tempvar1 = "t" + str(ast.node.get_id())
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
+            output += get_LLVM_load().format("%", tempvar1, type, type, "@", value)
             if printType == "double":
                 tempvar2 = "t" + str(ast.node.get_id())
-                output += "%" + tempvar2 + " = fpext float %" + tempvar1 + " to double\n"
+                output += VFloat().convertString("double").format("%", tempvar2, "%", tempvar1)
                 tempvar1 = tempvar2
-            output += printString.format(
-                formatType, printType, "%", tempvar1)
+            output += printString.format(formatType, printType, "%", tempvar1)
         else:
-            output += printString.format(
-                formatType, printType, "", ast.children[0].node.value)
+            output += printString.format(formatType, printType, "", value)
         return output, formatTypes
     return output, formatTypes
 

@@ -1,4 +1,7 @@
 int main(){
     int x = 2;
-    printf(x);
+    int* y = &x;
+    if (*y && x) {
+        *y = 2;
+    }
 }

@@ -164,6 +164,7 @@ class MyTestCase(unittest.TestCase):
             # There shouldn't be any errors
             self.assertTrue(False)
 
+    # Sets cause inconsistent output need to find a fix
     def test_const_printf(self):
         # Tests whether the folding has been done right
         try:

@@ -24,6 +24,9 @@ class Constant(Node):
     def getNeutral(self):
         return "0"
 
+    def convertString(self, type):
+        return ""
+
 
 class CInt(Constant):
     def __init__(self, value=0):
@@ -44,6 +47,16 @@ class CInt(Constant):
 
     def getFormatType(self):
         return "d"
+
+    def convertString(self, type):
+        if type == "int":
+            return ""
+        elif type == "char":
+            return "{}{} = trunc i32 {}{} to i8"
+        elif type == "float":
+            return "{}{} = sitofp i32 {}{} to float"
+        elif type == "double":
+            return "{}{} = sitofp i32 {}{} to double"
 
 
 class CFloat(Constant):
@@ -72,6 +85,16 @@ class CFloat(Constant):
     def getNeutral(self):
         return "0.0"
 
+    def convertString(self, type):
+        if type == "int":
+            return "{}{} = fptosi float {}{} to i32"
+        elif type == "char":
+            return "{}{} = fptoui float {}{} to i8"
+        elif type == "float":
+            return ""
+        elif type == "double":
+            return "{}{} = fpext float {}{} to float"
+
 
 class CChar(Constant):
     def __init__(self, value=""):
@@ -89,3 +112,41 @@ class CChar(Constant):
 
     def getFormatType(self):
         return "c"
+
+    def convertString(self, type):
+        if type == "int":
+            return "{}{} = zext i8 {}{} to i32"
+        elif type == "char":
+            return ""
+        elif type == "float":
+            return "{}{} = uitofp i8 {}{} to float"
+        elif type == "double":
+            return "{}{} = uitofp i8 {}{} to double"
+
+
+class CBool(Constant):
+    def __init__(self, value=""):
+        Constant.__init__(self, value)
+        self.type = "bool"
+
+    def __str__(self):
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
+
+    def getType(self, args):
+        return self.type
+
+    def getLLVMType(self):
+        return "i1"
+
+    def getFormatType(self):
+        return "c"
+
+    def convertString(self, type):
+        if type == "int":
+            return "{}{} = zext i1 {}{} to i32"
+        elif type == "char":
+            return "{}{} = zext i1 {}{} to i8"
+        elif type == "float":
+            return "{}{} = uitofp i1 {}{} to float"
+        elif type == "double":
+            return "{}{} = uitofp i1 {}{} to double"
