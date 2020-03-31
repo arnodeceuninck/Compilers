@@ -1,6 +1,7 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
 from src.Node.Node import *
 from src.symbolTable import *
+from src.Operations import *
 
 
 # TODO make meaning of retval clear
@@ -559,27 +560,6 @@ class AST:
         outputFile = open(filename, "w")
         outputFile.write(output)
         outputFile.close()
-
-    def plus(self, args):
-        return args[0] + args[1]
-
-    def min(self, args):
-        return args[0] - args[1]
-
-    def mult(self, args):
-        return args[0] * args[1]
-
-    def div(self, args):
-        return args[0] / args[1]
-
-    def mod(self, args):
-        return args[0] % args[1]
-
-    def minU(self, args):
-        return -args[0]
-
-    def plusU(self, args):
-        return +args[0]
 
     def traverse(self, func):
         func(self)
