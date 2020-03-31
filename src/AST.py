@@ -3,20 +3,6 @@ from src.Node.Node import *
 from src.symbolTable import *
 from src.Operations import *
 
-printString = 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str{}, i32 0, i32 0), {} {}{})\n'
-
-
-# TODO make meaning of retval clear
-def handle_return(retVal, output, formatTypes):
-    output += retVal[0]
-    for formatType in retVal[1]:
-        formatTypes.add(formatType)
-    return output
-
-
-def get_LLVM_load():
-    return "{}{} = load {}, {}* {}{}\n"
-
 
 def generate_LLVM(ast):
     output = ""
@@ -386,32 +372,9 @@ def generate_LLVM(ast):
         output += get_LLVM_load().format("%", str(ast), type[:-1], type[:-1], "%", tempvar1)
     elif isinstance(ast.node, UDeref):
         pass
-    elif isinstance(ast.node, UPlus) or isinstance(ast.node, UMinus):
-        is_float = ast.getType() == "float"
-        type = ast.getLLVMType()
-        tempvar1 = str(ast.children[0])
-        if isinstance(ast.children[0].node, Variable):
-            tempvar1 = "t" + str(ast.node.get_id())
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
-
-        output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
-
-    elif isinstance(ast.node, UNot):
-        is_float = ast.getType() == "float"
-        type = ast.getLLVMType()
-        tempvar1 = "t" + str(ast.node.get_id())
-        if isinstance(ast.children[0].node, Variable):
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", str(ast.children[0].node.value))
-
-            tempvar2 = "t" + str(ast.node.get_id())
-            if type == "float":
-                output += UNot().get_LLVM(is_float).format("%", tempvar2, "float", "%", tempvar1)
-                output += "%" + str(ast) + " = uitofp i1 %" + tempvar2 + " to float\n"
-            else:
-                output += UNot().get_LLVM(is_float).format("%", tempvar2, type, "%", tempvar1)
-                output += "%" + str(ast) + " = zext i1 %" + tempvar2 + " to " + type + "\n"
-
-    if isinstance(ast.node, Print):
+    elif isinstance(ast.node, UPlus) or isinstance(ast.node, UMinus) or isinstance(ast.node, UNot):
+        output += ast.node.generateLLVM(ast)
+    elif isinstance(ast.node, Print):
         formatType = ast.children[0].node.getFormatType()
         formatTypes.add(formatType)
 
