@@ -27,6 +27,12 @@ class Constant(Node):
     def convertString(self, type):
         return ""
 
+    def generateLLVM(self, ast):
+        type = ast.getLLVMType()
+        val = ast.getValue()
+        neutralval = ast.getNeutral()
+        return BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
+
 
 class CInt(Constant):
     def __init__(self, value=0):
@@ -57,6 +63,10 @@ class CInt(Constant):
             return "{}{} = sitofp i32 {}{} to float"
         elif type == "double":
             return "{}{} = sitofp i32 {}{} to double"
+
+    def generateLLVM(self, ast):
+        val = ast.getValue()
+        return BPlus().get_LLVM(False).format("%", str(ast), "i32", "", val, "", "0")
 
 
 class CFloat(Constant):
@@ -95,6 +105,10 @@ class CFloat(Constant):
         elif type == "double":
             return "{}{} = fpext float {}{} to float"
 
+    def generateLLVM(self, ast):
+        val = ast.getValue()
+        return BPlus().get_LLVM(True).format("%", str(ast), "float", "", val, "", "0.0")
+
 
 class CChar(Constant):
     def __init__(self, value=""):
@@ -122,6 +136,10 @@ class CChar(Constant):
             return "{}{} = uitofp i8 {}{} to float"
         elif type == "double":
             return "{}{} = uitofp i8 {}{} to double"
+
+    def generateLLVM(self, ast):
+        val = ast.getValue()
+        return BPlus().get_LLVM(False).format("%", str(ast), "i8", "", val, "", "0")
 
 
 class CBool(Constant):

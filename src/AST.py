@@ -29,15 +29,9 @@ def generate_LLVM(ast):
 
     # If we encounter a variable then we do not need to do anything because it is already assigned
     elif isinstance(ast.node, Variable):
-        return "", formatTypes
-
-    # If the node is a constant then we add the assignment of the constant
+        return output, formatTypes
     elif isinstance(ast.node, Constant):
-        type = ast.getLLVMType()
-        val = ast.getValue()
-        neutralval = ast.getNeutral()
-        output += BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
-
+        output += ast.node.generateLLVM(ast)
     # If we encounter an operator operate then we need to operate on its children
     elif isinstance(ast.node, Operate):
         # generate LLVM for the left and right side of the operator
@@ -45,7 +39,7 @@ def generate_LLVM(ast):
             tempret = generate_LLVM(ast.children[i])
             output = handle_return(tempret, output, formatTypes)
 
-        is_float = ast.getType() == "float"
+        is_float = (ast.getType() == "float")
 
         # execute operator
         type = ast.getLLVMType()
