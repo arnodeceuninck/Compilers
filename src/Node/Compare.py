@@ -1,5 +1,6 @@
 from src.Node.Node import *
 from src.Node.constant import *
+from src.Node.Operate import Mult, BPlus
 
 
 class Compare(Binary):
@@ -17,15 +18,15 @@ class Compare(Binary):
         else:
             return "unknown"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         # execute operator
-        type = ast.getLLVMType()
+        LLVM_type = ast.getLLVMType()
         is_float = ast.getType() == "float"
         # Both variable
         tempSave = "t" + str(ast.node.get_id())
-        output = ast.node.get_LLVM(is_float).format("%", tempSave, type, "%", str(ast.children[0]),
+        output = ast.node.get_LLVM(is_float).format("%", tempSave, LLVM_type, "%", str(ast.children[0]),
                                                     "%", str(ast.children[1]))
-        output += CBool().convertString(type).format("%", str(ast), "%", tempSave)
+        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave)
         return output
 
 
@@ -103,7 +104,7 @@ class LogicAnd(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp and {} {}{}, {}{}\n"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         # execute operator
         type = ast.getLLVMType()
         is_float = (ast.getType() == "float")
@@ -115,7 +116,7 @@ class LogicAnd(Compare):
                                                   "%", str(ast.children[1]))
         output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
                                                        "", ast.getNeutral())
-        output += CBool().convertString(type).format("%", str(ast), "%", tempSave2)
+        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
         return output
 
 
@@ -127,7 +128,7 @@ class LogicOr(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp or {} {}{}, {}{}\n"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         # execute operator
         type = ast.getLLVMType()
         is_float = (ast.getType() == "float")
@@ -139,5 +140,5 @@ class LogicOr(Compare):
                                                    "%", str(ast.children[1]))
         output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
                                                        "", ast.getNeutral())
-        output += CBool().convertString(type).format("%", str(ast), "%", tempSave2)
+        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
         return output

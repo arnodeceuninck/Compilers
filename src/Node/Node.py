@@ -29,7 +29,7 @@ class StatementSequence(Node):
     def __init__(self):
         Node.__init__(self, "Statement Sequence")
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         for child in ast.children:
             tempret = child.generate_LLVM()
             output = handle_return(tempret, output, formatTypes)
@@ -74,8 +74,8 @@ class Assign(Binary):
     def get_LLVM(self):
         return "store {} {}{}, {}* {}{}\n"
 
-    def generateLLVM(self, ast):
-        output = ast.children[1].node.generate_LLVM(ast.children[1])[0]
+    def generate_LLVM(self, ast):
+        output = ast.children[1].node.generate_LLVM(ast.children[1])
         # If The right side is a variable then take the variable name not the node type
         if isinstance(ast.children[1].node, UDeref):
             output += ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "@",

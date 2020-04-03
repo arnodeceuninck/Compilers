@@ -12,6 +12,9 @@ class Unary(Operator):
     def getType(self, args):
         return args[0]  # Only one type as argument
 
+    def generate_LLVM(self, ast):
+        return ""
+
 
 class UPlus(Unary):
     def __init__(self, value="+"):
@@ -23,7 +26,7 @@ class UPlus(Unary):
             return "{}{} = fadd {} {}{}, 0.0\n"
         return "{}{} = add {} {}{}, 0\n"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         output = ""
         is_float = ast.getType() == "float"
         type = ast.getLLVMType()
@@ -46,7 +49,7 @@ class UMinus(Unary):
             return "{}{} = fsub {} 0.0, {}{}\n"
         return "{}{} = sub {} 0, {}{}\n"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         output = ""
         is_float = ast.getType() == "float"
         type = ast.getLLVMType()
@@ -81,7 +84,7 @@ class UNot(Unary):
             return "{}{} = fcmp oeq {} {}{}, 0.0\n"
         return "{}{} = icmp eq {} {}{}, 0\n"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         output = ""
         is_float = ast.getType() == "float"
         type = ast.getLLVMType()
@@ -113,8 +116,8 @@ class UReref(Unary):
             raise RerefError()
         return args[0][:len(args[0]) - 1]
 
-    def generateLLVM(self, ast):
-        output = ast.children[0].node.generateLLVM(ast.children[0])
+    def generate_LLVM(self, ast):
+        output = ast.children[0].node.generate_LLVM(ast.children[0])
         type = ast.getLLVMType()
         # Load the value into the ast node
         output += get_LLVM_load().format("%", str(ast), type[:-1], type[:-1], "%", str(ast.children[0]))
@@ -128,9 +131,9 @@ class Print(Unary):
     def getType(self, args):
         return "function"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         # Generate LLVM for the node that needs to be printed
-        output = ast.children[0].node.generateLLVM()
+        output = ast.children[0].node.generate_LLVM(ast)
         formatType = ast.children[0].node.getFormatType()
         printType = ast.children[0].node.getLLVMPrintType()
 

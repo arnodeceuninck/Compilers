@@ -1,4 +1,5 @@
 from src.Node.Node import *
+from src.Node.Operate import BPlus
 
 
 class Constant(Node):
@@ -27,7 +28,7 @@ class Constant(Node):
     def convertString(self, type):
         return ""
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         type = ast.getLLVMType()
         val = ast.getValue()
         neutralval = ast.getNeutral()
@@ -64,7 +65,7 @@ class CInt(Constant):
         elif type == "double":
             return "{}{} = sitofp i32 {}{} to double"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         val = ast.getValue()
         return BPlus().get_LLVM(False).format("%", str(ast), "i32", "", val, "", "0")
 
@@ -105,7 +106,7 @@ class CFloat(Constant):
         elif type == "double":
             return "{}{} = fpext float {}{} to float"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         val = ast.getValue()
         return BPlus().get_LLVM(True).format("%", str(ast), "float", "", val, "", "0.0")
 
@@ -137,7 +138,7 @@ class CChar(Constant):
         elif type == "double":
             return "{}{} = uitofp i8 {}{} to double"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         val = ast.getValue()
         return BPlus().get_LLVM(False).format("%", str(ast), "i8", "", val, "", "0")
 

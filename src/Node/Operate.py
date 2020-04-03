@@ -13,7 +13,7 @@ class Operate(Binary):
         else:
             return "unknown"
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         is_float = (ast.getType() == "float")
 
         # execute operator

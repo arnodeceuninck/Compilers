@@ -26,7 +26,7 @@ class Variable(Node):
     def convertString(self, type):
         return ""
 
-    def generateLLVM(self, ast):
+    def generate_LLVM(self, ast):
         return get_LLVM_load().format("%", str(ast), ast.getLLVMType(), ast.getLLVMType(), "@", ast.getValue())
 
 
