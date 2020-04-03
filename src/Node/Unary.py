@@ -15,6 +15,10 @@ class Unary(Operator):
     def generate_LLVM(self, ast):
         return ""
 
+    def collapse_comment(self, ast):
+        self.comment = self.value + " " + ast.children[0].node.collapse_comment(ast.children[0])
+        return self.comment
+
 
 class UPlus(Unary):
     def __init__(self, value="+"):
@@ -142,3 +146,7 @@ class Print(Unary):
                 output += VFloat().convertString("double").format("%", str(ast), "%", str(ast.children[0]))
         output += printString.format(formatType, printType, "%", str(ast))
         return output
+
+    def collapse_comment(self, ast):
+        self.comment = "Print " + ast.children[0].node.collapse_comment(ast.children[0])
+        return ""

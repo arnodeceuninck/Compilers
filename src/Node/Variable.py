@@ -29,6 +29,9 @@ class Variable(Node):
     def generate_LLVM(self, ast):
         return get_LLVM_load().format("%", str(ast), ast.getLLVMType(), ast.getLLVMType(), "@", ast.getValue())
 
+    def collapse_comment(self, ast):
+        return self.value
+
 
 class VInt(Variable):
     def __init__(self, value=""):

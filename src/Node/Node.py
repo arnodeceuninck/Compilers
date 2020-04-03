@@ -12,6 +12,7 @@ class Node:
         self.value = value
         self.color = color
         self.funct = None
+        self.comment = ""
 
     @staticmethod
     def get_id():
@@ -29,20 +30,34 @@ class StatementSequence(Node):
     def __init__(self):
         Node.__init__(self, "Statement Sequence")
 
-    def generate_LLVM(self, ast):
+    def collapse_comment(self, ast):
         for child in ast.children:
-            tempret = child.generate_LLVM()
-            output = handle_return(tempret, output, formatTypes)
+            child.node.collapse_comment(child)
+        return ""
 
 
 class If(Node):
     def __init__(self):
         Node.__init__(self, "if")
 
+    def collapse_comment(self, ast):
+        self.comment = "if " + ast.children[0].node.collapse_comment(ast.children[0])
+        ast.children[1].node.collapse_comment(ast.children[1])
+
 
 class For(Node):
     def __init__(self):
         Node.__init__(self, "for")
+
+    def collapse_comment(self, ast):
+        self.comment = "for "
+        is_first = True
+        for child in ast.children:
+            if is_first:
+                self.comment += child.node.collapse_comment(child)
+                is_first = False
+                continue
+            self.comment += "; " + child.node.collapse_comment(child)
 
 
 class Operator(Node):
@@ -59,6 +74,11 @@ class Binary(Operator):
 
     def __str__(self):
         return '[label="Binary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+
+    def collapse_comment(self, ast):
+        self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
+                       ast.children[1].node.collapse_comment(ast.children[1])
+        return self.comment
 
 
 class Assign(Binary):
@@ -86,6 +106,11 @@ class Assign(Binary):
                                                  ast.children[0].getLLVMType(), "@",
                                                  str(ast.children[0].getNodeInfo()))
         return output
+
+    def collapse_comment(self, ast):
+        self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
+                       ast.children[1].node.collapse_comment(ast.children[1])
+        return self.comment
 
 
 # Use these imports to make these classes appear here

@@ -6,7 +6,8 @@ from src.Node.Node import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
-from src.AST import AST
+from src.AST import *
+
 
 def assignment(ast):
     # Check whether any other symbol is already in the symbol table
@@ -22,7 +23,10 @@ def assignment(ast):
         type = ast.children[0].node
         ast.symbol_table.insert(location, type)
 
-    if isinstance(ast.node, Variable) and ast.parent and not (isinstance(ast.parent.node, Assign) or isinstance(ast.parent.node, Print) or isinstance(ast.parent.node, Unary) or isinstance(ast.parent.node, Binary)):
+    if isinstance(ast.node, Variable) and ast.parent and not (
+            isinstance(ast.parent.node, Assign) or isinstance(ast.parent.node, Print) or isinstance(ast.parent.node,
+                                                                                                    Unary) or isinstance(
+        ast.parent.node, Binary)):
         location = ast.node.value
         type = ast.node
         ast.symbol_table.insert(location, type)
@@ -47,6 +51,7 @@ def convertVar(ast):
         ast.node.const = element.const
         ast.node.ptr = element.ptr
 
+
 def checkAssigns(ast: AST):
     # Check for const assigns
     # On assignments that are declarations, but the leftmost child is a const variable
@@ -61,6 +66,7 @@ def checkAssigns(ast: AST):
             pass
         else:
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
+
 
 def compile(input_file: str, catch_error=True) -> AST:
     input_stream = FileStream(input_file)
@@ -100,11 +106,14 @@ def main(argv):
         communismForLife.to_dot("output/c_tree.dot")
         communismForLife.constant_folding()
         communismForLife.to_dot("output/c_tree_folded.dot")
+        # Creates comments for every assignment, for loop and if statement
+        insert_comments(communismForLife)
         communismForLife.to_LLVM("output/communismForLife.ll")
 
         print("Done")
     else:
         print("Had to stop because of an error")
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -34,6 +34,9 @@ class Constant(Node):
         neutralval = ast.getNeutral()
         return BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
 
+    def collapse_comment(self, ast):
+        return str(self.value)
+
 
 class CInt(Constant):
     def __init__(self, value=0):
