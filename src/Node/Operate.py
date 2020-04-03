@@ -13,6 +13,15 @@ class Operate(Binary):
         else:
             return "unknown"
 
+    def generateLLVM(self, ast):
+        is_float = (ast.getType() == "float")
+
+        # execute operator
+        type = ast.getLLVMType()
+        # Operate on the children
+        return ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", ast.children[0],
+                                                  "%", str(ast.children[1]))
+
 
 class BMinus(Operate):
     def __init__(self, value="-"):

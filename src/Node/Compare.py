@@ -1,4 +1,5 @@
 from src.Node.Node import *
+from src.Node.constant import *
 
 
 class Compare(Binary):
@@ -15,6 +16,17 @@ class Compare(Binary):
             return "float"
         else:
             return "unknown"
+
+    def generateLLVM(self, ast):
+        # execute operator
+        type = ast.getLLVMType()
+        is_float = ast.getType() == "float"
+        # Both variable
+        tempSave = "t" + str(ast.node.get_id())
+        output = ast.node.get_LLVM(is_float).format("%", tempSave, type, "%", str(ast.children[0]),
+                                                    "%", str(ast.children[1]))
+        output += CBool().convertString(type).format("%", str(ast), "%", tempSave)
+        return output
 
 
 class LessT(Compare):
@@ -91,6 +103,21 @@ class LogicAnd(Compare):
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp and {} {}{}, {}{}\n"
 
+    def generateLLVM(self, ast):
+        # execute operator
+        type = ast.getLLVMType()
+        is_float = (ast.getType() == "float")
+        # Both variable
+        tempSave1 = "t" + str(ast.node.get_id())
+        tempSave2 = "t" + str(ast.node.get_id())
+        output = Mult().get_LLVM(is_float).format("%", tempSave1, type, "%",
+                                                  str(ast.children[0]),
+                                                  "%", str(ast.children[1]))
+        output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
+                                                       "", ast.getNeutral())
+        output += CBool().convertString(type).format("%", str(ast), "%", tempSave2)
+        return output
+
 
 class LogicOr(Compare):
     def __init__(self, value="||"):
@@ -99,3 +126,18 @@ class LogicOr(Compare):
 
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp or {} {}{}, {}{}\n"
+
+    def generateLLVM(self, ast):
+        # execute operator
+        type = ast.getLLVMType()
+        is_float = (ast.getType() == "float")
+        # Both variable
+        tempSave1 = "t" + str(ast.node.get_id())
+        tempSave2 = "t" + str(ast.node.get_id())
+        output = BPlus().get_LLVM(is_float).format("%", tempSave1, type, "%",
+                                                   str(ast.children[0]),
+                                                   "%", str(ast.children[1]))
+        output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
+                                                       "", ast.getNeutral())
+        output += CBool().convertString(type).format("%", str(ast), "%", tempSave2)
+        return output

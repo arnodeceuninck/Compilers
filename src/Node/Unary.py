@@ -113,6 +113,13 @@ class UReref(Unary):
             raise RerefError()
         return args[0][:len(args[0]) - 1]
 
+    def generateLLVM(self, ast):
+        output = ast.children[0].node.generateLLVM(ast.children[0])
+        type = ast.getLLVMType()
+        # Load the value into the ast node
+        output += get_LLVM_load().format("%", str(ast), type[:-1], type[:-1], "%", str(ast.children[0]))
+        return output
+
 
 class Print(Unary):
     def __init__(self, value="printf"):
@@ -120,3 +127,15 @@ class Print(Unary):
 
     def getType(self, args):
         return "function"
+
+    def generateLLVM(self, ast):
+        # Generate LLVM for the node that needs to be printed
+        output = ast.children[0].node.generateLLVM()
+        formatType = ast.children[0].node.getFormatType()
+        printType = ast.children[0].node.getLLVMPrintType()
+
+        if isinstance(ast.children[0].node, Variable):
+            if printType == "double":
+                output += VFloat().convertString("double").format("%", str(ast), "%", str(ast.children[0]))
+        output += printString.format(formatType, printType, "%", str(ast))
+        return output
