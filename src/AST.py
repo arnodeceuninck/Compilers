@@ -30,7 +30,14 @@ def generate_LLVM(ast):
             output += "; " + ast.node.comment + "\n"
         output += ast.node.generate_LLVM(ast)
     # If we encounter an Binary operate then we need to operate on its children
-    elif isinstance(ast.node, (Binary, Assign)):
+    elif isinstance(ast.node, Assign):
+        output += "; " + ast.node.comment + "\n"
+        # generate LLVM for the left and right side of the operator
+        tempret = generate_LLVM(ast.children[1])
+        output = handle_return(tempret, output, formatTypes)
+
+        output += ast.node.generate_LLVM(ast)
+    elif isinstance(ast.node, Binary):
         output += "; " + ast.node.comment + "\n"
         # generate LLVM for the left and right side of the operator
         for child in ast.children:
