@@ -25,16 +25,16 @@ def generate_LLVM(ast):
             tempret = generate_LLVM(child)
             output = handle_return(tempret, output, formatTypes)
     # If we encounter a variable then we do not need to do anything because it is already assigned
-    elif isinstance(ast.node, (UPlus, UMinus, UNot, UReref, Variable, Constant, Assign)):
+    elif isinstance(ast.node, (UPlus, UMinus, UNot, UReref, Variable, Constant)):
         if isinstance(ast.node, (Assign, Unary)):
             output += "; " + ast.node.comment + "\n"
         output += ast.node.generate_LLVM(ast)
     # If we encounter an Binary operate then we need to operate on its children
-    elif isinstance(ast.node, Binary):
+    elif isinstance(ast.node, (Binary, Assign)):
         output += "; " + ast.node.comment + "\n"
         # generate LLVM for the left and right side of the operator
         for child in ast.children:
-            tempret = child.node.generate_LLVM(child)
+            tempret = generate_LLVM(child)
             output = handle_return(tempret, output, formatTypes)
 
         output += ast.node.generate_LLVM(ast)

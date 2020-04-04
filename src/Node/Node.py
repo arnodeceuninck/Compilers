@@ -95,17 +95,15 @@ class Assign(Binary):
         return "store {} {}{}, {}* {}{}\n"
 
     def generate_LLVM(self, ast):
-        output = ast.children[1].node.generate_LLVM(ast.children[1])
         # If The right side is a variable then take the variable name not the node type
         if isinstance(ast.children[1].node, UDeref):
-            output += ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "@",
-                                                 str(ast.children[1].getNodeInfo()), ast.children[0].getLLVMType(),
-                                                 "@", str(ast.children[0].getNodeInfo()))
+            return ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "@",
+                                              str(ast.children[1].getNodeInfo()), ast.children[0].getLLVMType(),
+                                              "@", str(ast.children[0].getNodeInfo()))
         else:  # If the node wasnt a variable take the node id
-            output += ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "%", str(ast.children[1]),
-                                                 ast.children[0].getLLVMType(), "@",
-                                                 str(ast.children[0].getNodeInfo()))
-        return output
+            return ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "%", str(ast.children[1]),
+                                              ast.children[0].getLLVMType(), "@",
+                                              str(ast.children[0].getNodeInfo()))
 
     def collapse_comment(self, ast):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \

@@ -60,11 +60,11 @@ class VInt(Variable):
         if type == "int":
             return ""
         elif type == "char":
-            return "{}{} = trunc i32 {}{} to i8"
+            return "{}{} = trunc i32 {}{} to i8\n"
         elif type == "float":
-            return "{}{} = sitofp i32 {}{} to float"
+            return "{}{} = sitofp i32 {}{} to float\n"
         elif type == "double":
-            return "{}{} = sitofp i32 {}{} to double"
+            return "{}{} = sitofp i32 {}{} to double\n"
 
 
 class VChar(Variable):
@@ -92,13 +92,13 @@ class VChar(Variable):
 
     def convertString(self, type):
         if type == "int":
-            return "{}{} = zext i8 {}{} to i32"
+            return "{}{} = zext i8 {}{} to i32\n"
         elif type == "char":
             return ""
         elif type == "float":
-            return "{}{} = uitofp i8 {}{} to float"
+            return "{}{} = uitofp i8 {}{} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i8 {}{} to double"
+            return "{}{} = uitofp i8 {}{} to double\n"
 
 
 class VFloat(Variable):
@@ -126,10 +126,10 @@ class VFloat(Variable):
 
     def convertString(self, type):
         if type == "int":
-            return "{}{} = fptosi float {}{} to i32"
+            return "{}{} = fptosi float {}{} to i32\n"
         elif type == "char":
-            return "{}{} = fptoui float {}{} to i8"
+            return "{}{} = fptoui float {}{} to i8\n"
         elif type == "float":
             return ""
         elif type == "double":
-            return "{}{} = fpext float {}{} to double"
+            return "{}{} = fpext float {}{} to double\n"

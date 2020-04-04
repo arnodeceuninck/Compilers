@@ -62,11 +62,11 @@ class CInt(Constant):
         if type == "int":
             return ""
         elif type == "char":
-            return "{}{} = trunc i32 {}{} to i8"
+            return "{}{} = trunc i32 {}{} to i8\n"
         elif type == "float":
-            return "{}{} = sitofp i32 {}{} to float"
+            return "{}{} = sitofp i32 {}{} to float\n"
         elif type == "double":
-            return "{}{} = sitofp i32 {}{} to double"
+            return "{}{} = sitofp i32 {}{} to double\n"
 
     def generate_LLVM(self, ast):
         val = ast.getValue()
@@ -101,13 +101,13 @@ class CFloat(Constant):
 
     def convertString(self, type):
         if type == "int":
-            return "{}{} = fptosi float {}{} to i32"
+            return "{}{} = fptosi float {}{} to i32\n"
         elif type == "char":
-            return "{}{} = fptoui float {}{} to i8"
+            return "{}{} = fptoui float {}{} to i8\n"
         elif type == "float":
             return ""
         elif type == "double":
-            return "{}{} = fpext float {}{} to float"
+            return "{}{} = fpext float {}{} to float\n"
 
     def generate_LLVM(self, ast):
         val = ast.getValue()
@@ -133,13 +133,13 @@ class CChar(Constant):
 
     def convertString(self, type):
         if type == "int":
-            return "{}{} = zext i8 {}{} to i32"
+            return "{}{} = zext i8 {}{} to i32\n"
         elif type == "char":
             return ""
         elif type == "float":
-            return "{}{} = uitofp i8 {}{} to float"
+            return "{}{} = uitofp i8 {}{} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i8 {}{} to double"
+            return "{}{} = uitofp i8 {}{} to double\n"
 
     def generate_LLVM(self, ast):
         val = ast.getValue()
@@ -165,10 +165,10 @@ class CBool(Constant):
 
     def convertString(self, type):
         if type == "int":
-            return "{}{} = zext i1 {}{} to i32"
+            return "{}{} = zext i1 {}{} to i32\n"
         elif type == "char":
-            return "{}{} = zext i1 {}{} to i8"
+            return "{}{} = zext i1 {}{} to i8\n"
         elif type == "float":
-            return "{}{} = uitofp i1 {}{} to float"
+            return "{}{} = uitofp i1 {}{} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i1 {}{} to double"
+            return "{}{} = uitofp i1 {}{} to double\n"
