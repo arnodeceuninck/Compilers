@@ -137,7 +137,7 @@ class Print(Unary):
 
     def generate_LLVM(self, ast):
         # Generate LLVM for the node that needs to be printed
-        output = ast.children[0].node.generate_LLVM(ast)
+        output = ast.children[0].node.generate_LLVM(ast.children[0])
         formatType = ast.children[0].node.getFormatType()
         printType = ast.children[0].node.getLLVMPrintType()
 
