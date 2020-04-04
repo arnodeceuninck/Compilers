@@ -1,6 +1,6 @@
 import unittest
 from src.main import compile
-from src.AST import AST
+from src.AST import *
 from src.Node.Node import *
 from src.ErrorListener import *
 
@@ -37,11 +37,13 @@ class MyTestCase(unittest.TestCase):
             print("No tree generated")
 
         if cmp:
+            insert_comments(tree)  # Generate comments for LLVM
             tree.to_LLVM(output_file_ll)
             self.compare(output_file, expected_output_file)
             self.compare(output_file_ll, expected_output_file_ll)
             if fold:
                 tree.constant_folding()
+                insert_comments(tree)  # Generate comments for LLVM
                 tree.to_dot(output_file_folded)
                 self.compare(output_file_folded, expected_output_file_folded)
                 tree.to_LLVM(output_file_folded_ll)
