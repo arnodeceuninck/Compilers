@@ -2,11 +2,11 @@ import sys
 from antlr4 import *
 from gen import cLexer
 from gen import cParser
-from src.Node.Node import *
+from src.Node.AST import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
-from src.AST import *
+from src.AST_old import *
 
 
 def assignment(ast):
@@ -52,7 +52,7 @@ def convertVar(ast):
         ast.node.ptr = element.ptr
 
 
-def checkAssigns(ast: AST):
+def checkAssigns(ast: AST_old):
     # Check for const assigns
     # On assignments that are declarations, but the leftmost child is a const variable
     if isinstance(ast.node, Assign) and ast.children[0].node.const and not ast.node.declaration:
@@ -68,7 +68,7 @@ def checkAssigns(ast: AST):
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
 
-def compile(input_file: str, catch_error=True) -> AST:
+def compile(input_file: str, catch_error=True) -> AST_old:
     input_stream = FileStream(input_file)
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)

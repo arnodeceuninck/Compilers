@@ -1,4 +1,4 @@
-from src.Node.Node import *
+from src.Node.AST import *
 
 
 class Variable(Node):

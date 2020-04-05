@@ -1,4 +1,4 @@
-from src.Node.Node import *
+from src.Node.AST import *
 from src.Node.constant import *
 from src.Node.Operate import Mult, BPlus
 

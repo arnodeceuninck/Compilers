@@ -1,7 +1,7 @@
 import unittest
 from src.main import compile
-from src.AST import *
-from src.Node.Node import *
+from src.AST_old import *
+from src.Node.AST import *
 from src.ErrorListener import *
 
 
@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
 
     def helper_test_c(self, test_name: str, cmp=False, fold=False, catch_errors=True):
         # Reset node id because it causes errors in llvm creation
-        Node.id = 0
+        AST.id = 0
         input_file: str = "input/" + test_name + ".c"
         output_file: str = "output/" + test_name + ".dot"
         output_file_ll: str = "output/" + test_name + ".ll"
@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
         expected_output_file_folded: str = "expected_output/" + test_name + ".folded.dot"
         expected_output_file_folded_ll: str = "expected_output/" + test_name + ".folded.ll"
 
-        tree: AST = compile(input_file, catch_error=catch_errors)
+        tree: AST_old = compile(input_file, catch_error=catch_errors)
         if tree:
             tree.to_dot(output_file)
             if fold and not cmp:

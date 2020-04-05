@@ -1,5 +1,5 @@
 # https://medium.com/@raguiar2/building-a-working-calculator-in-python-with-antlr-d879e2ea9058 (accessed on 6/3/2020 14:31)
-from src.Node.Node import *
+from src.Node.AST import *
 from src.Node.Unary import *
 from src.symbolTable import *
 from src.Operations import *
@@ -57,14 +57,14 @@ def generate_LLVM(ast):
     return output, formatTypes
 
 
-class AST:
+class AST_old:
     symbol_table = SymbolTable()
 
     def __init__(self, node=None):
         self.node = node
         self.parent = None
         self.children = list()
-        AST.symbol_table = SymbolTable()  # symbol table must reset after each test
+        AST_old.symbol_table = SymbolTable()  # symbol table must reset after each test
 
     def childIndex(self, ast):
         return self.children.index(ast)

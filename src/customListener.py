@@ -1,5 +1,5 @@
 from antlr4 import *
-from src.AST import *
+from src.AST_old import *
 from gen.cParser import cParser
 from src.ErrorListener import CompilerError
 
@@ -15,8 +15,8 @@ class customListener(ParseTreeListener):
         self.trees = []  # A stack containing all subtrees
 
     # Add an AST with given node to the stack
-    def add(self, node: Node):
-        self.trees.append(AST(node))
+    def add(self, node: AST):
+        self.trees.append(AST_old(node))
 
     # Take <size> trees from the stack and place them as children from the last stack top
     # size = 1 for unary operations, size = 2 for binary operations
