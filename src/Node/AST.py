@@ -43,10 +43,12 @@ class AST:
         return "ERROR"
 
     def get_neutral(self) -> str:
-        if self.get_type() == "float":
-            return "0.0"
-        else:
-            return "0"
+        # 0.0 if float
+        return "0"
+
+    def get_llvm_print_type(self) -> str:
+        # The only moment when this returns something else is with floats
+        return self.get_llvm_type()
 
     @staticmethod
     def comment_out(comments: str, comment_out: bool):

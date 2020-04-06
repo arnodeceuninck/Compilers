@@ -1,10 +1,10 @@
-from src.Node.AST import *
+from src.Node.AST import AST
 from src.Node.Operate import BPlus
 
 
-class Constant(Node):
+class Constant(AST):
     def __init__(self, value=""):
-        Node.__init__(self, value, "#FFD885")
+        AST.__init__(self, value, "#FFD885")
         self.funct = None
 
     def __str__(self):
@@ -13,167 +13,154 @@ class Constant(Node):
     def set_value(self, value):
         self.value = value
 
-    def getLLVMType(self):
-        return ""
+    def get_llvm_type(self) -> str:
+        raise Exception("Abstract method")
 
-    def getLLVMPrintType(self):
-        return self.getLLVMType()
-
-    def getFormatType(self):
-        return ""
-
-    def getNeutral(self):
-        return "0"
+    # TODO: wtf is the use of tis function?
+    def get_format_type(self):
+        raise Exception("Abstract method")
 
     @staticmethod
-    def convertString(type):
-        return ""
+    def convert_template(type):
+        raise Exception("Abstract methos")
 
-    def generate_LLVM(self, ast):
-        type = ast.getLLVMType()
-        val = ast.getValue()
-        neutralval = ast.getNeutral()
-        return BPlus().get_LLVM(type == "float").format("%", str(ast), type, "", val, "", neutralval)
+    def get_llvm_template(self):
+        if self.get_type() == "float":
+            return "{result} = fadd {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = add {type} {lvalue}, {rvalue}\n"
 
-    def collapse_comment(self, ast):
-        return str(self.value)
+    def llvm_code(self) -> int:
+        output = self.comments()
+        code = self.get_llvm_template()
+        code.format(result=self.variable(self.id()), type=self.get_llvm_type(), lvalue=self.get_value(),
+                      rvalue=self.get_neutral())
+        output += code
+        return output
+
+    def comments(self, comment_out=True):
+        return self.comment_out(str(self.value), comment_out=False)
 
 
 class CInt(Constant):
-    def __init__(self, value=0):
-        Constant.__init__(self, int(round(int(value))))
-        self.type = "int"
+    def __init__(self, value: str = "0"):
+        Constant.__init__(self, str(int(round(float(value)))))
 
     def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.get_type(), self.value, self.color)
 
-    def getType(self, args):
-        return self.type
+    def get_type(self):
+        return "int"
 
-    def set_value(self, value):
-        self.value = int(round(value))
+    def set_value(self, value: float):
+        self.value = str(int(round(value)))
 
-    def getLLVMType(self):
+    def get_llvm_type(self) -> str:
         return "i32"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "d"
 
     @staticmethod
-    def convertString(type):
+    def convert_template(type):
         if type == "int":
             return ""
         elif type == "char":
-            return "{}{} = trunc i32 {}{} to i8\n"
+            return "{result} = trunc i32 {value} to i8\n"
         elif type == "float":
-            return "{}{} = sitofp i32 {}{} to float\n"
+            return "{result} = sitofp i32 {value} to float\n"
         elif type == "double":
-            return "{}{} = sitofp i32 {}{} to double\n"
-
-    def generate_LLVM(self, ast):
-        val = ast.getValue()
-        return BPlus().get_LLVM(False).format("%", str(ast), "i32", "", val, "", "0")
+            return "{result} = sitofp i32 {value} to double\n"
 
 
 class CFloat(Constant):
     def __init__(self, value=0):
         Constant.__init__(self, float(value))
-        self.type = "float"
 
     def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
+        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.get_type(), self.value, self.color)
 
-    def getType(self, args):
-        return self.type
-
-    def set_value(self, value):
-        self.value = float(value)
-
-    def getLLVMType(self):
+    def get_type(self, args):
         return "float"
 
-    def getLLVMPrintType(self):
+    def set_value(self, value):
+        self.value = str(float(value))
+
+    def get_llvm_type(self) -> str:
+        return "float"
+
+    def get_llvm_print_type(self):
         return "double"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "f"
 
-    def getNeutral(self):
+    def get_neutral(self) -> str:
         return "0.0"
 
     @staticmethod
-    def convertString(type):
+    def convert_template(type):
         if type == "int":
-            return "{}{} = fptosi float {}{} to i32\n"
+            return "{result} = fptosi float {value} to i32\n"
         elif type == "char":
-            return "{}{} = fptoui float {}{} to i8\n"
+            return "{result} = fptoui float {value} to i8\n"
         elif type == "float":
             return ""
         elif type == "double":
-            return "{}{} = fpext float {}{} to float\n"
-
-    def generate_LLVM(self, ast):
-        val = ast.getValue()
-        return BPlus().get_LLVM(True).format("%", str(ast), "float", "", val, "", "0.0")
+            return "{result} = fpext float {value} to float\n"
 
 
 class CChar(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
-        self.type = "char"
 
     def __str__(self):
         return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
-    def getType(self, args):
-        return self.type
+    def get_type(self):
+        return "char"
 
-    def getLLVMType(self):
+    def get_llvm_type(self) -> str:
         return "i8"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "c"
 
     @staticmethod
     def convertString(type):
         if type == "int":
-            return "{}{} = zext i8 {}{} to i32\n"
+            return "{result} = zext i8 {value} to i32\n"
         elif type == "char":
             return ""
         elif type == "float":
-            return "{}{} = uitofp i8 {}{} to float\n"
+            return "{result} = uitofp i8 {value} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i8 {}{} to double\n"
-
-    def generate_LLVM(self, ast):
-        val = ast.getValue()
-        return BPlus().get_LLVM(False).format("%", str(ast), "i8", "", val, "", "0")
+            return "{result} = uitofp i8 {value} to double\n"
 
 
 class CBool(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
-        self.type = "bool"
 
     def __str__(self):
         return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
-    def getType(self, args):
-        return self.type
+    def get_type(self):
+        return "bool"
 
-    def getLLVMType(self):
+    def get_llvm_type(self) -> str:
         return "i1"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "c"
 
     @staticmethod
-    def convertString(type):
+    def convert_template(type):
         if type == "int":
-            return "{}{} = zext i1 {}{} to i32\n"
+            return "{result} = zext i1 {value} to i32\n"
         elif type == "char":
-            return "{}{} = zext i1 {}{} to i8\n"
+            return "{result} = zext i1 {value} to i8\n"
         elif type == "float":
-            return "{}{} = uitofp i1 {}{} to float\n"
+            return "{result} = uitofp i1 {value} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i1 {}{} to double\n"
+            return "{result} = uitofp i1 {value} to double\n"

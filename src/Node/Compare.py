@@ -33,7 +33,7 @@ class Compare(Binary):
         output += comp_output
 
         # Now convert the output (i1) we got to the type we need
-        bool_to_type = CBool.convertString(self.get_type())
+        bool_to_type = CBool.convert_template(self.get_type())
         bool_to_type.format(self.variable(self.id()), self.variable(temp))
 
         output += bool_to_type
