@@ -1,9 +1,9 @@
 from src.Node.AST import *
 
 
-class Comments(Node):
+class Comments(AST):
     def __init__(self, value=""):
-        Node.__init__(self, value, "38A038")
+        AST.__init__(self, value, "38A038")
 
 
 class SingleLine(Comments):
@@ -13,6 +13,8 @@ class SingleLine(Comments):
     def get_LLVM(self):
         return ";" + self.value
 
+    def llvm_code(self):
+        return ";; " + self.value
 
 class Multiline(Comments):
     def __init__(self, value):
@@ -21,5 +23,11 @@ class Multiline(Comments):
     def get_LLVM(self):
         commentLLVM = ""
         for line in self.value:
-            commentLLVM += ";" + self.value
+            commentLLVM += "; " + self.value
         return commentLLVM
+
+    def llvm_code(self):
+        code = ""
+        for line in self.code:
+            code += ";; " + line
+        return code
