@@ -1,26 +1,33 @@
-from src.Node.AST import *
+from src.Node.AST import Binary
 
 
 class Operate(Binary):
     def __init__(self, value=""):
         Binary.__init__(self, value)
 
-    def getType(self, args):
-        if args[0] == args[1]:
-            return args[0]
-        elif "float" in args and "int" in args:
+    def get_type(self):
+        if self[0].get_type() == self[1].get_type():
+            return self[0].get_type()
+        elif self[0].get_type() == "int" and self[1].get_type() == "float" or \
+                self[0].get_type() == "float" and self[1].get_type() == "int":
             return "float"
         else:
-            return "unknown"
+            return "UNKNOWN"
 
-    def generate_LLVM(self, ast):
-        is_float = (ast.getType() == "float")
+    def llvm_code(self) -> str:
+        output = self.comments()
 
-        # execute operator
-        type = ast.getLLVMType()
-        # Operate on the children
-        return ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", ast.children[0],
-                                                  "%", str(ast.children[1]))
+        llvm_type = self.get_llvm_type()
+
+        result = self.variable(self.id())
+
+        code = self.get_llvm_template()
+        code.format(result=result, type=llvm_type, lvalue=self.variable(self[0].id()),
+                    rvalue=self.variable(self[1].id()))
+
+        output += code
+
+        return output
 
 
 class BMinus(Operate):
@@ -28,10 +35,11 @@ class BMinus(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] - args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fsub {} {}{}, {}{}\n"
-        return "{}{} = sub {} {}{}, {}{}\n"
+    def get_llvm_template(self):
+        if self.get_type() == "float":
+            return "{result} = fsub {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = sub {type} {lvalue}, {rvalue}\n"
 
 
 class BPlus(Operate):
@@ -39,10 +47,11 @@ class BPlus(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] + args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fadd {} {}{}, {}{}\n"
-        return "{}{} = add {} {}{}, {}{}\n"
+    def get_llvm_type(self):
+        if self.get_type() == "float":
+            return "{result} = fadd {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = add {type} {lvalue}, {rvalue}\n"
 
 
 class Div(Operate):
@@ -50,10 +59,11 @@ class Div(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] / args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fdiv {} {}{}, {}{}\n"
-        return "{}{} = sdiv {} {}{}, {}{}\n"
+    def get_llvm_template(self):
+        if self.get_type() == "float":
+            return "{result} = fdiv {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = sdiv {type} {lvalue}, {rvalue}\n"
 
 
 class Mult(Operate):
@@ -61,10 +71,11 @@ class Mult(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] * args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fmul {} {}{}, {}{}\n"
-        return "{}{} = mul {} {}{}, {}{}\n"
+    def get_llvm_template(self):
+        if self.get_type() == "float":
+            return "{result} = fmul {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = mul {type} {lvalue}, {rvalue}\n"
 
 
 class Mod(Operate):
@@ -75,7 +86,8 @@ class Mod(Operate):
     def getType(self, args):
         return "int"
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = frem {} {}{}, {}{}\n"
-        return "{}{} = srem {} {}{}, {}{}\n"
+    def get_llvm_template(self):
+        if self.get_type() == "float":
+            return "{result} = frem {type} {lvalue}, {rvalue}\n"
+        else:
+            return "{result} = srem {type} {lvalue}, {rvalue}\n"

@@ -19,6 +19,9 @@ class AST:
         self.funct = None  # The function that is applied for constant folding
         self.comment: str = ""  # Additional information as comment in the LLVM file
 
+    def __getitem__(self, item: int) -> AST:
+        return self.children[item]
+
     # Returns always a unique number
     @staticmethod
     def get_id() -> int:
