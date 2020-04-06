@@ -25,7 +25,8 @@ class Constant(Node):
     def getNeutral(self):
         return "0"
 
-    def convertString(self, type):
+    @staticmethod
+    def convertString(type):
         return ""
 
     def generate_LLVM(self, ast):
@@ -58,7 +59,8 @@ class CInt(Constant):
     def getFormatType(self):
         return "d"
 
-    def convertString(self, type):
+    @staticmethod
+    def convertString(type):
         if type == "int":
             return ""
         elif type == "char":
@@ -99,7 +101,8 @@ class CFloat(Constant):
     def getNeutral(self):
         return "0.0"
 
-    def convertString(self, type):
+    @staticmethod
+    def convertString(type):
         if type == "int":
             return "{}{} = fptosi float {}{} to i32\n"
         elif type == "char":
@@ -131,7 +134,8 @@ class CChar(Constant):
     def getFormatType(self):
         return "c"
 
-    def convertString(self, type):
+    @staticmethod
+    def convertString(type):
         if type == "int":
             return "{}{} = zext i8 {}{} to i32\n"
         elif type == "char":
@@ -163,7 +167,8 @@ class CBool(Constant):
     def getFormatType(self):
         return "c"
 
-    def convertString(self, type):
+    @staticmethod
+    def convertString(type):
         if type == "int":
             return "{}{} = zext i1 {}{} to i32\n"
         elif type == "char":

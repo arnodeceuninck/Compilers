@@ -30,20 +30,23 @@ class AST:
         return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
 
     # Returns the type of the tree in LLVM
-    @abstractmethod
     def get_llvm_type(self) -> str:
-        return ""
+        return "None"
 
     # A function that provides comments to put in the llvm code (end with \n)
-    @abstractmethod
     def comments(self, comment_out: bool = True) -> str:
         return ""
 
     # A function that generates the llvm code for the given tree (end with \n)
     # The first parameter is the code, the second parameter is the number of the calculated variable
-    @abstractmethod
     def llvm_code(self) -> (str, int):
-        return ""
+        return "ERROR"
+
+    def get_neutral(self) -> str:
+        if self.get_type() == "float":
+            return "0.0"
+        else:
+            return "0"
 
     @staticmethod
     def comment_out(comments: str, comment_out: bool):
@@ -184,7 +187,8 @@ class Binary(Operator):
         return self.comment_out(comment, comment_out)
 
     def get_llvm_type(self):
-        return None
+        if self.children[0].get_llvm_type == self.children[1].get_llvm_type:
+            return self.children[0].get_llvm_type
 
 
 
@@ -216,9 +220,6 @@ class Assign(Binary):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
                        ast.children[1].node.collapse_comment(ast.children[1])
         return self.comment
-
-    def get_llvm_type(self):
-        return None
 
     def llvm_code(self):
         code = self.comments()
