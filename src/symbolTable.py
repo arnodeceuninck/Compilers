@@ -39,7 +39,7 @@ class SymbolTable:
         for key in self.elements:
             custom_type = self.elements[key].type
             var_type = "const " if custom_type.const else ""
-            var_type += custom_type.type
+            var_type += custom_type.get_type()
             var_type += "*" if custom_type.ptr else ""
             table += "\t\t\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\n".format(key, var_type)
         # finish the table node

@@ -5,60 +5,63 @@ from gen import cParser
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
-from src.Node.AST import dot, Variable, AST, Assign, Binary, Print, Unary, VInt, VFloat, VChar
+from src.Node.AST import dot, Variable, AST, Assign, Binary, Print, Unary, VInt, VFloat, VChar, to_LLVM
 
 
 def assignment(ast):
     # Check whether any other symbol is already in the symbol table
 
-    if isinstance(ast.node, Variable) and ast.parent and isinstance(ast.parent.node, Assign):
+    if isinstance(ast, Variable) and ast.parent and isinstance(ast.parent, Assign):
         # return not required here, but otherwise pycharm thinks the statement is useless
-        return ast.symbol_table[ast.node.value]  # Raises an error if not yet declared
+        return ast.symbol_table[ast.value]  # Raises an error if not yet declared
 
     # Add symbol to symbol table
-    if ast.node.value == "=" and ast.node.declaration:
+    if ast.value == "=" and ast.declaration:
         # improve type without constant and ptr
-        location = ast.children[0].node.value
-        type = ast.children[0].node
+        location = ast.children[0].value
+        type = ast.children[0]
         ast.symbol_table.insert(location, type)
 
-    if isinstance(ast.node, Variable) and ast.parent and not (
-            isinstance(ast.parent.node, Assign) or isinstance(ast.parent.node, Print) or isinstance(ast.parent.node,
+    if isinstance(ast, Variable) and ast.parent and not (
+            isinstance(ast.parent, Assign) or isinstance(ast.parent, Print) or isinstance(ast.parent,
                                                                                                     Unary) or isinstance(
-        ast.parent.node, Binary)):
-        location = ast.node.value
-        type = ast.node
+        ast.parent, Binary)):
+        location = ast.value
+        type = ast
         ast.symbol_table.insert(location, type)
 
 
 def convertVar(ast):
-    if type(Variable()) != type(ast.node):
+    if not isinstance(ast, Variable):
         return
-    if isinstance(ast.node, Print):
+    if isinstance(ast, Print):
         return
-    element = ast.symbol_table[ast.node.value].type
-    if element.type == 'int':
-        ast.node = VInt(ast.node.value)
-        ast.node.const = element.const
-        ast.node.ptr = element.ptr
-    elif element.type == 'float':
-        ast.node = VFloat(ast.node.value)
-        ast.node.const = element.const
-        ast.node.ptr = element.ptr
-    elif element.type == 'char':
-        ast.node = VChar(ast.node.value)
-        ast.node.const = element.const
-        ast.node.ptr = element.ptr
+    element = ast.symbol_table[ast.value].type
+    if element.get_type() == 'int':
+        ast_new = VInt(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
+    elif element.get_type() == 'float':
+        ast_new = VFloat(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
+    elif element.get_type() == 'char':
+        ast_new = VChar(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
 
 
 def checkAssigns(ast):
     # Check for const assigns
     # On assignments that are declarations, but the leftmost child is a const variable
-    if isinstance(ast.node, Assign) and ast.children[0].node.const and not ast.node.declaration:
-        raise ConstError(ast.children[0].node.value)
-    if isinstance(ast.node, Assign):
-        type_lvalue = ast.children[0].getType()
-        type_rvalue = ast.children[1].getType()
+    if isinstance(ast, Assign) and ast.children[0].const and not ast.declaration:
+        raise ConstError(ast.children[0].value)
+    if isinstance(ast, Assign):
+        type_lvalue = ast.children[0].get_type()
+        type_rvalue = ast.children[1].get_type()
         if type_lvalue == type_rvalue:
             pass
         elif type_lvalue == "float" and type_rvalue == "int":
@@ -91,12 +94,12 @@ def make_ast(tree):
     walker.walk(communismRules, tree)
     communismForLife = communismRules.trees[0]
     # TODO: uncomment
-    # # The two methods of below should be combined in order to make it one pass and apply error checking
-    # # Create symbol table
-    # communismForLife.traverse(assignment)
+    # The two methods of below should be combined in order to make it one pass and apply error checking
+    # Create symbol table
+    communismForLife.traverse(assignment)
     # # Apply symbol table to all the variables
-    # communismForLife.traverse(convertVar)
-    # communismForLife.traverse(checkAssigns)
+    communismForLife.traverse(convertVar) # Qua de la fuck does this?
+    communismForLife.traverse(checkAssigns)
     return communismForLife
 
 
@@ -104,11 +107,11 @@ def main(argv):
     communismForLife = compile(argv[1])
     if communismForLife:
         dot(communismForLife, "output/c_tree.dot")
-        # communismForLife.to_dot("output/c_tree.dot")
-        # communismForLife.constant_folding()
-        # communismForLife.to_dot("output/c_tree_folded.dot")
-        # # Creates comments for every assignment, for loop and if statement
+        communismForLife.constant_folding()
+        dot(communismForLife, "output/c_tree_folded.dot")
+        # Creates comments for every assignment, for loop and if statement
         # insert_comments(communismForLife)
+        to_LLVM(communismForLife, "output/communismForLife.ll")
         # communismForLife.to_LLVM("output/communismForLife.ll")
 
         print("Done")

@@ -11,12 +11,9 @@ class Compare(Binary):
         return '{name}[label="Binary Operator Compare: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
                                                                                                  value=self.value,
                                                                                                  color=self.color)
-
-    def getType(self, args):
-        if args[0] == args[1]:
-            return args[0]
-        elif "float" in args and "int" in args:
-            return "float"
+    def get_type(self):
+        if self[0].get_type() == self[1].get_type():
+            return self[0].get_type()
         else:
             return "unknown"
 

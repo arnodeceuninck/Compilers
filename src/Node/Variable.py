@@ -4,7 +4,6 @@ from src.Node.AST import AST
 class Variable(AST):
     def __init__(self, value=""):
         AST.__init__(self, value, "#af93ff")
-        self.type = ""
         self.ptr = False  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
         self.defined = False
@@ -13,15 +12,19 @@ class Variable(AST):
 
     def __str__(self):
         var_type = "const " if self.const else ""
-        var_type += self.type
+        var_type += self.get_type()
         var_type += "*" if self.ptr else ""
         return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
                                                                                                type=var_type,
                                                                                                value=self.value,
                                                                                                color=self.color)
 
-    def getType(self, args):
-        return self.type + ("*" if self.ptr else "")
+    def constant_folding(self):
+        return False
+
+    def get_type(self):
+        raise Exception("Abstract function")
+        # return self.type + ("*" if self.ptr else "")
 
     def getLLVMType(self):
         return ""
@@ -50,27 +53,23 @@ class Variable(AST):
 class VInt(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
-        self.type = "int"
 
-    def __str__(self):
-        var_type = "const " if self.const else ""
-        var_type += self.type
-        var_type += "*" if self.ptr else ""
-        return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(), type=var_type, value=self.value, color=self.color)
-
-    def getLLVMType(self):
+    def get_llvm_type(self) -> str:
         return "i32" + ("*" if self.ptr else "")
 
-    def getLLVMPrintType(self):
+    def get_llvm_print_type(self) -> str:
         return "i32"
 
-    def getFormatType(self):
+    def get_type(self):
+        return "int"
+
+    def get_format_type(self):
         return "d"
 
-    def getAlign(self):
+    def get_align(self):
         return 4 + 4 * self.ptr
 
-    def convertString(self, type):
+    def convert_template(self, type):
         if type == "int":
             return ""
         elif type == "char":
@@ -84,22 +83,23 @@ class VInt(Variable):
 class VChar(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
-        self.type = "char"
 
-
-    def getLLVMType(self):
+    def get_llvm_type(self) -> str:
         return "i8" + ("*" if self.ptr else "")
 
-    def getLLVMPrintType(self):
+    def get_type(self):
+        return "char"
+
+    def get_llvm_print_type(self) -> str:
         return "i8"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "c"
 
-    def getAlign(self):
+    def get_align(self):
         return 1 + 7 * self.ptr
 
-    def convertString(self, type):
+    def convert_template(self, type):
         if type == "int":
             return "{}{} = zext i8 {}{} to i32\n"
         elif type == "char":
@@ -113,22 +113,23 @@ class VChar(Variable):
 class VFloat(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
-        self.type = "float"
 
+    def get_type(self):
+        return "float"
 
-    def getLLVMType(self):
+    def get_llvm_type(self):
         return "float" + ("*" if self.ptr else "")
 
-    def getLLVMPrintType(self):
+    def get_llvm_print_type(self) -> str:
         return "double"
 
-    def getFormatType(self):
+    def get_format_type(self):
         return "f"
 
-    def getAlign(self):
+    def get_align(self):
         return 4 + 4 * self.ptr
 
-    def convertString(self, type):
+    def convert_template(self, type):
         if type == "int":
             return "{}{} = fptosi float {}{} to i32\n"
         elif type == "char":

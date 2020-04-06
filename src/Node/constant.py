@@ -11,6 +11,9 @@ class Constant(AST):
         return '{name}[label="Constant {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
                                                                                  color=self.color)
 
+    def constant_folding(self):
+        return True
+
     def set_value(self, value):
         self.value = value
 
@@ -75,7 +78,7 @@ class CFloat(Constant):
     def __init__(self, value=0):
         Constant.__init__(self, float(value))
 
-    def get_type(self, args):
+    def get_type(self):
         return "float"
 
     def set_value(self, value):
