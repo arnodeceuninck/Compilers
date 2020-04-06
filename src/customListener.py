@@ -1,7 +1,9 @@
 from antlr4 import *
-from src.AST_old import *
 from gen.cParser import cParser
 from src.ErrorListener import CompilerError
+from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
+    Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
+    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -15,8 +17,8 @@ class customListener(ParseTreeListener):
         self.trees = []  # A stack containing all subtrees
 
     # Add an AST with given node to the stack
-    def add(self, node: AST):
-        self.trees.append(AST_old(node))
+    def add(self, ast: AST):
+        self.trees.append(ast)
 
     # Take <size> trees from the stack and place them as children from the last stack top
     # size = 1 for unary operations, size = 2 for binary operations
@@ -54,7 +56,7 @@ class customListener(ParseTreeListener):
         # Find the number of children
         children = 0
         tree = self.trees[len(self.trees) - 1]
-        while not isinstance(tree.node, StatementSequence):
+        while not isinstance(tree, StatementSequence):
             children += 1
             tree = self.trees[len(self.trees) - 1 - children]
 

@@ -8,7 +8,9 @@ class Compare(Binary):
         Binary.__init__(self, value)
 
     def __str__(self):
-        return '[label="Binary Operator Compare: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="Binary Operator Compare: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                                 value=self.value,
+                                                                                                 color=self.color)
 
     def getType(self, args):
         if args[0] == args[1]:
@@ -182,7 +184,8 @@ class LogicAnd(Compare):
 
         comp_output = self.get_llvm_template()
 
-        comp_output.format(result_temp=self.variable(temp1), type=llvm_type, lvalue=self.variable(self.children[0].id()),
+        comp_output.format(result_temp=self.variable(temp1), type=llvm_type,
+                           lvalue=self.variable(self.children[0].id()),
                            rvalue=self.variable(self.children[1].id()), result=temp2)
 
         output += comp_output
@@ -218,7 +221,7 @@ class LogicOr(Compare):
 
     def get_llvm_template(self) -> str:
         return "{result} = icmp or {type} {lvalue}, {rvalue}\n"
-        
+
     def get_LLVM(self, is_float=False):
         return "{}{} = icmp or {} {}{}, {}{}\n"
 

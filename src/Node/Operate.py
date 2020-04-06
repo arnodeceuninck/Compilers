@@ -19,7 +19,7 @@ class Operate(Binary):
 
         llvm_type = self.get_llvm_type()
 
-        result = self.variable(self.id())
+        result = self.variable(self._id())
 
         code = self.get_llvm_template()
         code.format(result=result, type=llvm_type, lvalue=self.variable(self[0].id()),

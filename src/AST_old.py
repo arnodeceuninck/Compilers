@@ -58,7 +58,7 @@ def generate_LLVM(ast):
 
 
 class AST_old:
-    symbol_table = SymbolTable()
+
 
     def __init__(self, node=None):
         self.node = node
@@ -125,42 +125,42 @@ class AST_old:
         outputFile.write(output)
         outputFile.close()
 
-    def dotNode(self):
-        # The output needs to be the id + The label itself
-        output = str(self)
-        output += str(self.node)
+    # def dotNode(self):
+    #     # The output needs to be the id + The label itself
+    #     output = str(self)
+    #     output += str(self.node)
+    #
+    #     for child in self.children:
+    #         output += child.dotNode()
+    #
+    #     return output
+    #
+    # def dotConnections(self):
+    #     output = ""
+    #     for child in self.children:
+    #         output += str(self) + " -> " + str(child) + "\n"
+    #         output += child.dotConnections()
+    #
+    #     return output
 
-        for child in self.children:
-            output += child.dotNode()
-
-        return output
-
-    def dotConnections(self):
-        output = ""
-        for child in self.children:
-            output += str(self) + " -> " + str(child) + "\n"
-            output += child.dotConnections()
-
-        return output
-
-    # Print the tree in dot
-    def to_dot(self, filename):
-        output = "Digraph G { \n"
-        # Add symbol table
-        output += str(self.symbol_table)
-        output += "subgraph cluster_1 {\n"
-        output += "node [style=filled, shape=rectangle, penwidth=2];\n"
-
-        output += self.dotNode()
-        output += self.dotConnections()
-
-        output += "label = \"AST\";\n"
-        output += "}\n"
-        output += "}"
-
-        outputFile = open(filename, "w")
-        outputFile.write(output)
-        outputFile.close()
+    # # Print the tree in dot
+    # def to_dot(self, filename):
+        # output = "Digraph G { \n"
+        # # Add symbol table
+        # output += str(self.symbol_table)
+        # output += "subgraph cluster_1 {\n"
+        # output += "node [style=filled, shape=rectangle, penwidth=2];\n"
+        #
+        # output += self.dotNode()
+        # output += self.dotConnections()
+        #
+        # output += "label = \"AST\";\n"
+        # output += "}\n"
+        # output += "}"
+        #
+        # outputFile = open(filename, "w")
+        # outputFile.write(output)
+        # outputFile.close()
 
     def traverse(self, func):
         func(self)

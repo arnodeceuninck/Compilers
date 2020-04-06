@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
 
     def helper_test_c(self, test_name: str, cmp=False, fold=False, catch_errors=True):
         # Reset node id because it causes errors in llvm creation
-        AST.id = 0
+        AST._id = 0
         input_file: str = "input/" + test_name + ".c"
         output_file: str = "output/" + test_name + ".dot"
         output_file_ll: str = "output/" + test_name + ".ll"

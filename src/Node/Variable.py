@@ -1,9 +1,9 @@
-from src.Node.AST import *
+from src.Node.AST import AST
 
 
-class Variable(Node):
+class Variable(AST):
     def __init__(self, value=""):
-        Node.__init__(self, value, "#af93ff")
+        AST.__init__(self, value, "#af93ff")
         self.type = ""
         self.ptr = False  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
@@ -12,7 +12,13 @@ class Variable(Node):
         self.reref = False  # e.g. *a
 
     def __str__(self):
-        return '[label="Variable: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        var_type = "const " if self.const else ""
+        var_type += self.type
+        var_type += "*" if self.ptr else ""
+        return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                               type=var_type,
+                                                                                               value=self.value,
+                                                                                               color=self.color)
 
     def getType(self, args):
         return self.type + ("*" if self.ptr else "")
@@ -26,8 +32,16 @@ class Variable(Node):
     def convertString(self, type):
         return ""
 
-    def generate_LLVM(self, ast):
-        return get_LLVM_load().format("%", str(ast), ast.getLLVMType(), ast.getLLVMType(), "@", ast.getValue())
+    def get_llvm_template(self):
+        return self.llvm_load_template()
+
+    # Variable should be llvm_formated, e.g. %1
+    def llvm_load(self, variable: str):
+        code = self.get_llvm_template()
+        code.format(result=variable, type=self.get_llvm_type(), var=self.variable())
+
+    def llvm_code(self):
+        return self.llvm_load()
 
     def collapse_comment(self, ast):
         return self.value
@@ -42,7 +56,7 @@ class VInt(Variable):
         var_type = "const " if self.const else ""
         var_type += self.type
         var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
+        return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(), type=var_type, value=self.value, color=self.color)
 
     def getLLVMType(self):
         return "i32" + ("*" if self.ptr else "")
@@ -72,11 +86,6 @@ class VChar(Variable):
         Variable.__init__(self, value)
         self.type = "char"
 
-    def __str__(self):
-        var_type = "const " if self.const else ""
-        var_type += self.type
-        var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
 
     def getLLVMType(self):
         return "i8" + ("*" if self.ptr else "")
@@ -106,11 +115,6 @@ class VFloat(Variable):
         Variable.__init__(self, value)
         self.type = "float"
 
-    def __str__(self):
-        var_type = "const " if self.const else ""
-        var_type += self.type
-        var_type += "*" if self.ptr else ""
-        return '[label="Variable Type: {}: {}", fillcolor="{}"] \n'.format(var_type, self.value, self.color)
 
     def getLLVMType(self):
         return "float" + ("*" if self.ptr else "")

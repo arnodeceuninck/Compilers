@@ -2,11 +2,10 @@ import sys
 from antlr4 import *
 from gen import cLexer
 from gen import cParser
-from src.Node.AST import *
 from src.customListener import customListener
 from src.ErrorListener import CustomErrorListener
 from src.ErrorListener import CompilerError, ConstError, IncompatibleTypesError
-from src.AST_old import *
+from src.Node.AST import dot, Variable, AST, Assign, Binary, Print, Unary, VInt, VFloat, VChar
 
 
 def assignment(ast):
@@ -52,7 +51,7 @@ def convertVar(ast):
         ast.node.ptr = element.ptr
 
 
-def checkAssigns(ast: AST_old):
+def checkAssigns(ast):
     # Check for const assigns
     # On assignments that are declarations, but the leftmost child is a const variable
     if isinstance(ast.node, Assign) and ast.children[0].node.const and not ast.node.declaration:
@@ -68,7 +67,7 @@ def checkAssigns(ast: AST_old):
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
 
-def compile(input_file: str, catch_error=True) -> AST_old:
+def compile(input_file: str, catch_error=True) -> AST:
     input_stream = FileStream(input_file)
     lexer = cLexer.cLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -91,24 +90,26 @@ def make_ast(tree):
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
     communismForLife = communismRules.trees[0]
-    # The two methods of below should be combined in order to make it one pass and apply error checking
-    # Create symbol table
-    communismForLife.traverse(assignment)
-    # Apply symbol table to all the variables
-    communismForLife.traverse(convertVar)
-    communismForLife.traverse(checkAssigns)
+    # TODO: uncomment
+    # # The two methods of below should be combined in order to make it one pass and apply error checking
+    # # Create symbol table
+    # communismForLife.traverse(assignment)
+    # # Apply symbol table to all the variables
+    # communismForLife.traverse(convertVar)
+    # communismForLife.traverse(checkAssigns)
     return communismForLife
 
 
 def main(argv):
     communismForLife = compile(argv[1])
     if communismForLife:
-        communismForLife.to_dot("output/c_tree.dot")
-        communismForLife.constant_folding()
-        communismForLife.to_dot("output/c_tree_folded.dot")
-        # Creates comments for every assignment, for loop and if statement
-        insert_comments(communismForLife)
-        communismForLife.to_LLVM("output/communismForLife.ll")
+        dot(communismForLife, "output/c_tree.dot")
+        # communismForLife.to_dot("output/c_tree.dot")
+        # communismForLife.constant_folding()
+        # communismForLife.to_dot("output/c_tree_folded.dot")
+        # # Creates comments for every assignment, for loop and if statement
+        # insert_comments(communismForLife)
+        # communismForLife.to_LLVM("output/communismForLife.ll")
 
         print("Done")
     else:

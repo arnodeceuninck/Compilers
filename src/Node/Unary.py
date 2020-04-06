@@ -1,5 +1,6 @@
-from src.Node.AST import *
-
+from src.Node.AST import Operator, Variable, AST, CBool, VFloat
+from src.Utils import printString
+from src.ErrorListener import RerefError
 
 class Unary(Operator):
     def __init__(self, value=""):
@@ -7,17 +8,25 @@ class Unary(Operator):
         self.funct = None
 
     def __str__(self):
-        return '[label="Unary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.name, value=self.value, color=self.color)
 
-    def getType(self, args):
-        return args[0]  # Only one type as argument
+    def get_type(self):
+        return self[0].get_type()  # Only one type as argument
 
-    def generate_LLVM(self, ast):
-        return ""
 
-    def collapse_comment(self, ast):
-        self.comment = self.value + " " + ast.children[0].node.collapse_comment(ast.children[0])
-        return self.comment
+    def comments(self, comment_out: bool = True) -> str:
+        comment = self.value + " " + self[0].comments()
+        return self.comment_out(comment, comment_out)
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
+
+        type = self.get_llvm_type()
+
+        code = self.get_llvm_template()
+        code.format(result=self.variable(), type=type, value=self[0].variable())
+
+        AST.llvm_output += code
 
 
 class UPlus(Unary):
@@ -25,22 +34,11 @@ class UPlus(Unary):
         Unary.__init__(self, value)
         self.funct = lambda args: +args[0]
 
-    def get_LLVM(self, is_float):
-        if is_float:
-            return "{}{} = fadd {} {}{}, 0.0\n"
-        return "{}{} = add {} {}{}, 0\n"
-
-    def generate_LLVM(self, ast):
-        output = ""
-        is_float = ast.getType() == "float"
-        type = ast.getLLVMType()
-        tempvar1 = str(ast.children[0])
-        if isinstance(ast.children[0].node, Variable):
-            tempvar1 = "t" + str(ast.node.get_id())
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", ast.children[0].node.value)
-
-        output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
-        return output
+    def get_llvm_template(self) -> str:
+        if self.get_type() == "float":
+            return "{result} = fadd {type} {value}, 0.0\n"
+        else:
+            return "{result} = add {type} {value}, 0\n"
 
 
 class UMinus(Unary):
@@ -48,22 +46,12 @@ class UMinus(Unary):
         Unary.__init__(self, value)
         self.funct = lambda args: -args[0]
 
-    def get_LLVM(self, is_float):
-        if is_float:
-            return "{}{} = fsub {} 0.0, {}{}\n"
-        return "{}{} = sub {} 0, {}{}\n"
+    def get_llvm_template(self) -> str:
+        if self.get_type() == "float":
+            return "{result} = fsub {type} 0.0, {value}\n"
+        else:
+            return "{result} = sub {type} 0, {value}\n"
 
-    def generate_LLVM(self, ast):
-        output = ""
-        is_float = ast.getType() == "float"
-        type = ast.getLLVMType()
-        tempvar1 = str(ast.children[0])
-        if isinstance(ast.children[0].node, Variable):
-            tempvar1 = "t" + str(ast.node.get_id())
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", ast.children[0].node.value)
-
-        output += ast.node.get_LLVM(is_float).format("%", str(ast), type, "%", tempvar1)
-        return output
 
 
 class UDMinus(Unary):
@@ -88,19 +76,27 @@ class UNot(Unary):
             return "{}{} = fcmp oeq {} {}{}, 0.0\n"
         return "{}{} = icmp eq {} {}{}, 0\n"
 
-    def generate_LLVM(self, ast):
-        output = ""
-        is_float = ast.getType() == "float"
-        type = ast.getLLVMType()
-        tempvar1 = "t" + str(ast.node.get_id())
-        if isinstance(ast.children[0].node, Variable):
-            output += get_LLVM_load().format("%", tempvar1, type, type, "@", ast.children[0].node.value)
+    def get_llvm_template(self) -> str:
+        if self.get_type() == "float":
+            return "{result} = fcmp oeq {type} 0.0, {value}\n"
+        else:
+            return "{result} = eq {type} 0, {value}\n"
 
-            tempvar2 = "t" + str(ast.node.get_id())
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
 
-            output += UNot().get_LLVM(is_float).format("%", tempvar2, type, "%", tempvar1)
-            output += CBool().convertString(type).format("%", str(ast), "%", tempvar2)
-        return output
+        type = self.get_llvm_type()
+
+        temp = self.get_temp()
+
+        code = self.get_llvm_template()
+        code = code.format(temp, type, self[0].variable())
+        AST.llvm_output += code
+
+        bool_to_type = CBool.convert_template(self.get_type())
+        bool_to_type.format(self.variable(), temp)
+
+        AST.llvm_output += bool_to_type
 
 
 class UDeref(Unary):
@@ -115,38 +111,46 @@ class UReref(Unary):
     def __init__(self, value="*"):
         Unary.__init__(self, value)
 
-    def getType(self, args):
-        if args[0][len(args[0]) - 1] != "*":
+    def get_type(self):
+        child_type = self[0].get_type()
+        if child_type[len(child_type) - 1] != "*":
             raise RerefError()
-        return args[0][:len(args[0]) - 1]
+        return child_type[:len(child_type - 1)]
 
-    def generate_LLVM(self, ast):
-        output = ast.children[0].node.generate_LLVM(ast.children[0])
-        type = ast.getLLVMType()
+    def llvm_code(self):
+        self[0].llvm_code()
+        type = self.get_llvm_type()
+
         # Load the value into the ast node
-        output += get_LLVM_load().format("%", str(ast), type[:-1], type[:-1], "%", str(ast.children[0]))
-        return output
+        code = self.llvm_load_template()
+        code = code.format(result=self.variable(), type=type[:-1], var=self[0].variable())
+
+        AST.llvm_output += code
 
 
 class Print(Unary):
     def __init__(self, value="printf"):
         Unary.__init__(self, value)
 
-    def getType(self, args):
+    def get_type(self):
         return "function"
 
-    def generate_LLVM(self, ast):
+    def llvm_code(self):
         # Generate LLVM for the node that needs to be printed
-        output = ast.children[0].node.generate_LLVM(ast.children[0])
-        formatType = ast.children[0].node.getFormatType()
-        printType = ast.children[0].node.getLLVMPrintType()
+        self[0].llvm_code()
+        format_type = self[0].get_format_type()
+        print_type = self[0].get_llvm_print_type()
 
-        if isinstance(ast.children[0].node, Variable):
-            if printType == "double":
-                output += VFloat().convertString("double").format("%", str(ast), "%", str(ast.children[0]))
-        output += printString.format(formatType, printType, "%", str(ast))
-        return output
+        # Because you can't print floats
+        if print_type == "double":
+            convert_code = VFloat.convertString("double")
+            convert_code = convert_code.format(self.variable(), self[0].variable())
+            AST.llvm_output += convert_code
 
-    def collapse_comment(self, ast):
-        self.comment = "Print " + ast.children[0].node.collapse_comment(ast.children[0])
-        return ""
+
+        print_code = printString.format(format_type=format_type, print_type=print_type, value=self.variable())
+        AST.llvm_output += print_code
+
+    def comments(self, comment_out=True):
+        comment = "Print " + self[0].comments()
+        return self.comment_out(comment, comment_out)

@@ -8,7 +8,8 @@ class Constant(AST):
         self.funct = None
 
     def __str__(self):
-        return '[label="Constant {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="Constant {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
+                                                                                 color=self.color)
 
     def set_value(self, value):
         self.value = value
@@ -33,8 +34,8 @@ class Constant(AST):
     def llvm_code(self) -> int:
         output = self.comments()
         code = self.get_llvm_template()
-        code.format(result=self.variable(self.id()), type=self.get_llvm_type(), lvalue=self.get_value(),
-                      rvalue=self.get_neutral())
+        code.format(result=self.variable(self._id()), type=self.get_llvm_type(), lvalue=self.get_value(),
+                    rvalue=self.get_neutral())
         output += code
         return output
 
@@ -45,9 +46,6 @@ class Constant(AST):
 class CInt(Constant):
     def __init__(self, value: str = "0"):
         Constant.__init__(self, str(int(round(float(value)))))
-
-    def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.get_type(), self.value, self.color)
 
     def get_type(self):
         return "int"
@@ -76,9 +74,6 @@ class CInt(Constant):
 class CFloat(Constant):
     def __init__(self, value=0):
         Constant.__init__(self, float(value))
-
-    def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.get_type(), self.value, self.color)
 
     def get_type(self, args):
         return "float"
@@ -114,9 +109,6 @@ class CChar(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
 
-    def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
-
     def get_type(self):
         return "char"
 
@@ -141,9 +133,6 @@ class CChar(Constant):
 class CBool(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
-
-    def __str__(self):
-        return '[label="Constant Type: {}: {}", fillcolor="{}"] \n'.format(self.type, self.value, self.color)
 
     def get_type(self):
         return "bool"

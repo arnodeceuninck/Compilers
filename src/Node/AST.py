@@ -4,12 +4,17 @@
 from src.ErrorListener import RerefError
 from src.Utils import *
 from abc import ABC, abstractmethod
+from src.symbolTable import SymbolTable
 
 
 class AST:
-    id = 0
+    _id = 0
+    llvm_output = ""
+    symbol_table = SymbolTable()
 
     def __init__(self, value: str = "", color: str = "#9f9f9f"):
+
+        self._id = None
 
         self.parent: AST = None
         self.children: list = list()
@@ -19,18 +24,35 @@ class AST:
         self.funct = None  # The function that is applied for constant folding
         self.comment: str = ""  # Additional information as comment in the LLVM file
 
-    def __getitem__(self, item: int) -> AST:
+    def __getitem__(self, item: int):  # -> AST
         return self.children[item]
+
+    def dot_node(self):
+        # The output needs to be the id + The label itself
+        output = str(self)
+
+        for child in self.children:
+            output += child.dot_node()
+
+        return output
+
+    def dot_connections(self):
+        output = ""
+        for child in self.children:
+            output += str(self.id()) + " -> " + str(child.id()) + "\n"
+            output += child.dot_connections()
+        return output
 
     # Returns always a unique number
     @staticmethod
-    def get_id() -> int:
-        AST.id += 1
-        return AST.id
+    def get_unique_id() -> int:
+        AST._id += 1
+        return AST._id
 
     # returns the dot representation of the given node
     def __str__(self):
-        return '[label="{}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="{value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
+                                                                        color=self.color)
 
     # Returns the type of the tree in LLVM
     def get_llvm_type(self) -> str:
@@ -62,9 +84,28 @@ class AST:
             comment = "; " + line
         return comment + '\n'
 
-    @staticmethod
-    def variable(var: int):
+    def llvm_load_template(self):
+        # Code for loading a variable (default is no loading required)
+        return "{result} = load {type}, {type}* {var}\n"
+
+    def id(self):
+        if not self._id:
+            self._id = self.get_unique_id()
+        return self._id
+
+    def variable(self):
+        if isinstance(self, Variable):
+            var = str(self.get_unique_id())
+            AST.llvm_output += self.llvm_load(var)
+            return "%" + var
+
+        var = self.id()
+
         return "%" + str(var)
+
+    @staticmethod
+    def get_temp():
+        return "%" + str(AST.get_unique_id())
 
     @staticmethod
     def goto(label: str):
@@ -73,6 +114,26 @@ class AST:
     @staticmethod
     def label(name: str):
         return name + ":\n"
+
+
+def dot(ast: AST, filename: str):
+    output = "Digraph G { \n"
+
+    # Add symbol table
+    output += str(ast.symbol_table)
+    output += "subgraph cluster_1 {\n"
+    output += "node [style=filled, shape=rectangle, penwidth=2];\n"
+
+    output += ast.dot_node()
+    output += ast.dot_connections()
+
+    output += "label = \"AST\";\n"
+    output += "}\n"
+    output += "}"
+
+    outputFile = open(filename, "w")
+    outputFile.write(output)
+    outputFile.close()
 
 
 # A sequence of statements
@@ -162,7 +223,8 @@ class Operator(AST):
         AST.__init__(self, value, "#87f5ff")
 
     def __str__(self):
-        return '[label="Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
+                                                                                  color=self.color)
 
     def get_type(self):
         type = self.children[0].get_type
@@ -179,7 +241,7 @@ class Binary(Operator):
         Operator.__init__(self, value)
 
     def __str__(self):
-        return '[label="Binary Operator: {}", fillcolor="{}"] \n'.format(self.value, self.color)
+        return '{name}[label="Binary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value, color=self.color)
 
     def collapse_comment(self, ast):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
@@ -196,7 +258,6 @@ class Binary(Operator):
             return self.children[0].get_llvm_type
 
 
-
 class Assign(Binary):
     def __init__(self, value="="):
         Binary.__init__(self, value)
@@ -204,8 +265,8 @@ class Assign(Binary):
 
     def __str__(self):
         if self.declaration:
-            return '[label="Assign Declaration", fillcolor="{}"] \n'.format(self.color)
-        return '[label="Assign", fillcolor="{}"] \n'.format(self.color)
+            return '{name}[label="Assign Declaration", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
+        return '{name}[label="Assign", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
 
     def get_LLVM(self):
         return "store {} {}{}, {}* {}{}\n"
@@ -245,7 +306,6 @@ class Assign(Binary):
         code += "@" + str(self.children[0].getNodeInfo())
 
         return code
-
 
 
 # Use these imports to make these classes appear here
