@@ -140,7 +140,6 @@ class AST:
                 tree_to.parent = self
                 break
 
-
     # Returns always a unique number
     @staticmethod
     def get_unique_id() -> int:
@@ -194,13 +193,16 @@ class AST:
 
     # Get the variable for the node (and load it from memory if required)
     # Store must be true when you want to store into the variable
-    def variable(self, store: bool=False):
+    def variable(self, store: bool = False):
+        # TOdo: move this to their own classes (virtual functions)
         if isinstance(self, Variable):
             if store:
                 return "@" + self.value
             var = "%" + str(self.get_unique_id())
-            self.llvm_load(var) # Loads the variable in storage into the variable var
+            self.llvm_load(var)  # Loads the variable in storage into the variable var
             return var
+        elif isinstance(self, UDeref) and store:
+            return self[0].variable(store)
 
         var = self.id()
 
@@ -212,7 +214,7 @@ class AST:
 
     @staticmethod
     def goto(label: str):
-        return "br label " + label + "\n"
+        AST.llvm_output += "br label " + label + "\n"
 
     @staticmethod
     def label(name: str):
@@ -276,28 +278,31 @@ class If(AST):
         return None
 
     def llvm_code(self):
-        code = self.comments()
-        condition = self.children[0]
+        # TODO: fix
+        AST.llvm_output += self.comments()
 
-        condition_code, conditon_var = condition.llvm_code()
-        code += condition_code
+        condition = self.children[0]
+        condition.llvm_code()
 
         label_true = "iftrue"
         label_false = "iffalse"
-        code += "br {type} {var}, label {label_true}, label {label_false}\n".format(type="i1",
-                                                                                    var=self.variable(conditon_var),
-                                                                                    label_true=label_true,
-                                                                                    label_false=label_false)
+        code = "br {type} {var}, label {label_true}, label {label_false}\n"
+        code = code.format(type="i1",
+                           var=condition.variable(),
+                           label_true=label_true,
+                           label_false=label_false)
+        AST.llvm_output += code
 
         label_end = "end"
         statement_sequence = self.children[1]
-        code += self.label(label_true) + statement_sequence.llvm_code() + self.goto(label_end)
+        AST.llvm_output += self.label(label_true) + "\n"
+        statement_sequence.llvm_code()
+        self.goto(label_end)
 
-        code += self.label(label_false) + self.goto(label_end)
-        code += self.label(label_end)
+        AST.llvm_output += self.label(label_false) + "\n"
+        self.goto(label_end)
+        AST.llvm_output += self.label(label_end) + '\n'
 
-        code += '\n'
-        AST.llvm_output += code
 
     # def collapse_comment(self, ast):
     #     self.comment = "if " + ast.children[0].node.collapse_comment(ast.children[0])
@@ -350,7 +355,9 @@ class Binary(Operator):
         Operator.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Binary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value, color=self.color)
+        return '{name}[label="Binary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                         value=self.value,
+                                                                                         color=self.color)
 
     def comments(self, comment_out=True):
         comment = self[0].comments(comment_out=False) + self.value + \
@@ -375,21 +382,19 @@ class Assign(Binary):
     def get_llvm_template(self):
         return "store {type} {temp}, {type}* {location}\n"
 
-
     def collapse_comment(self, ast):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
                        ast.children[1].node.collapse_comment(ast.children[1])
         return self.comment
 
     def llvm_code(self):
-
         # First calculate the value to store
         self[1].llvm_code()
 
         output = self.comments()
 
         code = self.get_llvm_template()
-        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(), location=self[0].variable(store=True))
+        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True), location=self[0].variable(store=True))
 
         output += code
 

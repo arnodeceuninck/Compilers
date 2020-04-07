@@ -282,7 +282,9 @@ class customListener(ParseTreeListener):
         elif ctx.FLOAT_ID():
             self.add(CFloat(ctx.getText()))
         elif ctx.CHAR_ID():
-            self.add(CChar(ctx.getText()))
+            character = ctx.CHAR_ID().getText()  # e.g. 'a'
+            character = character[1:-1]  # e.g. a
+            self.add(CChar(character))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
         # Handling operation of orders with brackets is already assured by the grammar

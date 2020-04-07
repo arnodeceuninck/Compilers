@@ -24,7 +24,7 @@ def assignment(ast):
 
     if isinstance(ast, Variable) and ast.parent and not (
             isinstance(ast.parent, Assign) or isinstance(ast.parent, Print) or isinstance(ast.parent,
-                                                                                                    Unary) or isinstance(
+                                                                                          Unary) or isinstance(
         ast.parent, Binary)):
         location = ast.value
         type = ast
@@ -37,17 +37,21 @@ def convertVar(ast):
     if isinstance(ast, Print):
         return
     element = ast.symbol_table[ast.value].type
-    if element.get_type() == 'int':
+    # TODO: This should be done from the listener
+    type = element.get_type()
+    while type[len(type) - 1] == "*":
+        type = type[:len(type) - 1]
+    if type == 'int':
         ast_new = VInt(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
         ast.parent.replace_child(ast, ast_new)
-    elif element.get_type() == 'float':
+    elif type == 'float':
         ast_new = VFloat(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
         ast.parent.replace_child(ast, ast_new)
-    elif element.get_type() == 'char':
+    elif type == 'char':
         ast_new = VChar(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
@@ -98,7 +102,7 @@ def make_ast(tree):
     # Create symbol table
     communismForLife.traverse(assignment)
     # # Apply symbol table to all the variables
-    communismForLife.traverse(convertVar) # Qua de la fuck does this?
+    communismForLife.traverse(convertVar)  # Qua de la fuck does this?
     communismForLife.traverse(checkAssigns)
     return communismForLife
 

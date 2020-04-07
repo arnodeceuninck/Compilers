@@ -13,7 +13,6 @@ class Variable(AST):
     def __str__(self):
         var_type = "const " if self.const else ""
         var_type += self.get_type()
-        var_type += "*" if self.ptr else ""
         return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
                                                                                                type=var_type,
                                                                                                value=self.value,
@@ -63,7 +62,7 @@ class VInt(Variable):
         return "i32"
 
     def get_type(self):
-        return "int"
+        return "int" + ("*" if self.ptr else "")
 
     def get_format_type(self):
         return "d"
@@ -90,7 +89,7 @@ class VChar(Variable):
         return "i8" + ("*" if self.ptr else "")
 
     def get_type(self):
-        return "char"
+        return "char" + ("*" if self.ptr else "")
 
     def get_llvm_print_type(self) -> str:
         return "i8"
@@ -103,13 +102,13 @@ class VChar(Variable):
 
     def convert_template(self, type):
         if type == "int":
-            return "{}{} = zext i8 {}{} to i32\n"
+            return "{result} = zext i8 {value} to i32\n"
         elif type == "char":
-            return ""
+            return None
         elif type == "float":
-            return "{}{} = uitofp i8 {}{} to float\n"
+            return "{result} = uitofp i8 {value} to float\n"
         elif type == "double":
-            return "{}{} = uitofp i8 {}{} to double\n"
+            return "{result} = uitofp i8 {value} to double\n"
 
 
 class VFloat(Variable):
@@ -117,7 +116,7 @@ class VFloat(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        return "float"
+        return "float" + ("*" if self.ptr else "")
 
     def get_llvm_type(self):
         return "float" + ("*" if self.ptr else "")

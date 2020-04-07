@@ -26,7 +26,7 @@ class Operate(Binary):
         result = self.variable()
 
         code = self.get_llvm_template()
-        code = code.format(result=result, type=llvm_type, lvalue=self.variable(),
+        code = code.format(result=result, type=llvm_type, lvalue=self[0].variable(),
                            rvalue=self[1].variable())
 
         output += code
