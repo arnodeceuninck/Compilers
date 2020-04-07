@@ -1,12 +1,120 @@
 """
 !
 """
-from src.ErrorListener import RerefError
-from src.Utils import *
-from abc import ABC, abstractmethod
+from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener
 from src.symbolTable import SymbolTable
+from gen import cParser, cLexer
+from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 
 
+# An error checking functions to check whether all symbols are already in the symbol table (or insert them when declaring)
+def assignment(ast):
+    # Check whether any other symbol is already in the symbol table
+
+    if isinstance(ast, Variable) and ast.parent and isinstance(ast.parent, Assign):
+        # return not required here, but otherwise pycharm thinks the statement is useless
+        return ast.symbol_table[ast.value]  # Raises an error if not yet declared
+
+    # Add symbol to symbol table
+    if ast.value == "=" and ast.declaration:
+        # improve type without constant and ptr
+        location = ast.children[0].value
+        type = ast.children[0]
+        ast.symbol_table.insert(location, type)
+
+    # Last minute fix before the evaluation
+    # (already forgot what it does)
+    if isinstance(ast, Variable) and ast.parent and not (
+            isinstance(ast.parent, Assign) or isinstance(ast.parent, Print) or isinstance(ast.parent,
+                                                                                          Unary) or isinstance(
+        ast.parent, Binary)):
+        location = ast.value
+        type = ast
+        ast.symbol_table.insert(location, type)
+
+
+# Converts all variables into the right type.
+# e.g. int x = y, y will be a variable from the listener, but must be the right type
+# (correct me if I'm wrong)
+def convertVar(ast):
+    if not isinstance(ast, Variable):
+        return
+    if isinstance(ast, Print):
+        return
+    element = ast.symbol_table[ast.value].type
+    # TODO: This should be done from the listener
+    type = element.get_type()
+    while type[len(type) - 1] == "*":
+        type = type[:len(type) - 1]
+    if type == 'int':
+        ast_new = VInt(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
+    elif type == 'float':
+        ast_new = VFloat(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
+    elif type == 'char':
+        ast_new = VChar(ast.value)
+        ast_new.const = element.const
+        ast_new.ptr = element.ptr
+        ast.parent.replace_child(ast, ast_new)
+
+
+# A function to check whether you're always assigning to the right type and not to a const value
+def checkAssigns(ast):
+    # Check for const assigns
+    # On assignments that are declarations, but the leftmost child is a const variable
+    if isinstance(ast, Assign) and ast.children[0].const and not ast.declaration:
+        raise ConstError(ast.children[0].value)
+    if isinstance(ast, Assign):
+        type_lvalue = ast.children[0].get_type()
+        type_rvalue = ast.children[1].get_type()
+        if type_lvalue == type_rvalue:
+            pass
+        elif type_lvalue == "float" and type_rvalue == "int":
+            pass
+        else:
+            raise IncompatibleTypesError(type_lvalue, type_rvalue)
+
+
+# return an ast tree from an input file
+def compile(input_file: str, catch_error=True):
+    input_stream = FileStream(input_file)
+    lexer = cLexer.cLexer(input_stream)
+    stream = CommonTokenStream(lexer)
+    parser = cParser.cParser(stream)
+    parser.addErrorListener(CustomErrorListener())
+    tree = parser.start_rule()
+
+    if catch_error:
+        try:
+            return make_ast(tree)
+        except CompilerError as e:
+            print(str(e))
+            return None
+    else:
+        return make_ast(tree)
+
+
+# Convert an antlr tree into our own AST
+def make_ast(tree):
+    communismRules = customListener()
+    walker = ParseTreeWalker()
+    walker.walk(communismRules, tree)
+    communismForLife = communismRules.trees[0]
+    # The two methods of below should be combined in order to make it one pass and apply error checking
+    # Create symbol table
+    communismForLife.traverse(assignment)  # Symbol table checks
+    # # Apply symbol table to all the variables
+    communismForLife.traverse(convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type
+    communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+    return communismForLife
+
+
+# Write the llvm version of the ast to the filename
 def to_LLVM(ast, filename):
     AST.llvm_output = ""
 
@@ -55,6 +163,7 @@ class AST:
     symbol_table = SymbolTable()
     print = False
 
+    # Resets the global class variables (must be used with tests)
     @staticmethod
     def reset():
         AST.llvm_output = ""
@@ -73,14 +182,17 @@ class AST:
         self.funct = None  # The function that is applied for constant folding
         self.comment: str = ""  # Additional information as comment in the LLVM file
 
+    # Get the child at index item using self[item]
     def __getitem__(self, item: int):  # -> AST
         return self.children[item]
 
+    # Preorder traverse with a given funciton
     def traverse(self, func):
         func(self)
         for child in self.children:
             child.traverse(func)
 
+    # Fold the constants where possible
     def constant_folding(self):
         ready_to_continue_folding = True  # Only ready to continue if all children are
         for i in range(len(self.children)):
@@ -115,6 +227,7 @@ class AST:
 
         return True
 
+    # Represent the nodes for the dotfile
     def dot_node(self):
         # The output needs to be the id + The label itself
         output = str(self)
@@ -124,6 +237,7 @@ class AST:
 
         return output
 
+    # represent the connections for the dotfile
     def dot_connections(self):
         output = ""
         for child in self.children:
@@ -131,6 +245,7 @@ class AST:
             output += child.dot_connections()
         return output
 
+    # Replace the child tree_from with tree_to
     def replace_child(self, tree_from, tree_to):
         if tree_from.parent != self:
             raise Exception("ast should be my child")
@@ -155,6 +270,7 @@ class AST:
     def get_llvm_type(self) -> str:
         return "NONE"
 
+    # returns the c_type
     def get_type(self) -> str:
         return ""
 
@@ -175,6 +291,7 @@ class AST:
         # The only moment when this returns something else is with floats
         return self.get_llvm_type()
 
+    # Comment out a given string if required
     @staticmethod
     def comment_out(comments: str, comment_out: bool):
         if not comment_out:
@@ -182,10 +299,12 @@ class AST:
         comments = "; " + comments
         return comments + '\n'
 
+    # The llvm template for loading a variable from storage
     def llvm_load_template(self):
         # Code for loading a variable (default is no loading required)
         return "{result} = load {type}, {type}* {var}\n"
 
+    # Get the unique ID of this subtree
     def id(self):
         if not self._id:
             self._id = self.get_unique_id()
@@ -208,19 +327,23 @@ class AST:
 
         return "%v" + str(var)
 
+    # Get a unique temp variable
     @staticmethod
     def get_temp():
         return "%t" + str(AST.get_unique_id())
 
+    # Jump to a given label
     @staticmethod
     def goto(label: str):
         AST.llvm_output += "br label " + label + "\n"
 
+    # Create a new label
     @staticmethod
     def label(name: str):
         return name + ":\n"
 
 
+# Convert given ast into a dotfile and write it to filename
 def dot(ast: AST, filename: str):
     output = "Digraph G { \n"
 
@@ -258,11 +381,6 @@ class StatementSequence(AST):
         for child in self.children:
             child.llvm_code()
         AST.llvm_output += '\n'
-
-    # def collapse_comment(self, ast):
-    #     for child in ast.children:
-    #         child.node.collapse_comment(child)
-    #     return ""
 
 
 class If(AST):
@@ -304,25 +422,18 @@ class If(AST):
         AST.llvm_output += self.label(label_end) + '\n'
 
 
-    # def collapse_comment(self, ast):
-    #     self.comment = "if " + ast.children[0].node.collapse_comment(ast.children[0])
-    #     ast.children[1].node.collapse_comment(ast.children[1])
-
-
 # TODO
 class For(AST):
     def __init__(self):
         AST.__init__(self, "for")
 
-    def collapse_comment(self, ast):
-        self.comment = "for "
-        is_first = True
-        for child in ast.children:
-            if is_first:
-                self.comment += child.node.collapse_comment(child)
-                is_first = False
-                continue
-            self.comment += "; " + child.node.collapse_comment(child)
+    def comments(self, comment_out=True):
+        comment = "for " + self[0].comments()  # only add comments for the condition, the comments for the statement
+        # sequence will be added when visiting their code
+        return self.comment_out(comment, comment_out)
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
 
 
 class Operator(AST):
@@ -394,7 +505,8 @@ class Assign(Binary):
         output = self.comments()
 
         code = self.get_llvm_template()
-        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True), location=self[0].variable(store=True))
+        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True),
+                           location=self[0].variable(store=True))
 
         output += code
 
@@ -408,3 +520,4 @@ from src.Node.Unary import *
 from src.Node.Compare import *
 from src.Node.Operate import *
 from src.Node.Comments import *
+from src.customListener import customListener

@@ -122,7 +122,7 @@ class CChar(Constant):
         return "c"
 
     @staticmethod
-    def convertString(type):
+    def convert_template(type):
         if type == "int":
             return "{result} = zext i8 {value} to i32\n"
         elif type == "char":

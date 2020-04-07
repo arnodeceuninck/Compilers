@@ -18,7 +18,7 @@ class Compare(Binary):
         else:
             return "unknown"
 
-    def llvm_code(self) -> str:
+    def llvm_code(self):
         self[0].llvm_code()
         self[1].llvm_code()
 
@@ -49,11 +49,6 @@ class LessT(Compare):
     def __init__(self, value="<"):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] < args[1]
-
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fcmp olt {} {}{}, {}{}\n"
-        return "{}{} = icmp slt {} {}{}, {}{}\n"
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
@@ -101,11 +96,6 @@ class MoreOrEq(Compare):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] >= args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fcmp oge {} {}{}, {}{}\n"
-        return "{}{} = icmp sge {} {}{}, {}{}\n"
-
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
             return "{result} = fcmp oge {type} {lvalue}, {rvalue}\n"
@@ -117,11 +107,6 @@ class Equal(Compare):
     def __init__(self, value="=="):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] == args[1]
-
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fcmp oeq {} {}{}, {}{}\n"
-        return "{}{} = icmp eq {} {}{}, {}{}\n"
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
@@ -135,11 +120,6 @@ class NotEqual(Compare):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] != args[1]
 
-    def get_LLVM(self, is_float=False):
-        if is_float:
-            return "{}{} = fcmp one {} {}{}, {}{}"
-        return "{}{} = icmp ne {} {}{}, {}{}\n"
-
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
             return "{result} = fcmp one {type} {lvalue}, {rvalue}\n"
@@ -152,9 +132,6 @@ class LogicAnd(Compare):
         Compare.__init__(self, value)
         self.funct = lambda args: args[0] and args[1]
 
-    def get_LLVM(self, is_float=False):
-        return "{}{} = icmp and {} {}{}, {}{}\n"
-
     def get_llvm_template(self) -> str:
         # A and B <=> A*B != 0
         if self.get_type() == "float":
@@ -165,7 +142,7 @@ class LogicAnd(Compare):
             template += "{result} = icmp ne {type} {result_temp}, " + str(self.get_neutral()) + "\n"
         return template
 
-    def llvm_code(self) -> (str, int):
+    def llvm_code(self):
         self[0].llvm_code()
         self[1].llvm_code()
 
@@ -210,18 +187,3 @@ class LogicOr(Compare):
         return template
         # return "{result} = icmp or {type} {lvalue}, {rvalue}\n"
 
-    # TODO?
-    # def generate_LLVM(self, ast):
-    #     # execute operator
-    #     type = ast.getLLVMType()
-    #     is_float = (ast.getType() == "float")
-    #     # Both variable
-    #     tempSave1 = "t" + str(ast.node.get_id())
-    #     tempSave2 = "t" + str(ast.node.get_id())
-    #     output = BPlus().get_LLVM(is_float).format("%", tempSave1, type, "%",
-    #                                                str(ast.children[0]),
-    #                                                "%", str(ast.children[1]))
-    #     output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
-    #                                                    "", ast.getNeutral())
-    #     output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
-    #     return output
