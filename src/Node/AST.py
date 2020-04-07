@@ -198,9 +198,9 @@ class AST:
         if isinstance(self, Variable):
             if store:
                 return "@" + self.value
-            var = str(self.get_unique_id())
-            AST.llvm_output += self.llvm_load(var)
-            return "%" + var
+            var = "%" + str(self.get_unique_id())
+            self.llvm_load(var) # Loads the variable in storage into the variable var
+            return var
 
         var = self.id()
 

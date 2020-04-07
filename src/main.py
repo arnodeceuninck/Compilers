@@ -107,8 +107,8 @@ def main(argv):
     communismForLife = compile(argv[1])
     if communismForLife:
         dot(communismForLife, "output/c_tree.dot")
-        communismForLife.constant_folding()
-        dot(communismForLife, "output/c_tree_folded.dot")
+        # communismForLife.constant_folding()
+        # dot(communismForLife, "output/c_tree_folded.dot")
         # Creates comments for every assignment, for loop and if statement
         # insert_comments(communismForLife)
         to_LLVM(communismForLife, "output/communismForLife.ll")

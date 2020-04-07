@@ -41,10 +41,11 @@ class Variable(AST):
     # Variable should be llvm_formated, e.g. %1
     def llvm_load(self, variable: str):
         code = self.get_llvm_template()
-        code.format(result=variable, type=self.get_llvm_type(), var=self.variable())
+        code = code.format(result=variable, type=self.get_llvm_type(), var=self.variable(store=True))
+        AST.llvm_output += code
 
     def llvm_code(self):
-        return self.llvm_load()
+        return ""  # Doesn't have llvm code: The code for loading gets added when doing self.variable()
 
     def comments(self, comment_out: bool = False):
         comment = self.value

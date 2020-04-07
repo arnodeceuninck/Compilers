@@ -1,3 +1,3 @@
-printf(42.0);
-printf(42);
-printf('b');
+int x = 3;
+x < 12;
+//x = 4;
