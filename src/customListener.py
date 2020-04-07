@@ -188,7 +188,9 @@ class customListener(ParseTreeListener):
         elif ctx.FLOAT_ID():
             self.add(CFloat(ctx.FLOAT_ID().getText()))
         elif ctx.CHAR_ID():
-            self.add(CChar(ctx.CHAR_ID().getText()))
+            character = ctx.CHAR_ID().getText() # e.g. 'a'
+            character = character[1:-1] # e.g. a
+            self.add(CChar(character))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.VAR_NAME().getText()))
         self.simplify(1)

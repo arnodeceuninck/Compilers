@@ -11,7 +11,9 @@ class SingleLine(Comments):
         Comments.__init__(self, value)
 
     def llvm_code(self):
-        return ";; " + self.value
+        code = ";; " + self.value
+        AST.llvm_output += code
+
 
 class Multiline(Comments):
     def __init__(self, value):
@@ -21,4 +23,4 @@ class Multiline(Comments):
         code = ""
         for line in self.code:
             code += ";; " + line
-        return code
+        AST.llvm_output += code

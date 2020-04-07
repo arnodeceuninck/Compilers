@@ -37,13 +37,13 @@ class Constant(AST):
     def llvm_code(self) -> int:
         output = self.comments()
         code = self.get_llvm_template()
-        code.format(result=self.variable(self._id()), type=self.get_llvm_type(), lvalue=self.get_value(),
-                    rvalue=self.get_neutral())
+        code = code.format(result=self.variable(), type=self.get_llvm_type(), lvalue=self.value,
+                           rvalue=self.get_neutral())
         output += code
-        return output
+        AST.llvm_output += output
 
     def comments(self, comment_out=True):
-        return self.comment_out(str(self.value), comment_out=False)
+        return self.comment_out(str(self.value), comment_out=comment_out)
 
 
 class CInt(Constant):
@@ -65,7 +65,7 @@ class CInt(Constant):
     @staticmethod
     def convert_template(type):
         if type == "int":
-            return ""
+            return None
         elif type == "char":
             return "{result} = trunc i32 {value} to i8\n"
         elif type == "float":
@@ -103,7 +103,7 @@ class CFloat(Constant):
         elif type == "char":
             return "{result} = fptoui float {value} to i8\n"
         elif type == "float":
-            return ""
+            return None
         elif type == "double":
             return "{result} = fpext float {value} to float\n"
 
@@ -126,11 +126,19 @@ class CChar(Constant):
         if type == "int":
             return "{result} = zext i8 {value} to i32\n"
         elif type == "char":
-            return ""
+            return None
         elif type == "float":
             return "{result} = uitofp i8 {value} to float\n"
         elif type == "double":
             return "{result} = uitofp i8 {value} to double\n"
+
+    def llvm_code(self) -> int:
+        output = self.comments()
+        code = self.get_llvm_template()
+        code = code.format(result=self.variable(), type=self.get_llvm_type(), lvalue=str(ord(self.value)),
+                           rvalue=self.get_neutral())
+        output += code
+        AST.llvm_output += output
 
 
 class CBool(Constant):

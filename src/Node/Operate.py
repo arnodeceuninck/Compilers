@@ -1,4 +1,4 @@
-from src.Node.AST import Binary
+from src.Node.AST import Binary, AST
 
 
 class Operate(Binary):
@@ -15,19 +15,23 @@ class Operate(Binary):
             return "UNKNOWN"
 
     def llvm_code(self) -> str:
+
+        self[0].llvm_code()
+        self[1].llvm_code()
+
         output = self.comments()
 
         llvm_type = self.get_llvm_type()
 
-        result = self.variable(self._id())
+        result = self.variable()
 
         code = self.get_llvm_template()
-        code.format(result=result, type=llvm_type, lvalue=self.variable(self[0].id()),
-                    rvalue=self.variable(self[1].id()))
+        code = code.format(result=result, type=llvm_type, lvalue=self.variable(),
+                           rvalue=self[1].variable())
 
         output += code
 
-        return output
+        AST.llvm_output += output
 
 
 class BMinus(Operate):
@@ -47,7 +51,7 @@ class BPlus(Operate):
         Operate.__init__(self, value)
         self.funct = lambda args: args[0] + args[1]
 
-    def get_llvm_type(self):
+    def get_llvm_template(self):
         if self.get_type() == "float":
             return "{result} = fadd {type} {lvalue}, {rvalue}\n"
         else:

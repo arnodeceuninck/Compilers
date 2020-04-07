@@ -1,5 +1,5 @@
-from src.Node.AST import *
-from src.Node.constant import *
+from src.Node.AST import AST, Binary
+from src.Node.constant import CBool
 from src.Node.Operate import Mult, BPlus
 
 
@@ -11,6 +11,7 @@ class Compare(Binary):
         return '{name}[label="Binary Operator Compare: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
                                                                                                  value=self.value,
                                                                                                  color=self.color)
+
     def get_type(self):
         if self[0].get_type() == self[1].get_type():
             return self[0].get_type()
@@ -18,37 +19,30 @@ class Compare(Binary):
             return "unknown"
 
     def llvm_code(self) -> str:
+        self[0].llvm_code()
+        self[1].llvm_code()
+
         output = self.comments()
 
         llvm_type = self.get_llvm_type()
 
-        temp = self.get_unique_id()
+        temp = self.get_temp()
 
         comp_output = self.get_llvm_template()
 
-        comp_output.format(result=self.variable(temp), type=llvm_type, lvalue=self.variable(self.children[0].id()),
-                           rvalue=self.variable(self.children[1].id()))
+        comp_output = comp_output.format(result=temp, type=llvm_type,
+                                         lvalue=self[0].variable(),
+                                         rvalue=self[1].variable())
 
         output += comp_output
 
         # Now convert the output (i1) we got to the type we need
         bool_to_type = CBool.convert_template(self.get_type())
-        bool_to_type.format(self.variable(self.id()), self.variable(temp))
+        bool_to_type = bool_to_type.format(result=self.variable(self.id()), value=temp)
 
         output += bool_to_type
 
-        return output
-
-    def generate_LLVM(self, ast):
-        # execute operator
-        LLVM_type = ast.getLLVMType()
-        is_float = ast.getType() == "float"
-        # Both variable
-        tempSave = "t" + str(ast.node.get_id())
-        output = ast.node.get_LLVM(is_float).format("%", tempSave, LLVM_type, "%", str(ast.children[0]),
-                                                    "%", str(ast.children[1]))
-        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave)
-        return output
+        AST.llvm_output += output
 
 
 class LessT(Compare):
@@ -181,34 +175,19 @@ class LogicAnd(Compare):
 
         comp_output = self.get_llvm_template()
 
-        comp_output.format(result_temp=self.variable(temp1), type=llvm_type,
-                           lvalue=self.variable(self.children[0].id()),
-                           rvalue=self.variable(self.children[1].id()), result=temp2)
+        comp_output = comp_output.format(result_temp=self.variable(temp1), type=llvm_type,
+                                         lvalue=self.variable(self.children[0].id()),
+                                         rvalue=self.variable(self.children[1].id()), result=temp2)
 
         output += comp_output
 
         # Now convert the output (i1) we got to the type we need
         bool_to_type = CBool.convertString(self.get_type())
-        bool_to_type.format(self.variable(self.id()), self.variable(temp2))
+        bool_to_type = bool_to_type.format(self.variable(self.id()), self.variable(temp2))
 
         output += bool_to_type
 
-        return output
-
-    def generate_LLVM(self, ast):
-        # execute operator
-        type = ast.getLLVMType()
-        is_float = (ast.getType() == "float")
-        # Both variable
-        tempSave1 = "t" + str(ast.node.get_id())
-        tempSave2 = "t" + str(ast.node.get_id())
-        output = Mult().get_LLVM(is_float).format("%", tempSave1, type, "%",
-                                                  str(ast.children[0]),
-                                                  "%", str(ast.children[1]))
-        output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
-                                                       "", ast.getNeutral())
-        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
-        return output
+        AST.llvm_output += output
 
 
 class LogicOr(Compare):
@@ -219,20 +198,18 @@ class LogicOr(Compare):
     def get_llvm_template(self) -> str:
         return "{result} = icmp or {type} {lvalue}, {rvalue}\n"
 
-    def get_LLVM(self, is_float=False):
-        return "{}{} = icmp or {} {}{}, {}{}\n"
-
-    def generate_LLVM(self, ast):
-        # execute operator
-        type = ast.getLLVMType()
-        is_float = (ast.getType() == "float")
-        # Both variable
-        tempSave1 = "t" + str(ast.node.get_id())
-        tempSave2 = "t" + str(ast.node.get_id())
-        output = BPlus().get_LLVM(is_float).format("%", tempSave1, type, "%",
-                                                   str(ast.children[0]),
-                                                   "%", str(ast.children[1]))
-        output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
-                                                       "", ast.getNeutral())
-        output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
-        return output
+    # TODO?
+    # def generate_LLVM(self, ast):
+    #     # execute operator
+    #     type = ast.getLLVMType()
+    #     is_float = (ast.getType() == "float")
+    #     # Both variable
+    #     tempSave1 = "t" + str(ast.node.get_id())
+    #     tempSave2 = "t" + str(ast.node.get_id())
+    #     output = BPlus().get_LLVM(is_float).format("%", tempSave1, type, "%",
+    #                                                str(ast.children[0]),
+    #                                                "%", str(ast.children[1]))
+    #     output += NotEqual().get_LLVM(is_float).format("%", tempSave2, type, "%", tempSave1,
+    #                                                    "", ast.getNeutral())
+    #     output += CBool().convertString(ast.getType()).format("%", str(ast), "%", tempSave2)
+    #     return output

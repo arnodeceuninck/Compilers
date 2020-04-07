@@ -46,8 +46,9 @@ class Variable(AST):
     def llvm_code(self):
         return self.llvm_load()
 
-    def collapse_comment(self, ast):
-        return self.value
+    def comments(self, comment_out: bool = False):
+        comment = self.value
+        return self.comment_out(comment, comment_out)
 
 
 class VInt(Variable):
@@ -129,12 +130,13 @@ class VFloat(Variable):
     def get_align(self):
         return 4 + 4 * self.ptr
 
-    def convert_template(self, type):
+    @staticmethod
+    def convert_template(type):
         if type == "int":
-            return "{}{} = fptosi float {}{} to i32\n"
+            return "{result} = fptosi float {value} to i32\n"
         elif type == "char":
-            return "{}{} = fptoui float {}{} to i8\n"
+            return "{result} = fptoui float {value} to i8\n"
         elif type == "float":
             return ""
         elif type == "double":
-            return "{}{} = fpext float {}{} to double\n"
+            return "{result} = fpext float {value} to double\n"

@@ -20,17 +20,10 @@ def generate_LLVM(ast):
     formatTypes = set()
     # If the ast node is a sequence then the nodes below it can be instructions,
     # but this node means nothing in code generation
-    if isinstance(ast.node, StatementSequence):
-        for child in ast.children:
-            tempret = generate_LLVM(child)
-            output = handle_return(tempret, output, formatTypes)
     # If we encounter a variable then we do not need to do anything because it is already assigned
-    elif isinstance(ast.node, (UPlus, UMinus, UNot, UReref, Variable, Constant)):
-        if isinstance(ast.node, (Assign, Unary)):
-            output += "; " + ast.node.comment + "\n"
-        output += ast.node.generate_LLVM(ast)
+
     # If we encounter an Binary operate then we need to operate on its children
-    elif isinstance(ast.node, Assign):
+    if isinstance(ast.node, Assign):
         output += "; " + ast.node.comment + "\n"
         # generate LLVM for the left and right side of the operator
         tempret = generate_LLVM(ast.children[1])

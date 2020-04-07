@@ -1,7 +1,7 @@
 import unittest
 from src.main import compile
 from src.AST_old import *
-from src.Node.AST import *
+from src.Node.AST import AST
 from src.ErrorListener import *
 
 
@@ -16,7 +16,8 @@ class MyTestCase(unittest.TestCase):
 
     def helper_test_c(self, test_name: str, cmp=False, fold=False, catch_errors=True):
         # Reset node id because it causes errors in llvm creation
-        AST._id = 0
+        AST.reset()
+
         input_file: str = "input/" + test_name + ".c"
         output_file: str = "output/" + test_name + ".dot"
         output_file_ll: str = "output/" + test_name + ".ll"
@@ -27,7 +28,7 @@ class MyTestCase(unittest.TestCase):
         expected_output_file_folded: str = "expected_output/" + test_name + ".folded.dot"
         expected_output_file_folded_ll: str = "expected_output/" + test_name + ".folded.ll"
 
-        tree: AST_old = compile(input_file, catch_error=catch_errors)
+        tree: AST = compile(input_file, catch_error=catch_errors)
         if tree:
             tree.to_dot(output_file)
             if fold and not cmp:
@@ -38,15 +39,15 @@ class MyTestCase(unittest.TestCase):
 
         if cmp:
             insert_comments(tree)  # Generate comments for LLVM
-            tree.to_LLVM(output_file_ll)
+            to_LLVM(tree, output_file_ll)
             self.compare(output_file, expected_output_file)
             self.compare(output_file_ll, expected_output_file_ll)
             if fold:
                 tree.constant_folding()
-                insert_comments(tree)  # Generate comments for LLVM
-                tree.to_dot(output_file_folded)
+                # insert_comments(tree)  # Generate comments for LLVM
+                dot(tree, output_file_folded)
                 self.compare(output_file_folded, expected_output_file_folded)
-                tree.to_LLVM(output_file_folded_ll)
+                to_LLVM(tree, output_file_folded_ll)
                 self.compare(output_file_folded_ll, expected_output_file_folded_ll)
 
         return tree
@@ -61,14 +62,14 @@ class MyTestCase(unittest.TestCase):
             # self.assertTrue(isinstance(child.node, Assign))
             # self.assertTrue(child.node.declaration)
             self.assertEqual(len(child.children), 2)
-            self.assertEqual(len(child.children[0].children), 0)  # Must be removed after folding
-            self.assertEqual(len(child.children[1].children), 0)
-            self.assertEqual(child.children[0].node.type, "int")  # Must stay the same after folding
-            self.assertTrue(isinstance(child.children[1].node, CInt))  # Type must be changed
-        self.assertEqual(tree.children[0].children[1].node.value, 5)  # Values must match
-        self.assertEqual(tree.children[1].children[1].node.value, 63)
-        self.assertEqual(tree.children[2].children[1].node.value, 2)
-        self.assertEqual(tree.children[3].children[1].node.value, 2)
+            self.assertEqual(len(child[0].children), 0)  # Must be removed after folding
+            self.assertEqual(len(child[1].children), 0)
+            self.assertEqual(child[0].type, "int")  # Must stay the same after folding
+            self.assertTrue(isinstance(child[1], CInt))  # Type must be changed
+        self.assertEqual(tree[0][1].value, 5)  # Values must match
+        self.assertEqual(tree[1][1].value, 63)
+        self.assertEqual(tree[2][1].value, 2)
+        self.assertEqual(tree[3][1].value, 2)
 
     def test_declaration(self):
         # Test whether all info from the declaration has been kept

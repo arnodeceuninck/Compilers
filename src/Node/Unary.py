@@ -8,7 +8,7 @@ class Unary(Operator):
         self.funct = None
 
     def __str__(self):
-        return '{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.name, value=self.value, color=self.color)
+        return '{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value, color=self.color)
 
     def get_type(self):
         return self[0].get_type()  # Only one type as argument
@@ -136,21 +136,28 @@ class Print(Unary):
         return "function"
 
     def llvm_code(self):
+        AST.print = True
+
         # Generate LLVM for the node that needs to be printed
         self[0].llvm_code()
+
+        AST.llvm_output += self.comments()
+
         format_type = self[0].get_format_type()
         print_type = self[0].get_llvm_print_type()
 
+        variable = self[0].variable()
         # Because you can't print floats
         if print_type == "double":
-            convert_code = VFloat.convertString("double")
-            convert_code = convert_code.format(self.variable(), self[0].variable())
+            convert_code = VFloat.convert_template("double")
+            convert_code = convert_code.format(result=self.variable(), value=self[0].variable())
+            variable = self.variable()
             AST.llvm_output += convert_code
 
 
-        print_code = printString.format(format_type=format_type, print_type=print_type, value=self.variable())
+        print_code = printString.format(format_type=format_type, print_type=print_type, value=variable)
         AST.llvm_output += print_code
 
     def comments(self, comment_out=True):
-        comment = "Print " + self[0].comments()
+        comment = "Print " + self[0].comments(comment_out=False)
         return self.comment_out(comment, comment_out)

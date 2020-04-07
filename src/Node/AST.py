@@ -36,12 +36,12 @@ def to_LLVM(ast, filename):
     AST.llvm_output += "}\n\n"
 
     # If we need to print then create the print function
-    # TODO
-    # if len(retval[1]):
-    #     for char in retval[1]:
-    #         AST.llvm_output += '@.str{formatType} = private unnamed_addr constant [4 x i8] c"%{formatType}\\0A\\00"' \
-    #                   ', align 1\n'.format(formatType=char)
-    #     AST.llvm_output += 'declare i32 @printf(i8*, ...)\n'
+    if AST.print:
+        print = "@.strc = private unnamed_addr constant [4 x i8] c\"%c\\0A\\00\", align 1\n"
+        print += "@.strd = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
+        print += "@.strf = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\", align 1\n"
+        print += "declare i32 @printf(i8*, ...)\n"
+        AST.llvm_output += print
 
     # Write output to the outputfile
     outputFile = open(filename, "w")
@@ -53,10 +53,17 @@ class AST:
     _id = 0
     llvm_output = ""
     symbol_table = SymbolTable()
+    print = False
+
+    @staticmethod
+    def reset():
+        AST.llvm_output = ""
+        AST.symbol_table = SymbolTable
+        AST._id = 0
 
     def __init__(self, value: str = "", color: str = "#9f9f9f"):
 
-        self._id = None
+        self._id = 0
 
         self.parent: AST = None
         self.children: list = list()
@@ -147,7 +154,7 @@ class AST:
 
     # Returns the type of the tree in LLVM
     def get_llvm_type(self) -> str:
-        return "None"
+        return "NONE"
 
     def get_type(self) -> str:
         return ""
@@ -173,10 +180,8 @@ class AST:
     def comment_out(comments: str, comment_out: bool):
         if not comment_out:
             return comments
-        comment: str = ""
-        for line in comments:
-            comment = "; " + line
-        return comment + '\n'
+        comments = "; " + comments
+        return comments + '\n'
 
     def llvm_load_template(self):
         # Code for loading a variable (default is no loading required)
@@ -187,19 +192,23 @@ class AST:
             self._id = self.get_unique_id()
         return self._id
 
-    def variable(self):
+    # Get the variable for the node (and load it from memory if required)
+    # Store must be true when you want to store into the variable
+    def variable(self, store: bool=False):
         if isinstance(self, Variable):
+            if store:
+                return "@" + self.value
             var = str(self.get_unique_id())
             AST.llvm_output += self.llvm_load(var)
             return "%" + var
 
         var = self.id()
 
-        return "%" + str(var)
+        return "%v" + str(var)
 
     @staticmethod
     def get_temp():
-        return "%" + str(AST.get_unique_id())
+        return "%t" + str(AST.get_unique_id())
 
     @staticmethod
     def goto(label: str):
@@ -243,11 +252,10 @@ class StatementSequence(AST):
         return None
 
     def llvm_code(self):
-        code = self.comments()
+        AST.llvm_output += self.comments()
         for child in self.children:
-            code += child.llvm_code()[0]
-        code += '\n'
-        return code
+            child.llvm_code()
+        AST.llvm_output += '\n'
 
     # def collapse_comment(self, ast):
     #     for child in ast.children:
@@ -289,7 +297,7 @@ class If(AST):
         code += self.label(label_end)
 
         code += '\n'
-        return code
+        AST.llvm_output += code
 
     # def collapse_comment(self, ast):
     #     self.comment = "if " + ast.children[0].node.collapse_comment(ast.children[0])
@@ -321,10 +329,17 @@ class Operator(AST):
                                                                                   color=self.color)
 
     def get_type(self):
-        type = self.children[0].get_type
+        type = self.children[0].get_type()
         for child in self.children:
             if child.get_type() != type:
-                return ""
+                return None
+        return type
+
+    def get_llvm_type(self):
+        type = self.children[0].get_llvm_type()
+        for child in self.children:
+            if child.get_llvm_type() != type:
+                return None
         return type
 
     # Has no own specific functions, is specified further in binary/unary/...
@@ -337,19 +352,14 @@ class Binary(Operator):
     def __str__(self):
         return '{name}[label="Binary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value, color=self.color)
 
-    def collapse_comment(self, ast):
-        self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
-                       ast.children[1].node.collapse_comment(ast.children[1])
-        return self.comment
-
     def comments(self, comment_out=True):
-        comment = self.children[0].comments(comment_out=False) + self.value + \
-                  self.children[1].comments(comment_out=False)
+        comment = self[0].comments(comment_out=False) + self.value + \
+                  self[1].comments(comment_out=False)
         return self.comment_out(comment, comment_out)
 
     def get_llvm_type(self):
-        if self.children[0].get_llvm_type == self.children[1].get_llvm_type:
-            return self.children[0].get_llvm_type
+        if self.children[0].get_llvm_type() == self.children[1].get_llvm_type():
+            return self.children[0].get_llvm_type()
 
 
 class Assign(Binary):
@@ -362,19 +372,9 @@ class Assign(Binary):
             return '{name}[label="Assign Declaration", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
         return '{name}[label="Assign", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
 
-    def get_LLVM(self):
-        return "store {} {}{}, {}* {}{}\n"
+    def get_llvm_template(self):
+        return "store {type} {temp}, {type}* {location}\n"
 
-    def generate_LLVM(self, ast):
-        # If The right side is a variable then take the variable name not the node type
-        if isinstance(ast.children[1].node, UDeref):
-            return ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "@",
-                                              str(ast.children[1].getNodeInfo()), ast.children[0].getLLVMType(),
-                                              "@", str(ast.children[0].getNodeInfo()))
-        else:  # If the node wasnt a variable take the node id
-            return ast.node.get_LLVM().format(ast.children[0].getLLVMType(), "%", str(ast.children[1]),
-                                              ast.children[0].getLLVMType(), "@",
-                                              str(ast.children[0].getNodeInfo()))
 
     def collapse_comment(self, ast):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
@@ -382,24 +382,18 @@ class Assign(Binary):
         return self.comment
 
     def llvm_code(self):
-        code = self.comments()
 
-        code += "store "
+        # First calculate the value to store
+        self[1].llvm_code()
 
-        code += self.children[0].get_llvm_type() + " "
+        output = self.comments()
 
-        # If The right side is a variable then take the variable name not the node type
-        if isinstance(self.children[1], UDeref):
-            code += "@" + str(self.children[1].getNodeInfo())
-        # If the node wasn't a variable take the node id
-        else:
-            code += "%" + str(self.children[1])
+        code = self.get_llvm_template()
+        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(), location=self[0].variable(store=True))
 
-        code += ", "
-        code += self.children[0].getLLVMType() + "* "
-        code += "@" + str(self.children[0].value) # Todo: check replacement value getNodeInfo
+        output += code
 
-        return code
+        AST.llvm_output += output
 
 
 # Use these imports to make these classes appear here
