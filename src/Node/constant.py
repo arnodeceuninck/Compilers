@@ -1,5 +1,4 @@
-from src.Node.AST import AST
-from src.Node.Operate import BPlus
+from src.Node.AST import AST, If
 
 
 class Constant(AST):
@@ -37,13 +36,38 @@ class Constant(AST):
     def llvm_code(self) -> int:
         output = self.comments()
         code = self.get_llvm_template()
-        code = code.format(result=self.variable(), type=self.get_llvm_type(), lvalue=self.value,
+
+        # Get the result of the result in the case the parent being an if statement then we need to store
+        # it into a temporary variable in order to convert the result to i1 afterwards
+        result = self.variable()
+        if isinstance(self.parent, If):
+            result = self.get_temp()
+
+        code = code.format(result=result, type=self.get_llvm_type(), lvalue=self.value,
                            rvalue=self.get_neutral())
+        # Convert the constant into a i1 if the parent is an if statement
+        if isinstance(self.parent, If):
+            type_to_bool = self.convert_template("bool")
+            type_to_bool = type_to_bool.format(result=self.variable(), value=result)
+            code += type_to_bool
+
         output += code
         AST.llvm_output += output
 
     def comments(self, comment_out=True):
         return self.comment_out(str(self.value), comment_out=comment_out)
+
+    # Returns a constant based of of the type passed through
+    def create_constant(self, type):
+        if type == "int":
+            return CInt()
+        elif type == "float":
+            return CFloat()
+        elif type == "char":
+            return CChar()
+        elif type == "bool":
+            return CBool()
+        return None
 
 
 class CInt(Constant):
@@ -72,6 +96,8 @@ class CInt(Constant):
             return "{result} = sitofp i32 {value} to float\n"
         elif type == "double":
             return "{result} = sitofp i32 {value} to double\n"
+        elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
+            return "{result} = icmp ne i32 {value}, 0\n"
 
 
 class CFloat(Constant):
@@ -105,7 +131,9 @@ class CFloat(Constant):
         elif type == "float":
             return None
         elif type == "double":
-            return "{result} = fpext float {value} to float\n"
+            return "{result} = fpext float {value} to double\n"
+        elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
+            return "{result} = fcmp one float {value}, 0.0\n"
 
 
 class CChar(Constant):
@@ -131,6 +159,8 @@ class CChar(Constant):
             return "{result} = uitofp i8 {value} to float\n"
         elif type == "double":
             return "{result} = uitofp i8 {value} to double\n"
+        elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
+            return "{result} = icmp ne i8 {value}, 0\n"
 
     def llvm_code(self) -> int:
         output = self.comments()
@@ -164,3 +194,5 @@ class CBool(Constant):
             return "{result} = uitofp i1 {value} to float\n"
         elif type == "double":
             return "{result} = uitofp i1 {value} to double\n"
+        elif type == "bool":
+            return ""

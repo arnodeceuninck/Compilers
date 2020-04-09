@@ -317,7 +317,7 @@ class AST:
         if isinstance(self, Variable):
             if store:
                 return "@" + self.value
-            var = "%" + str(self.get_unique_id())
+            var = "%t" + str(self.get_unique_id())
             self.llvm_load(var)  # Loads the variable in storage into the variable var
             return var
         elif isinstance(self, UDeref) and store:
@@ -335,7 +335,7 @@ class AST:
     # Jump to a given label
     @staticmethod
     def goto(label: str):
-        AST.llvm_output += "br label " + label + "\n"
+        AST.llvm_output += "br label %" + label + "\n"
 
     # Create a new label
     @staticmethod
@@ -402,16 +402,18 @@ class If(AST):
         condition = self.children[0]
         condition.llvm_code()
 
-        label_true = "iftrue"
-        label_false = "iffalse"
-        code = "br {type} {var}, label {label_true}, label {label_false}\n"
+        # Make both labels unique
+        label_true = "iftrue" + str(self.get_unique_id())
+        label_false = "iffalse" + str(self.get_unique_id())
+        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
         code = code.format(type="i1",
                            var=condition.variable(),
                            label_true=label_true,
                            label_false=label_false)
         AST.llvm_output += code
 
-        label_end = "end"
+        # Make a unique label for the end
+        label_end = "end" + str(self.get_unique_id())
         statement_sequence = self.children[1]
         AST.llvm_output += self.label(label_true) + "\n"
         statement_sequence.llvm_code()
@@ -515,9 +517,9 @@ class Assign(Binary):
 
 # Use these imports to make these classes appear here
 from src.Node.Variable import *
-from src.Node.constant import *
 from src.Node.Unary import *
 from src.Node.Compare import *
+from src.Node.constant import *
 from src.Node.Operate import *
 from src.Node.Comments import *
 from src.customListener import customListener

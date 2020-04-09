@@ -79,6 +79,8 @@ class VInt(Variable):
             return "{}{} = sitofp i32 {}{} to float\n"
         elif type == "double":
             return "{}{} = sitofp i32 {}{} to double\n"
+        elif type == "bool":
+            return "{}{} = trunc i32 {}{} to i1\n"
 
 
 class VChar(Variable):
@@ -109,6 +111,8 @@ class VChar(Variable):
             return "{result} = uitofp i8 {value} to float\n"
         elif type == "double":
             return "{result} = uitofp i8 {value} to double\n"
+        elif type == "bool":
+            return "{result} = trunc i8 {value} to i1\n"
 
 
 class VFloat(Variable):
@@ -140,3 +144,5 @@ class VFloat(Variable):
             return ""
         elif type == "double":
             return "{result} = fpext float {value} to double\n"
+        elif type == "bool":
+            return "{result} = fptoui float {value} to i1\n"

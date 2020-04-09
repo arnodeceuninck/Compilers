@@ -1,4 +1,6 @@
-from src.Node.AST import Operator, Variable, AST, CBool, VFloat
+from src.Node.AST import Operator, Variable, AST, If
+from src.Node.constant import CBool
+from src.Node.Variable import VFloat
 from src.Utils import printString
 from src.ErrorListener import RerefError
 
@@ -78,7 +80,7 @@ class UNot(Unary):
         if self.get_type() == "float":
             template = "{{result}} = fcmp oeq {{type}} {neutral}, {{value}}\n"
         else:
-            template = "{{result}} = eq {{type}} {neutral}, {{value}}\n"
+            template = "{{result}} = icmp eq {{type}} {neutral}, {{value}}\n"
         template = template.format(neutral=str(self.get_neutral()))
         return template
 
@@ -89,12 +91,20 @@ class UNot(Unary):
 
         type = self.get_llvm_type()
 
-        temp = self.get_temp()
+        # We need to have the variable in order to have the correct translation when the parrent is the If
+        # because we do not want to extend the i1 we have to keep it that way
+        if isinstance(self.parent, If):
+            temp = self.variable(self.id())
+        else:
+            temp = self.get_temp()
 
         code = self.get_llvm_template()
         code = code.format(result=temp, type=type, value=self[0].variable())
         AST.llvm_output += code
 
+        # if the parent is an if statement then do not convert the variable
+        if isinstance(self.parent, If):
+            return
         bool_to_type = CBool.convert_template(self.get_type())
         bool_to_type = bool_to_type.format(result=self.variable(), value=temp)
 

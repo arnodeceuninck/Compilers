@@ -1,4 +1,5 @@
-from src.Node.AST import Binary, AST
+from src.Node.AST import Binary, AST, If
+from src.Node.constant import Constant
 
 
 class Operate(Binary):
@@ -24,12 +25,22 @@ class Operate(Binary):
         llvm_type = self.get_llvm_type()
 
         result = self.variable()
+        # If the parent is an if statement then we need to store the code into a temporary variable and then convert it
+        if isinstance(self.parent, If):
+            result = self.get_temp()
 
         code = self.get_llvm_template()
         code = code.format(result=result, type=llvm_type, lvalue=self[0].variable(),
                            rvalue=self[1].variable())
 
         output += code
+
+        # We need to convert this node into a bool type (i1), because the node above it is an if statement
+        if isinstance(self.parent, If):
+            constant_type = Constant().create_constant(self.get_type())
+            type_to_bool = constant_type.convert_template("bool")
+            type_to_bool = type_to_bool.format(result=self.variable(), value=result)
+            output += type_to_bool
 
         AST.llvm_output += output
 

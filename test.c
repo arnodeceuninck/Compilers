@@ -1,5 +1,9 @@
 #include <stdio.h>
 
 int main(){
-    printf("%d", 3);
+    int x = 0;
+    if (x == 0) {
+        ++x;
+    }
+    printf("test %d", x);
 }

@@ -1,4 +1,4 @@
-from src.Node.AST import AST, Binary
+from src.Node.AST import AST, Binary, If
 from src.Node.constant import CBool
 from src.Node.Operate import Mult, BPlus
 
@@ -26,7 +26,12 @@ class Compare(Binary):
 
         llvm_type = self.get_llvm_type()
 
-        temp = self.get_temp()
+        # We need to have the variable in order to have the correct translation when the parrent is the If
+        # because we do not want to extend the i1 we have to keep it that way
+        if isinstance(self.parent, If):
+            temp = self.variable(self.id())
+        else:
+            temp = self.get_temp()
 
         comp_output = self.get_llvm_template()
 
@@ -36,6 +41,10 @@ class Compare(Binary):
 
         output += comp_output
 
+        # if the parent is an if statement then do not convert the variable
+        if isinstance(self.parent, If):
+            AST.llvm_output += output
+            return
         # Now convert the output (i1) we got to the type we need
         bool_to_type = CBool.convert_template(self.get_type())
         bool_to_type = bool_to_type.format(result=self.variable(self.id()), value=temp)
