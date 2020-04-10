@@ -24,10 +24,8 @@ def assignment(ast):
 
     # Last minute fix before the evaluation
     # (already forgot what it does)
-    if isinstance(ast, Variable) and ast.parent and not (
-            isinstance(ast.parent, Assign) or isinstance(ast.parent, Print) or isinstance(ast.parent,
-                                                                                          Unary) or isinstance(
-        ast.parent, Binary)):
+    # It
+    if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent, (Assign, Print, If, Unary, Binary)):
         location = ast.value
         type = ast
         ast.symbol_table.insert(location, type)
@@ -369,6 +367,7 @@ class StatementSequence(AST):
     def __init__(self, scope_count):
         AST.__init__(self, "Statement Sequence")
         self.scope_count = scope_count
+        self.symbol_table = SymbolTable()  # An empty symbol table
 
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)

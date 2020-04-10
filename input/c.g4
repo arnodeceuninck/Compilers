@@ -8,7 +8,7 @@ unnamed_scope: '{' operation_sequence '}';
 
 operation: (assignment | operation_logic_or | print_statement);
 
-if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}';
+if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}' ('else' '{' operation_sequence '}')?;
 
 for_statement: 'for' '(' initialization=operation ';' condition=operation ';' step=operation ')' '{' operation_sequence '}';
 
