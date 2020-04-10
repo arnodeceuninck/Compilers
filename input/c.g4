@@ -50,7 +50,7 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+                  | (INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | BREAK | CONTINUE);
 
 DOUBLE_PLUS: '++';
 DOUBLE_MIN: '--';
@@ -81,6 +81,8 @@ VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 CHAR_ID: '\'' . '\'';
+BREAK: 'break';
+CONTINUE: 'continue';
 WS: [ \t\r\n]+ -> skip;
 MULTI_CMNT: '/*' .*? '*/' -> skip;
 ONE_CMNT: '//' .*? '\n' -> skip;

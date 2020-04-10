@@ -1,4 +1,4 @@
-from src.Node.AST import Binary, AST, If
+from src.Node.AST import Binary, AST, BoolClasses
 from src.Node.constant import Constant
 
 
@@ -25,8 +25,8 @@ class Operate(Binary):
         llvm_type = self.get_llvm_type()
 
         result = self.variable()
-        # If the parent is an if statement then we need to store the code into a temporary variable and then convert it
-        if isinstance(self.parent, If):
+        # If the parent is a bool class entity then we need to store the code into a temporary variable and then convert it
+        if isinstance(self.parent, BoolClasses):
             result = self.get_temp()
 
         code = self.get_llvm_template()
@@ -36,7 +36,7 @@ class Operate(Binary):
         output += code
 
         # We need to convert this node into a bool type (i1), because the node above it is an if statement
-        if isinstance(self.parent, If):
+        if isinstance(self.parent, BoolClasses):
             constant_type = Constant().create_constant(self.get_type())
             type_to_bool = constant_type.convert_template("bool")
             type_to_bool = type_to_bool.format(result=self.variable(), value=result)

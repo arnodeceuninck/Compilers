@@ -1,4 +1,4 @@
-from src.Node.AST import AST, If
+from src.Node.AST import AST, BoolClasses
 
 
 class Constant(AST):
@@ -40,13 +40,13 @@ class Constant(AST):
         # Get the result of the result in the case the parent being an if statement then we need to store
         # it into a temporary variable in order to convert the result to i1 afterwards
         result = self.variable()
-        if isinstance(self.parent, If):
+        if isinstance(self.parent, BoolClasses):
             result = self.get_temp()
 
         code = code.format(result=result, type=self.get_llvm_type(), lvalue=self.value,
                            rvalue=self.get_neutral())
         # Convert the constant into a i1 if the parent is an if statement
-        if isinstance(self.parent, If):
+        if isinstance(self.parent, BoolClasses):
             type_to_bool = self.convert_template("bool")
             type_to_bool = type_to_bool.format(result=self.variable(), value=result)
             code += type_to_bool

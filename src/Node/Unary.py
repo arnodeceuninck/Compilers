@@ -1,4 +1,4 @@
-from src.Node.AST import Operator, Variable, AST, If
+from src.Node.AST import Operator, Variable, AST, BoolClasses
 from src.Node.constant import CBool
 from src.Node.Variable import VFloat
 from src.Utils import printString
@@ -91,9 +91,9 @@ class UNot(Unary):
 
         type = self.get_llvm_type()
 
-        # We need to have the variable in order to have the correct translation when the parrent is the If
+        # We need to have the variable in order to have the correct translation when the parrent is the boolclasses
         # because we do not want to extend the i1 we have to keep it that way
-        if isinstance(self.parent, If):
+        if isinstance(self.parent, BoolClasses):
             temp = self.variable(self.id())
         else:
             temp = self.get_temp()
@@ -103,7 +103,7 @@ class UNot(Unary):
         AST.llvm_output += code
 
         # if the parent is an if statement then do not convert the variable
-        if isinstance(self.parent, If):
+        if isinstance(self.parent, BoolClasses):
             return
         bool_to_type = CBool.convert_template(self.get_type())
         bool_to_type = bool_to_type.format(result=self.variable(), value=temp)

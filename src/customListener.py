@@ -3,7 +3,7 @@ from gen.cParser import cParser
 from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
-    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While
+    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -330,4 +330,8 @@ class customListener(ParseTreeListener):
             self.add(CChar(character))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
+        elif ctx.BREAK():
+            self.add(Break())
+        elif ctx.CONTINUE():
+            self.add(Continue())
         # Handling operation of orders with brackets is already assured by the grammar

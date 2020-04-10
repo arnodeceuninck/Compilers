@@ -396,15 +396,15 @@ class If(AST):
         return None
 
     def llvm_code(self):
-        # TODO: fix
+        # TODO: fix else
         AST.llvm_output += self.comments()
 
         condition = self.children[0]
         condition.llvm_code()
 
         # Make both labels unique
-        label_true = "iftrue" + str(self.get_unique_id())
-        label_false = "iffalse" + str(self.get_unique_id())
+        label_true = "iftrue" + str(self.id())
+        label_false = "iffalse" + str(self.id())
         code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
         code = code.format(type="i1",
                            var=condition.variable(),
@@ -413,7 +413,7 @@ class If(AST):
         AST.llvm_output += code
 
         # Make a unique label for the end
-        label_end = "end" + str(self.get_unique_id())
+        label_end = "end" + str(self.id())
         statement_sequence = self.children[1]
         AST.llvm_output += self.label(label_true) + "\n"
         statement_sequence.llvm_code()
@@ -435,7 +435,31 @@ class For(AST):
         return self.comment_out(comment, comment_out)
 
     def llvm_code(self):
-        AST.llvm_output += self.comments()
+        return
+        AST.llvm_output += self.id()
+
+        condition = self.children[0]
+        condition.llvm_code()
+
+        # Make for loop label unique
+        label_true = "for" + str(self.get_unique_id())
+        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
+        code = code.format(type="i1",
+                           var=condition.variable(),
+                           label_true=label_true,
+                           label_false="")
+        AST.llvm_output += code
+
+        # Make a unique label for the end
+        label_end = "end" + str(self.id())
+        statement_sequence = self.children[1]
+        AST.llvm_output += self.label(label_true) + "\n"
+        statement_sequence.llvm_code()
+        self.goto(label_end)
+
+        AST.llvm_output += self.label(label_false) + "\n"
+        self.goto(label_end)
+        AST.llvm_output += self.label(label_end) + "\n"
 
 
 class While(AST):
@@ -446,6 +470,33 @@ class While(AST):
         comment = "while " + self[0].comments()  # only add comments for the condition, the comments for the statement
         # sequence will be added when visiting their code
         return self.comment_out(comment, comment_out)
+
+    def llvm_code(self):
+        return
+        AST.llvm_output += self.comments()
+
+        condition = self.children[0]
+        condition.llvm_code()
+
+        # Make for loop label unique
+        label_true = "while" + str(self.id())
+        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
+        code = code.format(type="i1",
+                           var=condition.variable(),
+                           label_true=label_true,
+                           label_false="")
+        AST.llvm_output += code
+
+        # Make a unique label for the end
+        label_end = "end" + str(self.id())
+        statement_sequence = self.children[1]
+        AST.llvm_output += self.label(label_true) + "\n"
+        statement_sequence.llvm_code()
+        self.goto(label_end)
+
+        AST.llvm_output += self.label(label_false) + "\n"
+        self.goto(label_end)
+        AST.llvm_output += self.label(label_end) + '\n'
 
 
 class Operator(AST):
@@ -525,6 +576,9 @@ class Assign(Binary):
         AST.llvm_output += output
 
 
+# Variable to indicate that these classes need a bool for branching instead of original value
+BoolClasses = (If, For, While)
+
 # Use these imports to make these classes appear here
 from src.Node.Variable import *
 from src.Node.Unary import *
@@ -532,4 +586,5 @@ from src.Node.Compare import *
 from src.Node.constant import *
 from src.Node.Operate import *
 from src.Node.Comments import *
+from src.Node.ReservedType import *
 from src.customListener import customListener
