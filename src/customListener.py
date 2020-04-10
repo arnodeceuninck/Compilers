@@ -3,7 +3,7 @@ from gen.cParser import cParser
 from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
-    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod
+    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -98,6 +98,22 @@ class customListener(ParseTreeListener):
     def exitIf_statement(self, ctx: cParser.If_statementContext):
         self.simplify(2)
         pass
+
+    # Enter a parse tree produced by cParser#else_statement.
+    def enterElse_statement(self, ctx: cParser.Else_statementContext):
+        pass
+
+    # Exit a parse tree produced by cParser#else_statement.
+    def exitElse_statement(self, ctx: cParser.Else_statementContext):
+        pass
+
+    # Enter a parse tree produced by cParser#while_statement.
+    def enterWhile_statement(self, ctx: cParser.While_statementContext):
+        self.add(While())
+
+    # Exit a parse tree produced by cParser#while_statement.
+    def exitWhile_statement(self, ctx: cParser.While_statementContext):
+        self.simplify(2)
 
     # Enter a parse tree produced by cParser#for_statement.
     def enterFor_statement(self, ctx: cParser.For_statementContext):

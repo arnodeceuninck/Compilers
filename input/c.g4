@@ -2,13 +2,17 @@ grammar c;
 
 start_rule: operation_sequence;
 
-operation_sequence: (operation ';' |  if_statement | for_statement | unnamed_scope)*;
+operation_sequence: (operation ';' |  if_statement | for_statement | while_statement | unnamed_scope)*;
 
 unnamed_scope: '{' operation_sequence '}';
 
 operation: (assignment | operation_logic_or | print_statement);
 
-if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}' ('else' '{' operation_sequence '}')?;
+if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}' (else_statement)?;
+
+else_statement: 'else' '{' operation_sequence '}';
+
+while_statement: 'while' '(' condition=operation_logic_or ')' '{' operation_sequence '}';
 
 for_statement: 'for' '(' initialization=operation ';' condition=operation ';' step=operation ')' '{' operation_sequence '}';
 

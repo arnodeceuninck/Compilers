@@ -438,6 +438,16 @@ class For(AST):
         AST.llvm_output += self.comments()
 
 
+class While(AST):
+    def __init__(self):
+        AST.__init__(self, "while")
+
+    def comments(self, comment_out=True):
+        comment = "while " + self[0].comments()  # only add comments for the condition, the comments for the statement
+        # sequence will be added when visiting their code
+        return self.comment_out(comment, comment_out)
+
+
 class Operator(AST):
     def __init__(self, value=""):
         AST.__init__(self, value, "#87f5ff")
