@@ -472,31 +472,37 @@ class While(AST):
         return self.comment_out(comment, comment_out)
 
     def llvm_code(self):
-        return
         AST.llvm_output += self.comments()
+
+        # Make while loop label unique
+        label_while = "while" + str(self.id())
+        # Make while loop label unique for just after the
+        label_after_check = "afterCheck" + str(self.id())
+        # Create the label
+        AST.llvm_output += self.label(label_while) + "\n"
 
         condition = self.children[0]
         condition.llvm_code()
 
-        # Make for loop label unique
-        label_true = "while" + str(self.id())
-        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
-        code = code.format(type="i1",
-                           var=condition.variable(),
-                           label_true=label_true,
-                           label_false="")
-        AST.llvm_output += code
-
         # Make a unique label for the end
         label_end = "end" + str(self.id())
-        statement_sequence = self.children[1]
-        AST.llvm_output += self.label(label_true) + "\n"
-        statement_sequence.llvm_code()
-        self.goto(label_end)
+        # Check if we can go further with the loop
+        code = "br {type} {var}, label %{label_while}, label %{label_end}\n"
+        code = code.format(type="i1",
+                           var=condition.variable(),
+                           label_while=label_after_check,
+                           label_end=label_end)
+        AST.llvm_output += code
+        # Label necessary after the check
+        AST.llvm_output += self.label(label_after_check) + "\n"
 
-        AST.llvm_output += self.label(label_false) + "\n"
-        self.goto(label_end)
-        AST.llvm_output += self.label(label_end) + '\n'
+        statement_sequence = self.children[1]
+
+        statement_sequence.llvm_code()
+        # Loop back to the beginning
+        self.goto(label_while)
+        # Make the end of the loop
+        AST.llvm_output += self.label(label_end) + "\n"
 
 
 class Operator(AST):

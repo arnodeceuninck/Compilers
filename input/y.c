@@ -1,5 +1,5 @@
-int x = 1;
-for (int y = 0; x<2; y = y + 1){
-printf(x);
-x = x + 1;
+int i = 0;
+while (i < 5){
+    i = i + 1;
+	printf(i);
 }
