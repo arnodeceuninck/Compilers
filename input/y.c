@@ -1,4 +1,4 @@
 int x = 1;
-if (x) {
+if (1) {
 printf(x);
 }

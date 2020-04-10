@@ -15,6 +15,7 @@ def has_children(ctx: ParserRuleContext):
 class customListener(ParseTreeListener):
     def __init__(self):
         self.trees = []  # A stack containing all subtrees
+        self.scope_count = 0  # The current scope we are finding ourselves in
 
     # Add an AST with given node to the stack
     def add(self, ast: AST):
@@ -49,18 +50,44 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#operation_sequence.
     def enterOperation_sequence(self, ctx: cParser.Operation_sequenceContext):
-        self.add(StatementSequence())
+        self.scope_count += 1
+        self.add(StatementSequence(self.scope_count))
 
     # Exit a parse tree produced by cParser#operation_sequence.
     def exitOperation_sequence(self, ctx: cParser.Operation_sequenceContext):
         # Find the number of children
         children = 0
         tree = self.trees[len(self.trees) - 1]
-        while not isinstance(tree, StatementSequence):
+        # When we exit the operation sequence we need to find the right tree to fold to,
+        # which should be the same as the scope count of a tree that is the same as the one of
+        # the custom listener
+        while isinstance(tree, StatementSequence):
+            # If the scope count is the same
+            if tree.scope_count == self.scope_count:
+                break
             children += 1
             tree = self.trees[len(self.trees) - 1 - children]
 
+        while not isinstance(tree, StatementSequence):
+            children += 1
+            tree = self.trees[len(self.trees) - 1 - children]
+            # Check if the matched scope of the item is met
+            while isinstance(tree, StatementSequence):
+                if tree.scope_count == self.scope_count:
+                    break
+                children += 1
+                tree = self.trees[len(self.trees) - 1 - children]
+
         self.simplify(children)
+        self.scope_count -= 1
+
+    # Enter a parse tree produced by cParser#unnamed_scope.
+    def enterUnnamed_scope(self, ctx: cParser.Unnamed_scopeContext):
+        pass
+
+    # Exit a parse tree produced by cParser#unnamed_scope.
+    def exitUnnamed_scope(self, ctx: cParser.Unnamed_scopeContext):
+        pass
 
     # Enter a parse tree produced by cParser#if_statement.
     def enterIf_statement(self, ctx: cParser.If_statementContext):
@@ -188,8 +215,8 @@ class customListener(ParseTreeListener):
         elif ctx.FLOAT_ID():
             self.add(CFloat(ctx.FLOAT_ID().getText()))
         elif ctx.CHAR_ID():
-            character = ctx.CHAR_ID().getText() # e.g. 'a'
-            character = character[1:-1] # e.g. a
+            character = ctx.CHAR_ID().getText()  # e.g. 'a'
+            character = character[1:-1]  # e.g. a
             self.add(CChar(character))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.VAR_NAME().getText()))

@@ -366,8 +366,9 @@ def dot(ast: AST, filename: str):
 
 # A sequence of statements
 class StatementSequence(AST):
-    def __init__(self):
+    def __init__(self, scope_count):
         AST.__init__(self, "Statement Sequence")
+        self.scope_count = scope_count
 
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)

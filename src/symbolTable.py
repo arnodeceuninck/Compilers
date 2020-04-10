@@ -9,6 +9,7 @@ class SymbolTableElement:
 class SymbolTable:
     def __init__(self):
         self.elements = dict()
+        self.parent = None  # The next symbol table to use
 
     # Overloads the [] operator
     def __getitem__(self, location) -> SymbolTableElement:

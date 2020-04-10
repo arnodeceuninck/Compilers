@@ -2,7 +2,9 @@ grammar c;
 
 start_rule: operation_sequence;
 
-operation_sequence: (operation ';' |  if_statement | for_statement)*;
+operation_sequence: (operation ';' |  if_statement | for_statement | unnamed_scope)*;
+
+unnamed_scope: '{' operation_sequence '}';
 
 operation: (assignment | operation_logic_or | print_statement);
 
