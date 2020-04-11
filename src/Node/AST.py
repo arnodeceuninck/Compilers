@@ -32,7 +32,6 @@ def assignment(ast):
 
 # Converts all variables into the right type.
 # e.g. int x = y, y will be a variable from the listener, but must be the right type
-# (correct me if I'm wrong)
 def convertVar(ast):
     if not isinstance(ast, Variable):
         return
@@ -441,7 +440,7 @@ class For(AST):
         initialize.llvm_code()
 
         # Make for loop label unique
-        label_for = "for" + str(self.id())
+        label_for = "loop" + str(self.id())
         # This is to avoid a bug in llvm, just dont delete!
         self.goto(label_for)
 
@@ -491,7 +490,7 @@ class While(AST):
         AST.llvm_output += self.comments()
 
         # Make while loop label unique
-        label_while = "while" + str(self.id())
+        label_while = "loop" + str(self.id())
         # This is to avoid a bug in llvm, just dont delete!
         self.goto(label_while)
 

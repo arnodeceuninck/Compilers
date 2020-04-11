@@ -1,4 +1,4 @@
-from src.Node.AST import AST
+from src.Node.AST import AST, For, While
 
 
 class Break(AST):
@@ -16,7 +16,16 @@ class Break(AST):
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
-        pass
+
+        # The loop in which the user situates itself
+        loop = self
+        # Get the loop in which the break situates itself, it can be situated in an if statement
+        while not isinstance(loop, (While, For)):
+            loop = loop.parent
+
+        # Handle the break
+        end_label = "end" + str(loop.id())
+        loop.goto(end_label)
 
 
 class Continue(AST):
@@ -35,4 +44,13 @@ class Continue(AST):
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
-        pass
+
+        # The loop in which the user situates itself
+        loop = self
+        # Get the loop in which the break situates itself, it can be situated in an if statement
+        while not isinstance(loop, (While, For)):
+            loop = loop.parent
+
+        # Handle the continue
+        loop_label = "loop" + str(loop.id())
+        loop.goto(loop_label)
