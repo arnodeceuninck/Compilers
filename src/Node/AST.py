@@ -24,7 +24,6 @@ def assignment(ast):
 
     # Last minute fix before the evaluation
     # (already forgot what it does)
-    # It
     if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent, (Assign, Print, If, Unary, Binary)):
         location = ast.value
         type = ast
@@ -184,7 +183,7 @@ class AST:
     def __getitem__(self, item: int):  # -> AST
         return self.children[item]
 
-    # Preorder traverse with a given funciton
+    # Pre-order traverse with a given function
     def traverse(self, func):
         func(self)
         for child in self.children:
@@ -367,7 +366,7 @@ class StatementSequence(AST):
     def __init__(self, scope_count):
         AST.__init__(self, "Statement Sequence")
         self.scope_count = scope_count
-        self.symbol_table = SymbolTable()  # An empty symbol table
+        self.temp_symbol_table = SymbolTable()  # An empty symbol table
 
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)
@@ -476,6 +475,9 @@ class While(AST):
 
         # Make while loop label unique
         label_while = "while" + str(self.id())
+        # This is to avoid a bug in llvm, just dont delete!
+        self.goto(label_while)
+
         # Make while loop label unique for just after the
         label_after_check = "afterCheck" + str(self.id())
         # Create the label
