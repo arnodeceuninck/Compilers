@@ -12,7 +12,7 @@ class Break(AST):
         return None  # Has no type
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; break"
+        return "; break\n"
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
@@ -40,7 +40,7 @@ class Continue(AST):
         return None  # Has no type
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; break"
+        return "; continue\n"
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
