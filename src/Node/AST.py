@@ -314,7 +314,7 @@ class AST:
         if isinstance(self, Variable):
             if store:
                 return "@" + self.value
-            var = "%t" + str(self.get_unique_id())
+            var = "%.t" + str(self.get_unique_id())
             self.llvm_load(var)  # Loads the variable in storage into the variable var
             return var
         elif isinstance(self, UDeref) and store:
@@ -322,12 +322,12 @@ class AST:
 
         var = self.id()
 
-        return "%v" + str(var)
+        return "%.v" + str(var)
 
     # Get a unique temp variable
     @staticmethod
     def get_temp():
-        return "%t" + str(AST.get_unique_id())
+        return "%.t" + str(AST.get_unique_id())
 
     # Jump to a given label
     @staticmethod
