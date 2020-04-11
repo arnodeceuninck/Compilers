@@ -142,9 +142,9 @@ def to_LLVM(ast, filename):
 
     # If we need to print then create the print function
     if AST.print:
-        print = "@.strc = private unnamed_addr constant [4 x i8] c\"%c\\0A\\00\", align 1\n"
-        print += "@.strd = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
-        print += "@.strf = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\", align 1\n"
+        print = "@.strc = private unnamed_addr constant [3 x i8] c\"%c\\00\", align 1\n"
+        print += "@.strd = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n"
+        print += "@.strf = private unnamed_addr constant [3 x i8] c\"%f\\00\", align 1\n"
         print += "declare i32 @printf(i8*, ...)\n"
         AST.llvm_output += print
 
@@ -434,30 +434,47 @@ class For(AST):
         return self.comment_out(comment, comment_out)
 
     def llvm_code(self):
-        return
-        AST.llvm_output += self.id()
+        AST.llvm_output += self.comments()
 
-        condition = self.children[0]
-        condition.llvm_code()
+        # Initialize the for loop
+        initialize = self.children[0]
+        initialize.llvm_code()
 
         # Make for loop label unique
-        label_true = "for" + str(self.get_unique_id())
-        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
-        code = code.format(type="i1",
-                           var=condition.variable(),
-                           label_true=label_true,
-                           label_false="")
-        AST.llvm_output += code
+        label_for = "for" + str(self.id())
+        # This is to avoid a bug in llvm, just dont delete!
+        self.goto(label_for)
+
+        # Make while loop label unique for just after the condition
+        label_after_check = "afterCheck" + str(self.id())
+        # Create the label
+        AST.llvm_output += self.label(label_for) + "\n"
+
+        condition = self.children[1]
+        condition.llvm_code()
 
         # Make a unique label for the end
         label_end = "end" + str(self.id())
-        statement_sequence = self.children[1]
-        AST.llvm_output += self.label(label_true) + "\n"
-        statement_sequence.llvm_code()
-        self.goto(label_end)
+        # Check if we can go further with the loop
+        code = "br {type} {var}, label %{label_while}, label %{label_end}\n"
+        code = code.format(type="i1",
+                           var=condition.variable(),
+                           label_while=label_after_check,
+                           label_end=label_end)
+        AST.llvm_output += code
+        # Label necessary after the check
+        AST.llvm_output += self.label(label_after_check) + "\n"
 
-        AST.llvm_output += self.label(label_false) + "\n"
-        self.goto(label_end)
+        statement_sequence = self.children[3]
+        statement_sequence.llvm_code()
+
+        # Calculate the next step
+        iterate = self.children[2]
+        iterate.llvm_code()
+
+        # Loop back to the beginning
+        self.goto(label_for)
+        # Make the end of the loop
         AST.llvm_output += self.label(label_end) + "\n"
 
 
@@ -478,7 +495,7 @@ class While(AST):
         # This is to avoid a bug in llvm, just dont delete!
         self.goto(label_while)
 
-        # Make while loop label unique for just after the
+        # Make while loop label unique for just after the check condition
         label_after_check = "afterCheck" + str(self.id())
         # Create the label
         AST.llvm_output += self.label(label_while) + "\n"
