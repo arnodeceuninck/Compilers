@@ -2,13 +2,15 @@
 
 int main(){
     int i = 0;
-    while(i < 10){
+    for(i = 0; i < 10; i++){
 	    printf("%d", i);
 	    if (i == 5){
+	        float y = 0;
 		    break;
+	    } else {
+	        continue;
 	    }
-	    i = i + 1;
-	    continue;
 	    i = 10;
 }
+printf("%d", i);
 }

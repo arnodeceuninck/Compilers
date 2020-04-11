@@ -96,8 +96,16 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#if_statement.
     def exitIf_statement(self, ctx: cParser.If_statementContext):
-        self.simplify(2)
-        pass
+        # Find the number of children, it always will be 2 or 3, because
+        # if we have an if it will be 2, because of the condition and the statement sequence,
+        # If it is an else, there will be 3 children condition, statement sequence and else statement sequence
+        children = 2
+        tree = self.trees[len(self.trees) - 3]
+
+        if not isinstance(tree, If):
+            children = 3
+
+        self.simplify(children)
 
     # Enter a parse tree produced by cParser#else_statement.
     def enterElse_statement(self, ctx: cParser.Else_statementContext):
@@ -117,12 +125,15 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#for_statement.
     def enterFor_statement(self, ctx: cParser.For_statementContext):
-        self.add(For())
+        # It will become a while loop in the end
+        self.add(While())
         pass
 
     # Exit a parse tree produced by cParser#for_statement.
     def exitFor_statement(self, ctx: cParser.For_statementContext):
-        self.simplify(4)
+        # Because we know that a for loop is just a specialized while loop we can converten
+        # The init is dependend on assigning or defining it
+        # If we define it it needs to fall under the scope of the while loop
         pass
 
     # Enter a parse tree produced by cParser#operation.

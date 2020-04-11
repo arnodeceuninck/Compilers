@@ -412,12 +412,16 @@ class If(AST):
 
         # Make a unique label for the end
         label_end = "end" + str(self.id())
-        statement_sequence = self.children[1]
+        if_statement_sequence = self.children[1]
         AST.llvm_output += self.label(label_true) + "\n"
-        statement_sequence.llvm_code()
+        if_statement_sequence.llvm_code()
         self.goto(label_end)
 
         AST.llvm_output += self.label(label_false) + "\n"
+        # If we have 3 children and an else statement, then generate the LLVM code for it
+        if len(self.children) == 3:
+            else_statement_sequence = self.children[2]
+            else_statement_sequence.llvm_code()
         self.goto(label_end)
         AST.llvm_output += self.label(label_end) + '\n'
 
