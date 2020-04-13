@@ -67,7 +67,13 @@ Arno Deceuninck & Basil Rommens
 - [ ] Scopes: function
 - [ ] Local and global variables
 - [ ] Functions
+- [ ] Do not generate code after return statement
+- [ ] Do not generate code after break or continue
 
+#### Optional
+- [ ] Do not generate code for variables that are not used
+- [ ] Do not generate code for conditionals that are always false
+- [ ] Check if all functions end with return
 
 ### 6. Arrays
 #### Mandatory

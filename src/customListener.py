@@ -3,7 +3,8 @@ from gen.cParser import cParser
 from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
-    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue
+    UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
+    has_symbol_table
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -61,18 +62,18 @@ class customListener(ParseTreeListener):
         # When we exit the operation sequence we need to find the right tree to fold to,
         # which should be the same as the scope count of a tree that is the same as the one of
         # the custom listener
-        while isinstance(tree, StatementSequence):
+        while isinstance(tree, has_symbol_table):
             # If the scope count is the same
             if tree.scope_count == self.scope_count:
                 break
             children += 1
             tree = self.trees[len(self.trees) - 1 - children]
 
-        while not isinstance(tree, StatementSequence):
+        while not isinstance(tree, has_symbol_table):
             children += 1
             tree = self.trees[len(self.trees) - 1 - children]
             # Check if the matched scope of the item is met
-            while isinstance(tree, StatementSequence):
+            while isinstance(tree, has_symbol_table):
                 if tree.scope_count == self.scope_count:
                     break
                 children += 1
@@ -125,15 +126,14 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#for_statement.
     def enterFor_statement(self, ctx: cParser.For_statementContext):
-        # It will become a while loop in the end
-        self.add(While())
+        self.scope_count += 1
+        self.add(For(self.scope_count))
         pass
 
     # Exit a parse tree produced by cParser#for_statement.
     def exitFor_statement(self, ctx: cParser.For_statementContext):
-        # Because we know that a for loop is just a specialized while loop we can converten
-        # The init is dependend on assigning or defining it
-        # If we define it it needs to fall under the scope of the while loop
+        self.simplify(4)
+        self.scope_count -= 1
         pass
 
     # Enter a parse tree produced by cParser#operation.

@@ -10,12 +10,12 @@ from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 def connect_symbol_table(ast):
     # If we know that the symbol table is at global level then we do not need to connect it to any table
     # Or if the ast node is not a statement sequence then we do not need to search for a parent
-    if not ast.parent or not isinstance(ast, StatementSequence):
+    if not ast.parent or not isinstance(ast, has_symbol_table):
         return
     # The supposedly statement sequence which we need to connect the current symbol table with
     parent = ast.parent
     # Search the nearest parent which has a statement sequence
-    while not isinstance(parent, StatementSequence):
+    while not isinstance(parent, has_symbol_table):
         parent = parent.parent
 
     # Set the parent of the symbol table to the parent just found
@@ -33,7 +33,7 @@ def assignment(ast):
         parent = ast.parent
         # Insert the variable into the nearest parent ast symbol table that is a statement sequence
         # This is because they define scopes
-        while not isinstance(parent, StatementSequence):
+        while not isinstance(parent, has_symbol_table):
             parent = parent.parent
         # return not required here, but otherwise pycharm thinks the statement is useless
         return parent.symbol_table[ast.value]  # Raises an error if not yet declared
@@ -47,7 +47,7 @@ def assignment(ast):
         parent = ast.parent
         # Insert the variable into the nearest parent ast symbol table that is a statement sequence
         # This is because they define scopes
-        while not isinstance(parent, StatementSequence):
+        while not isinstance(parent, has_symbol_table):
             parent = parent.parent
 
         parent.symbol_table.insert(location, type)
@@ -61,7 +61,7 @@ def assignment(ast):
         parent = ast.parent
         # Insert the variable into the nearest parent ast symbol table that is a statement sequence
         # This is because they define scopes
-        while not isinstance(parent, StatementSequence):
+        while not isinstance(parent, has_symbol_table):
             parent = parent.parent
 
         parent.symbol_table.insert(location, type)
@@ -143,7 +143,7 @@ def make_ast(tree):
     # The two methods of below should be combined in order to make it one pass and apply error checking
     # Create symbol table
     communismForLife.traverse(assignment)  # Symbol table checks
-    # # Apply symbol table to all the variables
+    # Apply symbol table to all the variables
     communismForLife.traverse(convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     return communismForLife
@@ -224,12 +224,12 @@ class AST:
     # Returns the first symbol table it finds on the way to the top
     def get_symbol_table(self):
         # If we find that this node is a statement sequence then return its symboltable
-        if isinstance(self, StatementSequence):
+        if isinstance(self, has_symbol_table):
             return self.symbol_table
         # Otherwise we go to the first parent with that has a symbol_table
         cur_parent = self.parent
         # We go up in the AST searching for the first symbol table
-        while cur_parent and not isinstance(cur_parent, StatementSequence):
+        while cur_parent and not isinstance(cur_parent, has_symbol_table):
             cur_parent = cur_parent.parent
         return cur_parent.symbol_table
 
@@ -490,8 +490,10 @@ class If(AST):
 
 # TODO
 class For(AST):
-    def __init__(self):
+    def __init__(self, scope_count):
         AST.__init__(self, "for")
+        self.scope_count = scope_count
+        self.symbol_table = SymbolTable(self.id())
 
     def comments(self, comment_out=True):
         comment = "for " + self[0].comments()  # only add comments for the condition, the comments for the statement
@@ -658,12 +660,16 @@ class Assign(Binary):
         output = self.comments()
 
         # If the variable is not in the global scope then we need to make a variable
-        if not self.get_symbol_table().is_global(self[0].value):
+        # And check if the corresponding item has already been defined in llvm
+        if not self.get_symbol_table().is_global(self[0].value) and not \
+        self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined:
             create_var = "{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self[0].variable(store=True),
                 llvm_type=self[0].get_llvm_type(),
                 align=self[0].get_align())
             output += create_var
+            # The variable has been defined in llvm, so no more generating hereafter
+            self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined = True
         code = self.get_llvm_template()
         code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True),
                            location=self[0].variable(store=True))
@@ -675,6 +681,7 @@ class Assign(Binary):
 
 # Variable to indicate that these classes need a bool for branching instead of original value
 BoolClasses = (If, For, While)
+has_symbol_table = (StatementSequence, For)
 
 # Use these imports to make these classes appear here
 from src.Node.Variable import *

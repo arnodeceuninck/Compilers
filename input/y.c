@@ -1,8 +1,4 @@
-int y = 1;
 int i = 0;
-if (i == 0){
-    float y = 2.0;
-    printf(y);
+for (int i = 2; i < 3; i = 1 + i) {
+    printf(i);
 }
-printf(y);
-i = 10;

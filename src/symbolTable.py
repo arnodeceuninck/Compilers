@@ -4,6 +4,7 @@ from src.ErrorListener import VariableRedeclarationError, UndeclaredVariableErro
 class SymbolTableElement:
     def __init__(self, type=None):
         self.type = type
+        self.llvm_defined = False
 
 
 class SymbolTable:
@@ -34,6 +35,9 @@ class SymbolTable:
     # Overloads the [] operator
     def __getitem__(self, location) -> SymbolTableElement:
         return self.__get_symbol_table(location).elements[location]
+
+    def get_symbol_table(self, location):
+        return self.__get_symbol_table(location)
 
     # Returns the id of the symbol table where we can find the variable in
     def get_symbol_table_id(self, location) -> int:

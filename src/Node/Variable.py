@@ -7,6 +7,7 @@ class Variable(AST):
         self.ptr = False  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
         self.defined = False
+        self.llvm_defined = False  # If the variable is already defined in llvm code
 
         self.reref = False  # e.g. *a
 
