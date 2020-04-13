@@ -7,16 +7,32 @@ class SymbolTableElement:
 
 
 class SymbolTable:
-    def __init__(self):
+    dot_output = ""
+
+    def __init__(self, id):
         self.elements = dict()
         self.parent = None  # The next symbol table to use
+        self.children = list()  # The children of the symbol table
+        self._id = id  # This is the same as the node in the ast
 
     # Overloads the [] operator
     def __getitem__(self, location) -> SymbolTableElement:
         if location not in self.elements:
+            # If the variable isnt found in the elements then we need to search in the parents
+            cur_parent = self.parent
+            # Check while it still has parents and the location is not found
+            while cur_parent and location not in cur_parent.elements:
+                cur_parent[location]
+                cur_parent = cur_parent.parent
+            # If the location has been found then we return the element otherwise we return an error
+            if location in cur_parent.elements:
+                return cur_parent.elements[location]
             raise UndeclaredVariableError(location)
         else:
             return self.elements[location]
+
+    def id(self):
+        return self._id
 
     def insert(self, location, type):
         if location not in self.elements:
@@ -30,22 +46,48 @@ class SymbolTable:
         if not len(self.elements):
             return ""
         # start the table node
-        table = "\tsubgraph cluster_0 {\n" \
-                "\t\ttbl [\n" \
-                "\t\t\tshape=plaintext\n" \
-                "\t\t\tlabel=<\n" \
-                "\t\t\t\t<table border='0' cellborder='1' cellspacing='0'>\n" \
-                "\t\t\t\t\t<tr><td>location</td><td>type</td></tr>\n"
+        # A table has a unique id
+        table = "\t\ttbl{id} [\n".format(id=self.id())
+        table += "\t\t\tshape=plaintext\n" \
+                 "\t\t\tlabel=<\n" \
+                 "\t\t\t\t<table border='0' cellborder='1' cellspacing='0'>\n"
+        # Create the header of the table so it can match the ast node ids based on eyesight of the user
+        table += "\t\t\t\t\t<tr><td colspan=\"2\"><b>{tableId}</b></td></tr>\n".format(tableId=self.id())
+        table += "\t\t\t\t\t<tr><td>location</td><td>type</td></tr>\n"
         # add all the row elements
         for key in self.elements:
             custom_type = self.elements[key].type
             var_type = "const " if custom_type.const else ""
             var_type += custom_type.get_type()
             var_type += "*" if custom_type.ptr else ""
-            table += "\t\t\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\n".format(key, var_type)
+            table += "\t\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\n".format(key, var_type)
         # finish the table node
         table += "\t\t\t\t</table>\n" \
-                 "\t\t\t>];\n" \
-                 "\t\tlabel = \"Symbol Table\";\n" \
-                 "\t}\n"
+                 "\t\t\t>];\n"
         return table
+
+    def __dot_node(self):
+        # create the symbol table
+        SymbolTable.dot_output += str(self)
+        # The output needs to be the id + The label itself
+        for child in self.children:
+            child.__dot_node()
+
+    def __dot_connections(self):
+        # Make the connections between the parent and the child(ren)
+        for child in self.children:
+            SymbolTable.dot_output += "\t\ttbl" + str(self.id()) + " -> " + "tbl" + str(child.id()) + "\n"
+            child.__dot_connections()
+
+    def to_dot(self):
+        # Being the cluster subgraph
+        SymbolTable.dot_output = "\tsubgraph cluster_0 {\n"
+
+        # Make the dot nodes
+        self.__dot_node()
+        # Make the dot connections between the symbol tables
+        self.__dot_connections()
+
+        # Finish the cluster subgraph
+        SymbolTable.dot_output += "\t\tlabel = \"Symbol Table\";\n" \
+                                  "\t}\n"

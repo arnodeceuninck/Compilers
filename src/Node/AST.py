@@ -7,27 +7,64 @@ from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 
 
-# An error checking functions to check whether all symbols are already in the symbol table (or insert them when declaring)
+def connect_symbol_table(ast):
+    # If we know that the symbol table is at global level then we do not need to connect it to any table
+    # Or if the ast node is not a statement sequence then we do not need to search for a parent
+    if not ast.parent or not isinstance(ast, StatementSequence):
+        return
+    # The supposedly statement sequence which we need to connect the current symbol table with
+    parent = ast.parent
+    # Search the nearest parent which has a statement sequence
+    while not isinstance(parent, StatementSequence):
+        parent = parent.parent
+
+    # Set the parent of the symbol table to the parent just found
+    ast.symbol_table.parent = parent.symbol_table
+    # Add a child to this parent
+    parent.symbol_table.children.append(ast.symbol_table)
+
+
+# An error checking functions to check whether all symbols are already in the symbol table
+# (or insert them when declaring)
 def assignment(ast):
     # Check whether any other symbol is already in the symbol table
-
     if isinstance(ast, Variable) and ast.parent and isinstance(ast.parent, Assign):
+        # The supposedly statement sequence in which we need to put the variable
+        parent = ast.parent
+        # Insert the variable into the nearest parent ast symbol table that is a statement sequence
+        # This is because they define scopes
+        while not isinstance(parent, StatementSequence):
+            parent = parent.parent
         # return not required here, but otherwise pycharm thinks the statement is useless
-        return ast.symbol_table[ast.value]  # Raises an error if not yet declared
+        return parent.symbol_table[ast.value]  # Raises an error if not yet declared
 
     # Add symbol to symbol table
     if ast.value == "=" and ast.declaration:
         # improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]
-        ast.symbol_table.insert(location, type)
+        # The supposedly statement sequence in which we need to put the variable
+        parent = ast.parent
+        # Insert the variable into the nearest parent ast symbol table that is a statement sequence
+        # This is because they define scopes
+        while not isinstance(parent, StatementSequence):
+            parent = parent.parent
+
+        parent.symbol_table.insert(location, type)
 
     # Last minute fix before the evaluation
     # (already forgot what it does)
     if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent, (Assign, Print, If, Unary, Binary)):
         location = ast.value
         type = ast
-        ast.symbol_table.insert(location, type)
+        # The supposedly statement sequence in which we need to put the variable
+        parent = ast.parent
+        # Insert the variable into the nearest parent ast symbol table that is a statement sequence
+        # This is because they define scopes
+        while not isinstance(parent, StatementSequence):
+            parent = parent.parent
+
+        parent.symbol_table.insert(location, type)
 
 
 # Converts all variables into the right type.
@@ -37,7 +74,7 @@ def convertVar(ast):
         return
     if isinstance(ast, Print):
         return
-    element = ast.symbol_table[ast.value].type
+    element = ast.get_symbol_table()[ast.value].type
     # TODO: This should be done from the listener
     type = element.get_type()
     while type[len(type) - 1] == "*":
@@ -101,6 +138,8 @@ def make_ast(tree):
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
     communismForLife = communismRules.trees[0]
+    # Makes a tree of the symbol tables
+    communismForLife.traverse(connect_symbol_table)
     # The two methods of below should be combined in order to make it one pass and apply error checking
     # Create symbol table
     communismForLife.traverse(assignment)  # Symbol table checks
@@ -156,7 +195,7 @@ def to_LLVM(ast, filename):
 class AST:
     _id = 0
     llvm_output = ""
-    symbol_table = SymbolTable()
+    # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable -> found in the statement sequences
     print = False
 
     # Resets the global class variables (must be used with tests)
@@ -181,6 +220,18 @@ class AST:
     # Get the child at index item using self[item]
     def __getitem__(self, item: int):  # -> AST
         return self.children[item]
+
+    # Returns the first symbol table it finds on the way to the top
+    def get_symbol_table(self):
+        # If we find that this node is a statement sequence then return its symboltable
+        if isinstance(self, StatementSequence):
+            return self.symbol_table
+        # Otherwise we go to the first parent with that has a symbol_table
+        cur_parent = self.parent
+        # We go up in the AST searching for the first symbol table
+        while cur_parent and not isinstance(cur_parent, StatementSequence):
+            cur_parent = cur_parent.parent
+        return cur_parent.symbol_table
 
     # Pre-order traverse with a given function
     def traverse(self, func):
@@ -343,8 +394,10 @@ class AST:
 def dot(ast: AST, filename: str):
     output = "Digraph G { \n"
 
-    # Add symbol table
-    output += str(ast.symbol_table)
+    # Add the symbol table tree
+    ast.symbol_table.to_dot()
+    output += SymbolTable.dot_output
+
     output += "subgraph cluster_1 {\n"
     output += "node [style=filled, shape=rectangle, penwidth=2];\n"
 
@@ -365,7 +418,12 @@ class StatementSequence(AST):
     def __init__(self, scope_count):
         AST.__init__(self, "Statement Sequence")
         self.scope_count = scope_count
-        self.temp_symbol_table = SymbolTable()  # An empty symbol table
+        self.symbol_table = SymbolTable(self.id())  # An empty symbol table
+
+    # returns the dot representation of a statement sequence
+    def __str__(self):
+        return '{name}[label="{value} ({id})", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
+                                                                               id=self.id(), color=self.color)
 
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)
