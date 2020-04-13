@@ -363,7 +363,11 @@ class AST:
         # TOdo: move this to their own classes (virtual functions)
         if isinstance(self, Variable):
             if store:
-                return "@" + self.value
+                # We need to check if the variable is a global one or a local one
+                # If the symbol table is global then we need to return a global variable form
+                if self.get_symbol_table().is_global(self.value):
+                    return "@" + self.value
+                return "%" + self.value + "." + str(self.get_symbol_table().get_symbol_table_id(self.value))
             var = "%.t" + str(self.get_unique_id())
             self.llvm_load(var)  # Loads the variable in storage into the variable var
             return var
@@ -653,6 +657,13 @@ class Assign(Binary):
 
         output = self.comments()
 
+        # If the variable is not in the global scope then we need to make a variable
+        if not self.get_symbol_table().is_global(self[0].value):
+            create_var = "{variable} = alloca {llvm_type}, align {align}\n".format(
+                variable=self[0].variable(store=True),
+                llvm_type=self[0].get_llvm_type(),
+                align=self[0].get_align())
+            output += create_var
         code = self.get_llvm_template()
         code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True),
                            location=self[0].variable(store=True))

@@ -1,16 +1,12 @@
 #include <stdio.h>
 
 int main(){
+    int y = 0;
     int i = 0;
-    for(i = 0; i < 10; i++){
-	    printf("%d", i);
-	    if (i == 5){
-	        float y = 0;
-		    break;
-	    } else {
-	        continue;
+	    if (i == 0){
+	        float y = 2.0;
+	        printf("%f\n", y);
 	    }
+	    printf("%d", y);
 	    i = 10;
-}
-printf("%d", i);
 }

@@ -15,8 +15,8 @@ class SymbolTable:
         self.children = list()  # The children of the symbol table
         self._id = id  # This is the same as the node in the ast
 
-    # Overloads the [] operator
-    def __getitem__(self, location) -> SymbolTableElement:
+    # Returns the symbol table that contains the specific variable
+    def __get_symbol_table(self, location):
         if location not in self.elements:
             # If the variable isnt found in the elements then we need to search in the parents
             cur_parent = self.parent
@@ -26,10 +26,22 @@ class SymbolTable:
                 cur_parent = cur_parent.parent
             # If the location has been found then we return the element otherwise we return an error
             if location in cur_parent.elements:
-                return cur_parent.elements[location]
+                return cur_parent
             raise UndeclaredVariableError(location)
-        else:
-            return self.elements[location]
+        else:  # These variables are global variables and do not need to be changed in return value
+            return self
+
+    # Overloads the [] operator
+    def __getitem__(self, location) -> SymbolTableElement:
+        return self.__get_symbol_table(location).elements[location]
+
+    # Returns the id of the symbol table where we can find the variable in
+    def get_symbol_table_id(self, location) -> int:
+        return self.__get_symbol_table(location).id()
+
+    # Check if the variable is global
+    def is_global(self, location):
+        return self.__get_symbol_table(location).parent is None
 
     def id(self):
         return self._id
