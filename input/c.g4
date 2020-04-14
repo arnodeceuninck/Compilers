@@ -50,7 +50,9 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation ')'
-                  | (BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+                  | (return_op | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+
+return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
 
 DOUBLE_PLUS: '++';
 DOUBLE_MIN: '--';
@@ -76,9 +78,11 @@ ASSIGN: '=';
 INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';
+VOID_TYPE: 'void';
 CONST: 'const';
 BREAK: 'break';
 CONTINUE: 'continue';
+RETURN: 'return';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;

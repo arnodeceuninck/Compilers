@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+void func() {
+    return;
+}
+
 int main(){
     int y = 0;
     int i = 0;
@@ -9,4 +13,5 @@ int main(){
 	    }
 	    printf("%d", y);
 	    i = 10;
+	func();
 }

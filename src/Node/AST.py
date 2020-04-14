@@ -54,7 +54,8 @@ def assignment(ast):
 
     # Last minute fix before the evaluation
     # (already forgot what it does)
-    if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent, (Assign, Print, If, Unary, Binary)):
+    if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent,
+                                                                   (Assign, Print, If, Unary, Binary, Return)):
         location = ast.value
         type = ast
         # The supposedly statement sequence in which we need to put the variable
@@ -662,7 +663,7 @@ class Assign(Binary):
         # If the variable is not in the global scope then we need to make a variable
         # And check if the corresponding item has already been defined in llvm
         if not self.get_symbol_table().is_global(self[0].value) and not \
-        self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined:
+                self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined:
             create_var = "{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self[0].variable(store=True),
                 llvm_type=self[0].get_llvm_type(),

@@ -4,7 +4,7 @@ from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
     UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
-    has_symbol_table
+    has_symbol_table, Return
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -346,3 +346,25 @@ class customListener(ParseTreeListener):
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
         # Handling operation of orders with brackets is already assured by the grammar
+        pass
+
+    # Enter a parse tree produced by cParser#return_op.
+    def enterReturn_op(self, ctx: cParser.Return_opContext):
+        self.add(Return())
+        if has_children(ctx):
+            if ctx.INT_ID():
+                self.add(CInt(ctx.getText()[6:]))
+            elif ctx.FLOAT_ID():
+                self.add(CFloat(ctx.getText()[6:]))
+            elif ctx.CHAR_ID():
+                character = ctx.CHAR_ID().getText()  # e.g. 'a'
+                character = character[1:-1]  # e.g. a
+                self.add(CChar(character))
+            elif ctx.VAR_NAME():
+                self.add(Variable(ctx.getText()[6:]))
+            # make it a child of the current return value
+            self.simplify(1)
+
+    # Exit a parse tree produced by cParser#return_op.
+    def exitReturn_op(self, ctx: cParser.Return_opContext):
+        pass
