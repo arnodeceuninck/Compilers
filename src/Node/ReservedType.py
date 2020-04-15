@@ -3,7 +3,7 @@ from src.Node.AST import AST, For, While
 
 class Break(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#87f5ff")
+        AST.__init__(self, value, "#46ff8a")
 
     def __str__(self):
         return '{name}[label="Reserved Word: break", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
@@ -30,7 +30,7 @@ class Break(AST):
 
 class Continue(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#87f5ff")
+        AST.__init__(self, value, "#46ff8a")
 
     def __str__(self):
         return '{name}[label="Reserved Word: Continue", fillcolor="{color}"] \n'.format(name=self.id(),
@@ -58,7 +58,7 @@ class Continue(AST):
 
 class Return(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#87f5ff")
+        AST.__init__(self, value, "#46ff8a")
 
     def __str__(self):
         return '{name}[label="Reserved Word: return", fillcolor="{color}"] \n'.format(name=self.id(),
@@ -90,3 +90,24 @@ class Return(AST):
 
         # The loop in which the user situates itself
         AST.llvm_output = "ret " + self.value
+
+
+class Void(AST):
+    def __init__(self, value=""):
+        AST.__init__(self, value, "#46ff8a")
+
+    def __str__(self):
+        return '{name}[label="Reserved Word: void", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                    color=self.color)
+
+    def get_type(self):
+        return "void"
+
+    def get_llvm_template(self):
+        return "void"
+
+    def comments(self, comment_out: bool = True) -> str:
+        return "; void\n"
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()

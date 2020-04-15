@@ -1,3 +1,6 @@
-int i = 0;
-i = 0;
-return 0;
+int main();
+
+int main(int i, const int* y){
+    main();
+    int i = 0;
+}

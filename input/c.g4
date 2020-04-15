@@ -2,7 +2,19 @@ grammar c;
 
 start_rule: operation_sequence;
 
-operation_sequence: (operation ';' |  if_statement | for_statement | while_statement | unnamed_scope)*;
+operation_sequence: (operation ';' | function |  if_statement | for_statement | while_statement | unnamed_scope)*;
+
+function: function_declaration ';' | function_definition;
+
+function_definition: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argument_list ')' '{' operation_sequence '}';
+
+function_declaration: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argument_list ')';
+
+function_use: VAR_NAME '(' (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)?(',' VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)* ')';
+
+argument_list: (argument)?(',' argument)*;
+
+argument: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)?) VAR_NAME;
 
 unnamed_scope: '{' operation_sequence '}';
 
@@ -49,8 +61,8 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | '&' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
-operation_brackets: '(' operation ')'
-                  | (return_op | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+operation_brackets: '(' operation_logic_or ')'
+                  | (return_op | function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
 return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
 

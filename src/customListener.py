@@ -4,7 +4,7 @@ from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
     UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
-    has_symbol_table, Return
+    has_symbol_table, Return, Function, Arguments
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -362,9 +362,107 @@ class customListener(ParseTreeListener):
                 self.add(CChar(character))
             elif ctx.VAR_NAME():
                 self.add(Variable(ctx.getText()[6:]))
-            # make it a child of the current return value
-            self.simplify(1)
 
     # Exit a parse tree produced by cParser#return_op.
     def exitReturn_op(self, ctx: cParser.Return_opContext):
+        # TODO: Fix that this also works with variables and such in place...
+        if has_children(ctx):
+            # make it a child of the current return value
+            self.simplify(1)
+        pass
+
+    # Enter a parse tree produced by cParser#function.
+    def enterFunction(self, ctx: cParser.FunctionContext):
+        pass
+
+    # Exit a parse tree produced by cParser#function.
+    def exitFunction(self, ctx: cParser.FunctionContext):
+        pass
+
+    # Enter a parse tree produced by cParser#function_definition.
+    def enterFunction_definition(self, ctx: cParser.Function_definitionContext):
+        self.add(Function(value=ctx.children[1], return_type=ctx.children[0], function_type="definition"))
+        pass
+
+    # Exit a parse tree produced by cParser#function_definition.
+    def exitFunction_definition(self, ctx: cParser.Function_definitionContext):
+        self.simplify(2)
+        pass
+
+    # Enter a parse tree produced by cParser#function_declaration.
+    def enterFunction_declaration(self, ctx: cParser.Function_declarationContext):
+        self.add(Function(value=ctx.children[1], return_type=ctx.children[0], function_type="declaration"))
+        pass
+
+    # Exit a parse tree produced by cParser#function_declaration.
+    def exitFunction_declaration(self, ctx: cParser.Function_declarationContext):
+        self.simplify(1)
+        pass
+
+    # Enter a parse tree produced by cParser#function_use.
+    def enterFunction_use(self, ctx: cParser.Function_useContext):
+        # TODO: update the return type of this function, needs to be searched
+        self.add(Function(value=ctx.children[0], function_type="use"))
+        pass
+
+    # Exit a parse tree produced by cParser#function_use.
+    def exitFunction_use(self, ctx: cParser.Function_useContext):
+        self.simplify(1)
+        pass
+
+    # Enter a parse tree produced by cParser#argument_list.
+    def enterArgument_list(self, ctx: cParser.Argument_listContext):
+        print("enter argument list")
+        self.add(Arguments())
+        pass
+
+    # Exit a parse tree produced by cParser#argument_list.
+    def exitArgument_list(self, ctx: cParser.Argument_listContext):
+        # Find the number of children
+        children = 0
+        tree = self.trees[len(self.trees) - 1]
+        while not isinstance(tree, Arguments):
+            children += 1
+            tree = self.trees[len(self.trees) - 1 - children]
+
+        self.simplify(children)
+        pass
+
+    # Enter a parse tree produced by cParser#argument.
+    def enterArgument(self, ctx: cParser.ArgumentContext):
+        value = ""
+        ptr = False
+        const = False
+        node = None
+        for child in ctx.getChildren():
+            # Try to find the type of the variable
+            if child.getText() == str(ctx.INT_TYPE()):
+                node = VInt()
+            elif child.getText() == str(ctx.FLOAT_TYPE()):
+                node = VFloat()
+
+            elif child.getText() == str(ctx.CHAR_TYPE()):
+                node = VChar()
+            # Check whether it's a pointer
+            elif child.getText() == "*":
+                ptr = True
+
+            # Check whether it's a const variable
+            elif child.getText() == str(ctx.CONST()):
+                const = True
+
+            elif ctx.VAR_NAME():
+                # Get the name of variable
+                value = child.getText()
+                if ctx.getChildCount() == 1:
+                    # Case: assignment (no declaration)
+                    node = Variable()
+
+        node.value = value
+        node.const = const
+        node.ptr = ptr
+        self.add(node)
+
+    # Exit a parse tree produced by cParser#argument.
+    def exitArgument(self, ctx: cParser.ArgumentContext):
         pass

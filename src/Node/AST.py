@@ -12,12 +12,23 @@ def connect_symbol_table(ast):
     # Or if the ast node is not a statement sequence then we do not need to search for a parent
     if not ast.parent or not isinstance(ast, has_symbol_table):
         return
+    # Checks wheter the ast is a function, if it is then we need to check if it defines a function
+    # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
+    if isinstance(ast, Function):
+        if ast.function_type == "declaration" or ast.function_type == "use":
+            return
+
     # The supposedly statement sequence which we need to connect the current symbol table with
     parent = ast.parent
     # Search the nearest parent which has a statement sequence
     while not isinstance(parent, has_symbol_table):
         parent = parent.parent
 
+    # Checks wheter the parent is a function, if it is then we need to check if it defines a function
+    # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
+    if isinstance(parent, Function):
+        if parent.function_type == "declaration" or parent.function_type == "use":
+            return
     # Set the parent of the symbol table to the parent just found
     ast.symbol_table.parent = parent.symbol_table
     # Add a child to this parent
@@ -35,6 +46,9 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
+        # Check if the parent is a function, if it is then check if it conflicts with one of the passed variables
+        if isinstance(parent.parent, Function):
+            pass
         # return not required here, but otherwise pycharm thinks the statement is useless
         return parent.symbol_table[ast.value]  # Raises an error if not yet declared
 
@@ -680,9 +694,79 @@ class Assign(Binary):
         AST.llvm_output += output
 
 
+class Function(AST):
+    def __init__(self, value="", return_type="void", function_type="use"):
+        AST.__init__(self, value, "#ff6486")
+        self.return_type = return_type  # The type the return value must be
+        self.function_type = function_type  # The use of the function, declaration/definition/using a function
+        self.scope_count = 0  # Scope count does nothing
+        self.symbol_table = SymbolTable(self.id())  # Function does have its own symbol table
+
+    def __str__(self):
+        return '{name}[label="Function ({id}): {type}: {return_type} {func_name}", fillcolor="{color}"] \n'.format(
+            name=self.id(),
+            id=self.id(),
+            type=self.function_type,
+            return_type=self.return_type,
+            func_name=self.value,
+            color=self.color)
+
+    def get_type(self):
+        return self.return_type
+
+    def comments(self, comment_out: bool = True) -> str:
+        # Add the arguments for a function in a string
+        function_arguments = ""
+        for child in self.children[0]:
+            if len(function_arguments):
+                # Add a separator to the arguments, because there was a previous argument
+                function_arguments += ", "
+            # Add the type of the variable
+            function_arguments += child.get_type()
+            # Add space between the type and the arguments variable name
+            function_arguments += " "
+            # Add the value of the child
+            function_arguments += child.value
+
+        return "; {function_name}({function_arguments})\n".format(function_name=self.value,
+                                                                  function_arguments=function_arguments)
+
+    def get_llvm_template(self):
+        return ""
+
+    # The llvm code needs to be generated a special way and not in the main function
+    # TODO: Duplicate functions are possible so naming scheme needs to change
+    # TODO: Functions declarations/use need to point to the definition in order to call the correct function
+    # TODO: Forward declaring
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
+
+
+class Arguments(AST):
+    def __init__(self, value=""):
+        AST.__init__(self, value, "#ff6486")
+
+    def __str__(self):
+        return '{name}[label="Argument List", fillcolor="{color}"] \n'.format(
+            name=self.id(),
+            color=self.color)
+
+    def get_type(self):
+        return None
+
+    def comments(self, comment_out: bool = True) -> str:
+        return ""
+
+    def get_llvm_template(self):
+        return ""
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
+
+
 # Variable to indicate that these classes need a bool for branching instead of original value
 BoolClasses = (If, For, While)
-has_symbol_table = (StatementSequence, For)
+has_symbol_table = (StatementSequence, For, Function)
 
 # Use these imports to make these classes appear here
 from src.Node.Variable import *
