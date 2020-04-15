@@ -1,9 +1,18 @@
 from src.Node.AST import AST, For, While
 
 
-class Break(AST):
+class ReservedType(AST):
     def __init__(self, value=""):
         AST.__init__(self, value, "#46ff8a")
+
+    def __str__(self):
+        return '{name}[label="Reserved Word: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
+                                                                                       color=self.color)
+
+
+class Break(ReservedType):
+    def __init__(self, value=""):
+        ReservedType.__init__(self, "break")
 
     def __str__(self):
         return '{name}[label="Reserved Word: break", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
@@ -28,13 +37,9 @@ class Break(AST):
         loop.goto(end_label)
 
 
-class Continue(AST):
+class Continue(ReservedType):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#46ff8a")
-
-    def __str__(self):
-        return '{name}[label="Reserved Word: Continue", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                        color=self.color)
+        ReservedType.__init__(self, "continue")
 
     def get_type(self):
         return None  # Has no type
@@ -56,13 +61,9 @@ class Continue(AST):
         loop.goto(loop_label)
 
 
-class Return(AST):
+class Return(ReservedType):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#46ff8a")
-
-    def __str__(self):
-        return '{name}[label="Reserved Word: return", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                      color=self.color)
+        ReservedType.__init__(self, "return")
 
     def get_type(self):
         # If the return has a child then we return the type of that child else we return a void type
@@ -92,13 +93,9 @@ class Return(AST):
         AST.llvm_output = "ret " + self.value
 
 
-class Void(AST):
+class Void(ReservedType):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#46ff8a")
-
-    def __str__(self):
-        return '{name}[label="Reserved Word: void", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                    color=self.color)
+        ReservedType.__init__(self, "void")
 
     def get_type(self):
         return "void"
