@@ -26,7 +26,7 @@ class SymbolTable:
                 cur_parent[location]
                 cur_parent = cur_parent.parent
             # If the location has been found then we return the element otherwise we return an error
-            if location in cur_parent.elements:
+            if cur_parent and location in cur_parent.elements:
                 return cur_parent
             raise UndeclaredVariableError(location)
         else:  # These variables are global variables and do not need to be changed in return value
