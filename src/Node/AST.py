@@ -37,6 +37,13 @@ class AST:
     def __getitem__(self, item: int):  # -> AST
         return self.children[item]
 
+    def optimize(self):
+        # Using a function inside the class and not the traverse function because this might delete objects
+        #  and deleting inside the element were traversing over is often not the best idea
+        # Iterating over i to prevent working with copies
+        for i in range(len(self.children)):
+            self.children[i].optimize()
+
     # Returns the first symbol table it finds on the way to the top
     def get_symbol_table(self):
         # If we find that this node is a statement sequence then return its symboltable
@@ -257,6 +264,17 @@ class StatementSequence(AST):
         for child in self.children:
             child.llvm_code()
         AST.llvm_output += '\n'
+
+    def optimize(self):
+        # Iterating over i to prevent working with copies
+        i = 0
+        # Using a while loop because in range doesn't update every iteration
+        while i < len(self.children):
+            if isinstance(self[i], Return):
+                # Remove all code after a return
+                self.children = self.children[:len(self.children)-i]
+            self[i].optimize()
+            i += 1
 
 
 class If(AST):
@@ -541,6 +559,8 @@ class Function(AST):
     # TODO: Forward declaring
     def llvm_code(self):
         AST.llvm_output += self.comments()
+        for child in self.children:
+            child.llvm_code()
 
 
 class Arguments(AST):

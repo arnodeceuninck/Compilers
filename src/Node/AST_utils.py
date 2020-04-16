@@ -152,7 +152,7 @@ def compile(input_file: str, catch_error=True):
 
 
 # Convert an antlr tree into our own AST
-def make_ast(tree):
+def make_ast(tree, optimize: bool = True):
     communismRules = customListener()
     walker = ParseTreeWalker()
     walker.walk(communismRules, tree)
@@ -165,6 +165,8 @@ def make_ast(tree):
     # Apply symbol table to all the variables
     communismForLife.traverse(convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+    if optimize:
+        communismForLife.optimize()
     return communismForLife
 
 
