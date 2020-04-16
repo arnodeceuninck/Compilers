@@ -191,13 +191,15 @@ def to_LLVM(ast, filename):
         LLVM_align += " {}".format(symbol_table[var].type.get_align())
         AST.llvm_output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
     AST.llvm_output += "\n"
-    AST.llvm_output += "define i32 @main() {\n\n"
+    if not AST.contains_function:
+        AST.llvm_output += "define i32 @main() {\n\n"
 
     ast.llvm_code()
 
-    AST.llvm_output += "\n"
-    AST.llvm_output += "ret i32 0\n"
-    AST.llvm_output += "}\n\n"
+    if not AST.contains_function:
+        AST.llvm_output += "\n"
+        AST.llvm_output += "ret i32 0\n"
+        AST.llvm_output += "}\n\n"
 
     # If we need to print then create the print function
     if AST.print:

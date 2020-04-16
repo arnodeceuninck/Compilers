@@ -79,18 +79,20 @@ class Return(ReservedType):
         return "; return\n"
 
     def llvm_code(self):
-        AST.llvm_output += self.comments()
-
         # If we find that the return has no children then return a void type
         if not self.children:
+            AST.llvm_output += self.comments()
             AST.llvm_output += "ret void\n"
             return
 
         # Generate code for the only child of return
         self[0].llvm_code()
 
+        AST.llvm_output += self.comments()
+
         # The loop in which the user situates itself
-        AST.llvm_output = "ret " + self.value
+        code = "ret " + self[0].get_llvm_type() + " " + self[0].variable()
+        AST.llvm_output += code
 
 
 class Void(ReservedType):

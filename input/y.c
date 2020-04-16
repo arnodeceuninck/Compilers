@@ -1,6 +1,4 @@
-int main();
-
-int main(int i, const int* y){
-    main();
+int test(){
     int i = 0;
+    return i;
 }

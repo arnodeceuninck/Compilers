@@ -13,6 +13,7 @@ class AST:
     llvm_output = ""
     # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable -> found in the statement sequences
     print = False
+    contains_function = False # Check whether you have to manually add the int main()
 
     # Resets the global class variables (must be used with tests)
     @staticmethod
@@ -272,7 +273,7 @@ class StatementSequence(AST):
         while i < len(self.children):
             if isinstance(self[i], Return):
                 # Remove all code after a return
-                self.children = self.children[:len(self.children)-i]
+                self.children = self.children[:len(self.children)-i+1] #TODO: Check whether +1 required
             self[i].optimize()
             i += 1
 
@@ -515,6 +516,7 @@ class Assign(Binary):
 
 class Function(AST):
     def __init__(self, value="", return_type="void", function_type="use"):
+        AST.contains_function = True
         AST.__init__(self, value, "#ff6486")
         self.return_type = return_type  # The type the return value must be
         self.function_type = function_type  # The use of the function, declaration/definition/using a function
@@ -551,7 +553,7 @@ class Function(AST):
                                                                   function_arguments=function_arguments)
 
     def get_llvm_template(self):
-        return ""
+        return "define {return_type} @{name}({arg_list}) #0"
 
     # The llvm code needs to be generated a special way and not in the main function
     # TODO: Duplicate functions are possible so naming scheme needs to change
@@ -559,8 +561,29 @@ class Function(AST):
     # TODO: Forward declaring
     def llvm_code(self):
         AST.llvm_output += self.comments()
+
+        # Add the arguments for a function in a string
+        # TODO: Check llvm arguments structure
+        function_arguments = ""
+        for child in self.children[0]:
+            if len(function_arguments):
+                # Add a separator to the arguments, because there was a previous argument
+                function_arguments += ", "
+            # Add the type of the variable
+            function_arguments += child.get_llvm_type()
+            # Add space between the type and the arguments variable name
+            function_arguments += " "
+            # Add the value of the child
+            function_arguments += child.value
+
+        initialization_line = self.get_llvm_template()
+        initialization_line = initialization_line.format(return_type="i32", name=self.value, arg_list=function_arguments)
+        AST.llvm_output += initialization_line
+
+        AST.llvm_output += " {\n"
         for child in self.children:
             child.llvm_code()
+        AST.llvm_output += "}\n"
 
 
 class Arguments(AST):
