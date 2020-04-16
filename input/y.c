@@ -1,4 +1,3 @@
-int test(){
-    int i = 0;
-    return i;
+int test(int i, int j){
+    return;
 }

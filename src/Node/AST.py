@@ -5,15 +5,12 @@
 from src.symbolTable import SymbolTable
 
 
-
-
-
 class AST:
     _id = 0
     llvm_output = ""
     # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable -> found in the statement sequences
     print = False
-    contains_function = False # Check whether you have to manually add the int main()
+    contains_function = False  # Check whether you have to manually add the int main()
 
     # Resets the global class variables (must be used with tests)
     @staticmethod
@@ -273,7 +270,7 @@ class StatementSequence(AST):
         while i < len(self.children):
             if isinstance(self[i], Return):
                 # Remove all code after a return
-                self.children = self.children[:len(self.children)-i+1] #TODO: Check whether +1 required
+                self.children = self.children[:len(self.children) - i + 1]  # TODO: Check whether +1 required
             self[i].optimize()
             i += 1
 
@@ -571,16 +568,27 @@ class Function(AST):
                 function_arguments += ", "
             # Add the type of the variable
             function_arguments += child.get_llvm_type()
-            # Add space between the type and the arguments variable name
-            function_arguments += " "
-            # Add the value of the child
-            function_arguments += child.value
 
         initialization_line = self.get_llvm_template()
-        initialization_line = initialization_line.format(return_type="i32", name=self.value, arg_list=function_arguments)
+        initialization_line = initialization_line.format(return_type="i32", name=self.value,
+                                                         arg_list=function_arguments)
         AST.llvm_output += initialization_line
 
         AST.llvm_output += " {\n"
+
+        # First get all arguments
+        AST.llvm_output += "; fetching all arguments\n"
+        for i in range(len(self[0].children)):
+            code = "{variable} = alloca {type}, align {align}\n"
+            code += "store {type} %{arg_nr}, {type}* {variable}\n"
+            code = code.format(
+                variable=self[0][i].variable(store=True),
+                type=self[0][i].get_llvm_type(),
+                align=self[0][i].get_align(),
+                arg_nr=str(i))
+
+            AST.llvm_output += code
+
         for child in self.children:
             child.llvm_code()
         AST.llvm_output += "}\n"
