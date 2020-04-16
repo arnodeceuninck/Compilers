@@ -18,7 +18,7 @@ argument: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)?) VAR_NAM
 
 unnamed_scope: '{' operation_sequence '}';
 
-operation: (assignment | operation_logic_or | print_statement);
+operation: (assignment | operation_logic_or | print_statement | return_op);
 
 if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}' (else_statement)?;
 
@@ -62,9 +62,10 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation_logic_or ')'
-                  | (return_op | function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
-return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
+//return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
+return_op: RETURN (return_val=operation_logic_or)?;
 
 DOUBLE_PLUS: '++';
 DOUBLE_MIN: '--';

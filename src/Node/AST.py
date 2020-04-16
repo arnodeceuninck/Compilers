@@ -577,7 +577,8 @@ class Function(AST):
         AST.llvm_output += " {\n"
 
         # First get all arguments
-        AST.llvm_output += "; fetching all arguments\n"
+        if len(self[0].children):
+            AST.llvm_output += "; fetching all arguments\n"
         for i in range(len(self[0].children)):
             code = "{variable} = alloca {type}, align {align}\n"
             code += "store {type} %{arg_nr}, {type}* {variable}\n"

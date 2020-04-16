@@ -1,3 +1,3 @@
-int test(int i, int j){
-    return;
+int first(){
+    return 1+1;
 }
