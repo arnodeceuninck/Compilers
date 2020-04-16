@@ -1,4 +1,3 @@
-
 define i32 @main() {
 
 ; Code Block

@@ -5,8 +5,6 @@
 @z1 = global float undef, align 4
 @z2 = global float undef, align 4
 
-define i32 @main() {
-
 ; Code Block
 ; 0
 %.v5 = add i32 0, 0
@@ -62,10 +60,6 @@ store float %.v24, float* @z1
 %.v28 = zext i1 %.t39 to i32
 ; z2=! 1
 store float %.v28, float* @z2
-
-
-ret i32 0
-}
 
 @.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
 @.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1

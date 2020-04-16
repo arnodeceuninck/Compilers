@@ -1,7 +1,5 @@
 @x = global i32 undef, align 4
 
-define i32 @main() {
-
 ; Code Block
 ; 3
 %.v5 = add i32 3, 0
@@ -28,10 +26,6 @@ iffalse6:
 br label %end6
 end6:
 
-
-
-ret i32 0
-}
 
 @.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
 @.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1

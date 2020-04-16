@@ -2,8 +2,6 @@
 @y = global i32 undef, align 4
 @c = global i8 undef, align 1
 
-define i32 @main() {
-
 ; Code Block
 ; 42.0
 %.v4 = fadd float 42.0, 0.0
@@ -17,10 +15,6 @@ store i32 %.v7, i32* @y
 %.v10 = add i8 98, 0
 ; c=b
 store i8 %.v10, i8* @c
-
-
-ret i32 0
-}
 
 @.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
 @.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1

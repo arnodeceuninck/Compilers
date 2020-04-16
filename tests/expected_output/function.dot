@@ -1,0 +1,48 @@
+Digraph G { 
+	subgraph cluster_0 {
+		tbl2 [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>2</b></td></tr>
+					<tr><td>location</td><td>type</td></tr>
+					<tr><td>i</td><td>int</td></tr>
+				</table>
+			>];
+		tbl3 [
+			shape=plaintext
+			label=<
+				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>3</b></td></tr>
+					<tr><td>location</td><td>type</td></tr>
+					<tr><td>i</td><td>int</td></tr>
+				</table>
+			>];
+		tbl1 -> tbl2
+		tbl2 -> tbl3
+		label = "Symbol Table";
+	}
+subgraph cluster_1 {
+node [style=filled, shape=rectangle, penwidth=2];
+1[label="Statement Sequence (1)", fillcolor="#9f9f9f"] 
+2[label="Function (2): definition: int test", fillcolor="#ff6486"] 
+4[label="Argument List", fillcolor="#ff6486"] 
+5[label="Variable Type: int: i", fillcolor="#af93ff"] 
+3[label="Statement Sequence (3)", fillcolor="#9f9f9f"] 
+6[label="Assign Declaration", fillcolor="#87f5ff"] 
+7[label="Variable Type: int: i", fillcolor="#af93ff"] 
+8[label="Constant 0", fillcolor="#FFD885"] 
+9[label="Reserved Word: return", fillcolor="#46ff8a"] 
+10[label="Variable Type: int: i", fillcolor="#af93ff"] 
+1 -> 2
+2 -> 4
+4 -> 5
+2 -> 3
+3 -> 6
+6 -> 7
+6 -> 8
+3 -> 9
+9 -> 10
+label = "AST";
+}
+}

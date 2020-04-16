@@ -263,6 +263,9 @@ class MyTestCase(unittest.TestCase):
         # Values must match
         self.assertIsInstance(tree.children[0], Assign)
 
+    def test_function(self):
+        tree = self.helper_test_c("function", cmp=True)
+
 
 if __name__ == '__main__':
     unittest.main()
