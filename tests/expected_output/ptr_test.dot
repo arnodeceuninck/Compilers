@@ -1,52 +1,53 @@
 Digraph G { 
 	subgraph cluster_0 {
-		tbl [
+		tbl1 [
 			shape=plaintext
 			label=<
 				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>1</b></td></tr>
 					<tr><td>location</td><td>type</td></tr>
-						<tr><td>x</td><td>int</td></tr>
-						<tr><td>y</td><td>int*</td></tr>
-						<tr><td>z</td><td>int</td></tr>
+					<tr><td>x</td><td>int</td></tr>
+					<tr><td>y</td><td>int**</td></tr>
+					<tr><td>z</td><td>int</td></tr>
 				</table>
 			>];
 		label = "Symbol Table";
 	}
 subgraph cluster_1 {
 node [style=filled, shape=rectangle, penwidth=2];
-T[label="Statement Sequence", fillcolor="#9f9f9f"] 
-N0T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N0T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N1N0T[label="Constant Type: int: 2", fillcolor="#FFD885"] 
-N1T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N1T[label="Variable Type: int*: y", fillcolor="#af93ff"] 
-N1N1T[label="Unary Operator: &", fillcolor="#87f5ff"] 
-N0N1N1T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N2T[label="Assign", fillcolor="#87f5ff"] 
-N0N2T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N1N2T[label="Constant Type: int: 3", fillcolor="#FFD885"] 
-N3T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N3T[label="Variable Type: int: z", fillcolor="#af93ff"] 
-N1N3T[label="Unary Operator: *", fillcolor="#87f5ff"] 
-N0N1N3T[label="Variable Type: int*: y", fillcolor="#af93ff"] 
-N4T[label="Unary Operator: printf", fillcolor="#87f5ff"] 
-N0N4T[label="Variable Type: int: z", fillcolor="#af93ff"] 
-T -> N0T
-N0T -> N0N0T
-N0T -> N1N0T
-T -> N1T
-N1T -> N0N1T
-N1T -> N1N1T
-N1N1T -> N0N1N1T
-T -> N2T
-N2T -> N0N2T
-N2T -> N1N2T
-T -> N3T
-N3T -> N0N3T
-N3T -> N1N3T
-N1N3T -> N0N1N3T
-T -> N4T
-N4T -> N0N4T
+1[label="Statement Sequence (1)", fillcolor="#9f9f9f"] 
+2[label="Assign Declaration", fillcolor="#87f5ff"] 
+3[label="Variable Type: int: x", fillcolor="#af93ff"] 
+4[label="Constant 2", fillcolor="#FFD885"] 
+5[label="Assign Declaration", fillcolor="#87f5ff"] 
+6[label="Variable Type: int*: y", fillcolor="#af93ff"] 
+7[label="Unary Operator: &", fillcolor="#87f5ff"] 
+8[label="Variable Type: int: x", fillcolor="#af93ff"] 
+9[label="Assign", fillcolor="#87f5ff"] 
+10[label="Variable Type: int: x", fillcolor="#af93ff"] 
+11[label="Constant 3", fillcolor="#FFD885"] 
+12[label="Assign Declaration", fillcolor="#87f5ff"] 
+13[label="Variable Type: int: z", fillcolor="#af93ff"] 
+14[label="Unary Operator: *", fillcolor="#87f5ff"] 
+15[label="Variable Type: int*: y", fillcolor="#af93ff"] 
+16[label="Unary Operator: printf", fillcolor="#87f5ff"] 
+17[label="Variable Type: int: z", fillcolor="#af93ff"] 
+1 -> 2
+2 -> 3
+2 -> 4
+1 -> 5
+5 -> 6
+5 -> 7
+7 -> 8
+1 -> 9
+9 -> 10
+9 -> 11
+1 -> 12
+12 -> 13
+12 -> 14
+14 -> 15
+1 -> 16
+16 -> 17
 label = "AST";
 }
 }

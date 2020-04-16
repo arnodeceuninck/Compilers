@@ -6,24 +6,38 @@
 @z2 = global float undef, align 4
 
 define i32 @main() {
+
+; Code Block
+; 0
+%.v6 = add i32 0, 0
 ; x1=0
-%N1N0T = add i32 0, 0
-store float %N1N0T, float* @x1
+store float %.v6, float* @x1
+; 0
+%.v11 = add i32 0, 0
 ; x2=0
-%N1N1T = add i32 0, 0
-store float %N1N1T, float* @x2
+store float %.v11, float* @x2
+; 1
+%.v16 = add i32 1, 0
 ; x3=1
-%N1N2T = add i32 1, 0
-store float %N1N2T, float* @x3
+store float %.v16, float* @x3
+; 1
+%.v21 = add i32 1, 0
 ; y=1
-%N1N3T = add i32 1, 0
-store float %N1N3T, float* @y
+store float %.v21, float* @y
+; 1
+%.v25 = add i32 1, 0
 ; z1=1
-%N1N4T = add i32 1, 0
-store float %N1N4T, float* @z1
+store float %.v25, float* @z1
+; 0
+%.v29 = add i32 0, 0
 ; z2=0
-%N1N5T = add i32 0, 0
-store float %N1N5T, float* @z2
+store float %.v29, float* @z2
+
+
 ret i32 0
 }
 
+@.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@.strf = private unnamed_addr constant [3 x i8] c"%f\00", align 1
+declare i32 @printf(i8*, ...)

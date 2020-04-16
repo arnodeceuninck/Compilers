@@ -1,12 +1,22 @@
 @y = global float undef, align 4
 
 define i32 @main() {
-; y=5/0
+
+; Code Block
+; 5
+%.v5 = add i32 5, 0
+; 0
+%.v6 = add i32 0, 0
 ; 5/0
-%N0N1N0T = add i32 5, 0
-%N1N1N0T = add i32 0, 0
-%N1N0T = sdiv i32 %N0N1N0T, %N1N1N0T
-store float %N1N0T, float* @y
+%.v4 = sdiv i32 %.v5, %.v6
+; y=5/0
+store float %.v4, float* @y
+
+
 ret i32 0
 }
 
+@.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@.strf = private unnamed_addr constant [3 x i8] c"%f\00", align 1
+declare i32 @printf(i8*, ...)

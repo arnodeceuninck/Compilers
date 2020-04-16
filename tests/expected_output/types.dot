@@ -1,38 +1,39 @@
 Digraph G { 
 	subgraph cluster_0 {
-		tbl [
+		tbl1 [
 			shape=plaintext
 			label=<
 				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>1</b></td></tr>
 					<tr><td>location</td><td>type</td></tr>
-						<tr><td>x</td><td>float</td></tr>
-						<tr><td>y</td><td>int</td></tr>
-						<tr><td>c</td><td>char</td></tr>
+					<tr><td>x</td><td>float</td></tr>
+					<tr><td>y</td><td>int</td></tr>
+					<tr><td>c</td><td>char</td></tr>
 				</table>
 			>];
 		label = "Symbol Table";
 	}
 subgraph cluster_1 {
 node [style=filled, shape=rectangle, penwidth=2];
-T[label="Statement Sequence", fillcolor="#9f9f9f"] 
-N0T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N0T[label="Variable Type: float: x", fillcolor="#af93ff"] 
-N1N0T[label="Constant Type: float: 42.0", fillcolor="#FFD885"] 
-N1T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N1T[label="Variable Type: int: y", fillcolor="#af93ff"] 
-N1N1T[label="Constant Type: int: 42", fillcolor="#FFD885"] 
-N2T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N2T[label="Variable Type: char: c", fillcolor="#af93ff"] 
-N1N2T[label="Constant Type: char: 'b'", fillcolor="#FFD885"] 
-T -> N0T
-N0T -> N0N0T
-N0T -> N1N0T
-T -> N1T
-N1T -> N0N1T
-N1T -> N1N1T
-T -> N2T
-N2T -> N0N2T
-N2T -> N1N2T
+1[label="Statement Sequence (1)", fillcolor="#9f9f9f"] 
+2[label="Assign Declaration", fillcolor="#87f5ff"] 
+3[label="Variable Type: float: x", fillcolor="#af93ff"] 
+4[label="Constant 42.0", fillcolor="#FFD885"] 
+5[label="Assign Declaration", fillcolor="#87f5ff"] 
+6[label="Variable Type: int: y", fillcolor="#af93ff"] 
+7[label="Constant 42", fillcolor="#FFD885"] 
+8[label="Assign Declaration", fillcolor="#87f5ff"] 
+9[label="Variable Type: char: c", fillcolor="#af93ff"] 
+10[label="Constant b", fillcolor="#FFD885"] 
+1 -> 2
+2 -> 3
+2 -> 4
+1 -> 5
+5 -> 6
+5 -> 7
+1 -> 8
+8 -> 9
+8 -> 10
 label = "AST";
 }
 }

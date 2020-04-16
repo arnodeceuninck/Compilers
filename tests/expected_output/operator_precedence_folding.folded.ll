@@ -5,21 +5,34 @@
 @b = global i32 undef, align 4
 
 define i32 @main() {
+
+; Code Block
+; 6
+%.v10 = add i32 6, 0
 ; x=6
-%N1N0T = add i32 6, 0
-store i32 %N1N0T, i32* @x
+store i32 %.v10, i32* @x
+; 3
+%.v17 = add i32 3, 0
 ; y=3
-%N1N1T = add i32 3, 0
-store i32 %N1N1T, i32* @y
+store i32 %.v17, i32* @y
+; 13
+%.v22 = add i32 13, 0
 ; z=13
-%N1N2T = add i32 13, 0
-store i32 %N1N2T, i32* @z
+store i32 %.v22, i32* @z
+; 1
+%.v31 = add i32 1, 0
 ; a=1
-%N1N3T = add i32 1, 0
-store i32 %N1N3T, i32* @a
+store i32 %.v31, i32* @a
+; 69
+%.v40 = add i32 69, 0
 ; b=69
-%N1N4T = add i32 69, 0
-store i32 %N1N4T, i32* @b
+store i32 %.v40, i32* @b
+
+
 ret i32 0
 }
 
+@.strc = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@.strd = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@.strf = private unnamed_addr constant [3 x i8] c"%f\00", align 1
+declare i32 @printf(i8*, ...)

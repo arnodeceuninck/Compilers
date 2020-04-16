@@ -1,7 +1,7 @@
 import unittest
 # from src.main import compile
-from src.Node.AST import AST, to_LLVM, dot, compile
-# from src.ErrorListener import *
+from src.Node.AST_utils import *
+from src.ErrorListener import *
 
 
 class MyTestCase(unittest.TestCase):
@@ -54,80 +54,72 @@ class MyTestCase(unittest.TestCase):
     def test_binop_folding(self):
         # Test whether binop folding gives the correct answers and removes all additional subtrees
         tree = self.helper_test_c("binop_folding", fold=True)
-        # self.assertEqual(len(tree.children), 4)
-        # self.assertEqual(tree.node.value, "Statement Sequence")
         for child in tree.children:
-            # self.assertEqual(child.node.value, "=")
-            # self.assertTrue(isinstance(child.node, Assign))
-            # self.assertTrue(child.node.declaration)
             self.assertEqual(len(child.children), 2)
             self.assertEqual(len(child[0].children), 0)  # Must be removed after folding
             self.assertEqual(len(child[1].children), 0)
-            self.assertEqual(child[0].type, "int")  # Must stay the same after folding
+            self.assertEqual(child[0].get_type(), "int")  # Must stay the same after folding
             self.assertTrue(isinstance(child[1], CInt))  # Type must be changed
-        self.assertEqual(tree[0][1].value, 5)  # Values must match
-        self.assertEqual(tree[1][1].value, 63)
-        self.assertEqual(tree[2][1].value, 2)
-        self.assertEqual(tree[3][1].value, 2)
+        self.assertEqual(int(tree[0][1].value), 5)  # Values must match
+        self.assertEqual(int(tree[1][1].value), 63)
+        self.assertEqual(int(tree[2][1].value), 2)
+        self.assertEqual(int(tree[3][1].value), 2)
 
     def test_declaration(self):
         # Test whether all info from the declaration has been kept
         tree = self.helper_test_c("declaration")
         for child in tree.children:
-            # self.assertEqual(child.node.value, "=")
-            # self.assertTrue(isinstance(child.node, Assign))
-            # self.assertTrue(child.node.declaration)
             self.assertEqual(len(child.children), 0)
-            self.assertTrue(isinstance(child.node, Variable))
+            self.assertTrue(isinstance(child, Variable))
 
         # Check all int types
         int_type = [i * 3 for i in range(4)]
         for i in int_type:
-            self.assertTrue(isinstance(tree.children[i].node, VInt))
+            self.assertTrue(isinstance(tree.children[i], VInt))
 
         # Check all float types
         float_type = [i + 1 for i in int_type]
         for i in float_type:
-            self.assertTrue(isinstance(tree.children[i].node, VFloat))
+            self.assertTrue(isinstance(tree.children[i], VFloat))
 
         # Check all char types
         char_type = [i + 2 for i in int_type]
         for i in char_type:
-            self.assertTrue(isinstance(tree.children[i].node, VChar))
+            self.assertTrue(isinstance(tree.children[i], VChar))
 
         const = [3, 4, 5, 9, 10, 11]
         ptr = [6, 7, 8, 9, 10, 11]
         for i in range(len(tree.children)):
-            self.assertEqual(tree.children[i].node.ptr, i in ptr)
-            self.assertEqual(tree.children[i].node.const, i in const)
+            self.assertEqual(tree.children[i].ptr, i in ptr)
+            self.assertEqual(tree.children[i].const, i in const)
         pass
 
     def test_logicop(self):
         # Tests whether the folding has been done right
         tree = self.helper_test_c("logicop", fold=True, cmp=True)
-        self.assertEqual(float(tree.children[0].children[1].node.value), 0)  # Values must match
-        self.assertEqual(float(tree.children[1].children[1].node.value), 0)
-        self.assertEqual(float(tree.children[2].children[1].node.value), 1)
-        self.assertEqual(float(tree.children[3].children[1].node.value), 1)
-        self.assertEqual(float(tree.children[4].children[1].node.value), 1)
-        self.assertEqual(float(tree.children[5].children[1].node.value), 0)
+        self.assertEqual(float(tree.children[0].children[1].value), 0)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].value), 0)
+        self.assertEqual(float(tree.children[2].children[1].value), 1)
+        self.assertEqual(float(tree.children[3].children[1].value), 1)
+        self.assertEqual(float(tree.children[4].children[1].value), 1)
+        self.assertEqual(float(tree.children[5].children[1].value), 0)
         pass
 
     def test_unop_num(self):
         # Tests whether the unary operations on numbers (not logical) are successfully folded
         tree = self.helper_test_c("unop_num", fold=True, cmp=True)
-        self.assertEqual(float(tree.children[0].children[1].node.value), 1)  # Values must match
-        self.assertEqual(float(tree.children[1].children[1].node.value), -1)
+        self.assertEqual(float(tree.children[0].children[1].value), 1)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].value), -1)
         pass
 
     def test_operator_precedence_folding(self):
         # Tests whether the folding has been done right
         tree = self.helper_test_c("operator_precedence_folding", fold=True, cmp=True)
-        self.assertEqual(float(tree.children[0].children[1].node.value), 6)  # Values must match
-        self.assertEqual(float(tree.children[1].children[1].node.value), 3)
-        self.assertEqual(float(tree.children[2].children[1].node.value), 13)
-        self.assertEqual(float(tree.children[3].children[1].node.value), 1)
-        self.assertEqual(float(tree.children[4].children[1].node.value), 69)
+        self.assertEqual(float(tree.children[0].children[1].value), 6)  # Values must match
+        self.assertEqual(float(tree.children[1].children[1].value), 3)
+        self.assertEqual(float(tree.children[2].children[1].value), 13)
+        self.assertEqual(float(tree.children[3].children[1].value), 1)
+        self.assertEqual(float(tree.children[4].children[1].value), 69)
         pass
 
     def test_redeclaration_error(self):
@@ -192,6 +184,7 @@ class MyTestCase(unittest.TestCase):
             error = True
         self.assertTrue(error)
 
+    # TODO: fix failing test
     def test_error_undeclared(self):
         # Tests whether the folding has been done right
         error_given = False
@@ -245,30 +238,30 @@ class MyTestCase(unittest.TestCase):
     def test_really_long_var(self):
         tree = self.helper_test_c("long_var", cmp=True)
         # Values must match
-        self.assertEqual(tree.children[0].children[0].node.value, "i_am_a_really_long_variable_withCamelCaseInBetween")
-        self.assertEqual(tree.children[0].children[1].node.value, 0)
+        self.assertEqual(tree.children[0].children[0].value, "i_am_a_really_long_variable_withCamelCaseInBetween")
+        self.assertEqual(int(tree.children[0].children[1].value), 0)
 
     def test_reref_mult_handling(self):
         tree = self.helper_test_c("mixing_reref_and_mult", cmp=True)
         # Values must match
-        self.assertIsInstance(tree.children[2].children[1].node, Mult)
-        self.assertIsInstance(tree.children[2].children[1].children[1].node, UReref)
+        self.assertIsInstance(tree.children[2].children[1], Mult)
+        self.assertIsInstance(tree.children[2].children[1].children[1], UReref)
 
     def test_reref_in_the_mix(self):
         tree = self.helper_test_c("reref_in_the_mix", cmp=True)
         # Values must match
-        self.assertIsInstance(tree.children[2].children[1].node, BPlus)
-        self.assertIsInstance(tree.children[2].children[1].children[1].node, UReref)
+        self.assertIsInstance(tree.children[2].children[1], BPlus)
+        self.assertIsInstance(tree.children[2].children[1].children[1], UReref)
 
     def test_multiline_code(self):
         tree = self.helper_test_c("multiline_code", cmp=True)
         # Values must match
-        self.assertIsInstance(tree.children[0].node, Assign)
+        self.assertIsInstance(tree.children[0], Assign)
 
     def test_comments(self):
         tree = self.helper_test_c("comments", cmp=True)
         # Values must match
-        self.assertIsInstance(tree.children[0].node, Assign)
+        self.assertIsInstance(tree.children[0], Assign)
 
 
 if __name__ == '__main__':

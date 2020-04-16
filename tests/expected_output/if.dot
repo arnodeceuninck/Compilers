@@ -1,40 +1,42 @@
 Digraph G { 
 	subgraph cluster_0 {
-		tbl [
+		tbl1 [
 			shape=plaintext
 			label=<
 				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>1</b></td></tr>
 					<tr><td>location</td><td>type</td></tr>
-						<tr><td>x</td><td>int</td></tr>
+					<tr><td>x</td><td>int</td></tr>
 				</table>
 			>];
+		tbl1 -> tbl2
 		label = "Symbol Table";
 	}
 subgraph cluster_1 {
 node [style=filled, shape=rectangle, penwidth=2];
-T[label="Statement Sequence", fillcolor="#9f9f9f"] 
-N0T[label="Assign Declaration", fillcolor="#87f5ff"] 
-N0N0T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N1N0T[label="Constant Type: int: 3", fillcolor="#FFD885"] 
-N1T[label="if", fillcolor="#9f9f9f"] 
-N0N1T[label="Binary Operator Compare: <", fillcolor="#87f5ff"] 
-N0N0N1T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N1N0N1T[label="Constant Type: int: 12", fillcolor="#FFD885"] 
-N1N1T[label="Statement Sequence", fillcolor="#9f9f9f"] 
-N0N1N1T[label="Assign", fillcolor="#87f5ff"] 
-N0N0N1N1T[label="Variable Type: int: x", fillcolor="#af93ff"] 
-N1N0N1N1T[label="Constant Type: int: 4", fillcolor="#FFD885"] 
-T -> N0T
-N0T -> N0N0T
-N0T -> N1N0T
-T -> N1T
-N1T -> N0N1T
-N0N1T -> N0N0N1T
-N0N1T -> N1N0N1T
-N1T -> N1N1T
-N1N1T -> N0N1N1T
-N0N1N1T -> N0N0N1N1T
-N0N1N1T -> N1N0N1N1T
+1[label="Statement Sequence (1)", fillcolor="#9f9f9f"] 
+3[label="Assign Declaration", fillcolor="#87f5ff"] 
+4[label="Variable Type: int: x", fillcolor="#af93ff"] 
+5[label="Constant 3", fillcolor="#FFD885"] 
+6[label="if", fillcolor="#9f9f9f"] 
+7[label="Binary Operator Compare: <", fillcolor="#87f5ff"] 
+8[label="Variable Type: int: x", fillcolor="#af93ff"] 
+9[label="Constant 12", fillcolor="#FFD885"] 
+2[label="Statement Sequence (2)", fillcolor="#9f9f9f"] 
+10[label="Assign", fillcolor="#87f5ff"] 
+11[label="Variable Type: int: x", fillcolor="#af93ff"] 
+12[label="Constant 4", fillcolor="#FFD885"] 
+1 -> 3
+3 -> 4
+3 -> 5
+1 -> 6
+6 -> 7
+7 -> 8
+7 -> 9
+6 -> 2
+2 -> 10
+10 -> 11
+10 -> 12
 label = "AST";
 }
 }

@@ -1,53 +1,54 @@
 Digraph G { 
 	subgraph cluster_0 {
-		tbl [
+		tbl1 [
 			shape=plaintext
 			label=<
 				<table border='0' cellborder='1' cellspacing='0'>
+					<tr><td colspan="2"><b>1</b></td></tr>
 					<tr><td>location</td><td>type</td></tr>
-						<tr><td>a</td><td>int</td></tr>
-						<tr><td>b</td><td>float</td></tr>
-						<tr><td>c</td><td>char</td></tr>
-						<tr><td>d</td><td>const int</td></tr>
-						<tr><td>e</td><td>const float</td></tr>
-						<tr><td>f</td><td>const char</td></tr>
-						<tr><td>g</td><td>int*</td></tr>
-						<tr><td>h</td><td>float*</td></tr>
-						<tr><td>i</td><td>char*</td></tr>
-						<tr><td>j</td><td>const int*</td></tr>
-						<tr><td>k</td><td>const float*</td></tr>
-						<tr><td>l</td><td>const char*</td></tr>
+					<tr><td>a</td><td>int</td></tr>
+					<tr><td>b</td><td>float</td></tr>
+					<tr><td>c</td><td>char</td></tr>
+					<tr><td>d</td><td>const int</td></tr>
+					<tr><td>e</td><td>const float</td></tr>
+					<tr><td>f</td><td>const char</td></tr>
+					<tr><td>g</td><td>int**</td></tr>
+					<tr><td>h</td><td>float**</td></tr>
+					<tr><td>i</td><td>char**</td></tr>
+					<tr><td>j</td><td>const int**</td></tr>
+					<tr><td>k</td><td>const float**</td></tr>
+					<tr><td>l</td><td>const char**</td></tr>
 				</table>
 			>];
 		label = "Symbol Table";
 	}
 subgraph cluster_1 {
 node [style=filled, shape=rectangle, penwidth=2];
-T[label="Statement Sequence", fillcolor="#9f9f9f"] 
-N0T[label="Variable Type: int: a", fillcolor="#af93ff"] 
-N1T[label="Variable Type: float: b", fillcolor="#af93ff"] 
-N2T[label="Variable Type: char: c", fillcolor="#af93ff"] 
-N3T[label="Variable Type: const int: d", fillcolor="#af93ff"] 
-N4T[label="Variable Type: const float: e", fillcolor="#af93ff"] 
-N5T[label="Variable Type: const char: f", fillcolor="#af93ff"] 
-N6T[label="Variable Type: int*: g", fillcolor="#af93ff"] 
-N7T[label="Variable Type: float*: h", fillcolor="#af93ff"] 
-N8T[label="Variable Type: char*: i", fillcolor="#af93ff"] 
-N9T[label="Variable Type: const int*: j", fillcolor="#af93ff"] 
-N10T[label="Variable Type: const float*: k", fillcolor="#af93ff"] 
-N11T[label="Variable Type: const char*: l", fillcolor="#af93ff"] 
-T -> N0T
-T -> N1T
-T -> N2T
-T -> N3T
-T -> N4T
-T -> N5T
-T -> N6T
-T -> N7T
-T -> N8T
-T -> N9T
-T -> N10T
-T -> N11T
+1[label="Statement Sequence (1)", fillcolor="#9f9f9f"] 
+2[label="Variable Type: int: a", fillcolor="#af93ff"] 
+3[label="Variable Type: float: b", fillcolor="#af93ff"] 
+4[label="Variable Type: char: c", fillcolor="#af93ff"] 
+5[label="Variable Type: const int: d", fillcolor="#af93ff"] 
+6[label="Variable Type: const float: e", fillcolor="#af93ff"] 
+7[label="Variable Type: const char: f", fillcolor="#af93ff"] 
+8[label="Variable Type: int*: g", fillcolor="#af93ff"] 
+9[label="Variable Type: float*: h", fillcolor="#af93ff"] 
+10[label="Variable Type: char*: i", fillcolor="#af93ff"] 
+11[label="Variable Type: const int*: j", fillcolor="#af93ff"] 
+12[label="Variable Type: const float*: k", fillcolor="#af93ff"] 
+13[label="Variable Type: const char*: l", fillcolor="#af93ff"] 
+1 -> 2
+1 -> 3
+1 -> 4
+1 -> 5
+1 -> 6
+1 -> 7
+1 -> 8
+1 -> 9
+1 -> 10
+1 -> 11
+1 -> 12
+1 -> 13
 label = "AST";
 }
 }
