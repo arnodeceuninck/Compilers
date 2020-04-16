@@ -1,6 +1,6 @@
 from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
-from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener
+from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, SyntaxCompilerError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -139,15 +139,16 @@ def compile(input_file: str, catch_error=True):
     stream = CommonTokenStream(lexer)
     parser = cParser.cParser(stream)
     parser.addErrorListener(CustomErrorListener())
-    tree = parser.start_rule()
 
     if catch_error:
         try:
+            tree = parser.start_rule()
             return make_ast(tree)
         except CompilerError as e:
             print(str(e))
             return None
     else:
+        tree = parser.start_rule()
         return make_ast(tree)
 
 

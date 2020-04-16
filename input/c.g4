@@ -96,6 +96,7 @@ CONST: 'const';
 BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
+RESERVED_WORD: ('if' | 'else' | 'while' | 'for' | 'printf'); //https://stackoverflow.com/questions/9726620/how-can-i-differentiate-between-reserved-words-and-variables-using-antlr
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;

@@ -1,3 +1,3 @@
-int first(){
-    return 1+1;
+int main(){
+    char while;
 }

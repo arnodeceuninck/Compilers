@@ -66,7 +66,7 @@ class SyntaxCompilerError(CompilerError):
         self.msg = msg
 
     def __str__(self):
-        return "[ERROR] Oh no!! Something went wrong at line " + str(self.row) + ", column " + str(
+        return "[ERROR] Oh no!! You've used the wrong syntax at line " + str(self.row) + ", column " + str(
             self.column) + ": " + self.msg
 
 
