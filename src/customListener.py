@@ -19,7 +19,7 @@ class customListener(ParseTreeListener):
         self.scope_count = 0  # The current scope we are finding ourselves in
 
     # Add an AST with given node to the stack
-    def add(self, ast: AST):
+    def add(self, ast):
         self.trees.append(ast)
 
     # Take <size> trees from the stack and place them as children from the last stack top

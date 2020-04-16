@@ -1,6 +1,5 @@
 import sys
-from src.Node.AST import dot, compile, to_LLVM
-
+from src.Node.AST_utils import dot, compile, to_LLVM
 
 
 def main(argv):
