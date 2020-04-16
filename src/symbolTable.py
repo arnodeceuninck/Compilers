@@ -58,9 +58,19 @@ class SymbolTable:
             # print("Variable", location, "already in the symbol table.")
 
     def __str__(self):
-        # If there is no symbol table to construct then return the empty string
+        # If there is no symbol table to construct then return an empty table
         if not len(self.elements):
-            return ""
+            # A table has a unique id
+            table = "\t\ttbl{id} [\n".format(id=self.id())
+            table += "\t\t\tshape=plaintext\n" \
+                     "\t\t\tlabel=<\n" \
+                     "\t\t\t\t<table border='0' cellborder='1' cellspacing='0'>\n"
+            # Create the header of the table so it can match the ast node ids based on eyesight of the user
+            table += "\t\t\t\t\t<tr><td colspan=\"2\"><b>{tableId}</b></td></tr>\n".format(tableId=self.id())
+            table += "\t\t\t\t\t<tr><td>location</td><td>type</td></tr>\n" \
+                     "\t\t\t\t</table>\n" \
+                     "\t\t\t>];\n"
+            return table
         # start the table node
         # A table has a unique id
         table = "\t\ttbl{id} [\n".format(id=self.id())

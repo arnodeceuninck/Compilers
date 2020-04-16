@@ -1,11 +1,11 @@
 #include <stdio.h>
 
-void test_func(int y) {
-    int y = 0;
-    printf("%d", y);
+void test_func(int y, int x) {
+    x = y;
+    printf("%d", x);
 }
 
-int i = 0;
 int main() {
-    int y = 0;
+    test_func(0, 1);
+    return 1+1;
 }

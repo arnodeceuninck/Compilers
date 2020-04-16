@@ -10,7 +10,7 @@ function_definition: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argu
 
 function_declaration: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argument_list ')';
 
-function_use: VAR_NAME '(' (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)?(',' VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)* ')';
+function_use: VAR_NAME '(' (INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME)?(',' INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME)* ')';
 
 argument_list: (argument)?(',' argument)*;
 

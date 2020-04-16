@@ -351,22 +351,32 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#return_op.
     def enterReturn_op(self, ctx: cParser.Return_opContext):
         self.add(Return())
-        # if has_children(ctx):
-        #     if ctx.INT_ID():
-        #         self.add(CInt(ctx.getText()[6:]))
-        #     elif ctx.FLOAT_ID():
-        #         self.add(CFloat(ctx.getText()[6:]))
-        #     elif ctx.CHAR_ID():
-        #         character = ctx.CHAR_ID().getText()  # e.g. 'a'
-        #         character = character[1:-1]  # e.g. a
-        #         self.add(CChar(character))
-        #     elif ctx.VAR_NAME():
-        #         self.add(Variable(ctx.getText()[6:]))
+        if has_children(ctx):
+            if ctx.INT_ID():
+                self.add(CInt(ctx.getText()[6:]))
+            elif ctx.FLOAT_ID():
+                self.add(CFloat(ctx.getText()[6:]))
+            elif ctx.CHAR_ID():
+                character = ctx.CHAR_ID().getText()  # e.g. 'a'
+                character = character[1:-1]  # e.g. a
+                self.add(CChar(character))
+            elif ctx.VAR_NAME():
+                self.add(Variable(ctx.getText()[6:]))
 
     # Exit a parse tree produced by cParser#return_op.
     def exitReturn_op(self, ctx: cParser.Return_opContext):
         # TODO: Fix that this also works with variables and such in place...
         if has_children(ctx):
+            # # TODO: This needs to be much more elegant
+            # # We need to switch the return and last value because they are in the wrong order in the list
+            # # Take the last element
+            # last_element = self.trees[len(self.trees) - 1]
+            # # Take the pre last element
+            # pre_last_element = self.trees[len(self.trees) - 2]
+            # # Swap the two entities
+            # self.trees[len(self.trees) - 1] = pre_last_element
+            # self.trees[len(self.trees) - 2] = last_element
+
             # make it a child of the current return value
             self.simplify(1)
         pass
