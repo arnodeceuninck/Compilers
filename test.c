@@ -1,11 +1,15 @@
 #include <stdio.h>
 
-void test_func(int y, int x) {
-    x = y;
-    printf("%d", x);
+void f(int* a){
+	int b = 43;
+	*a = b;
+	return;
 }
 
-int main() {
-    test_func(0, 1);
-    return 1+1;
+int main(){
+	int x = 0;
+	int* xp = &x;
+	f(xp);
+	printf("%d", x);
+	return 1;
 }

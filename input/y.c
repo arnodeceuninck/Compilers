@@ -1,18 +1,13 @@
-int mul(int x, int y){
-    int z = x * y;
-    return z;
+void f(int* a){
+	int b = 43;
+	a = &b;
+	return;
 }
-/*
-* My program
-*/
+
 int main(){
-    int x = 1;
-    while (x < 10) {
-        int result = mul(x, 2);
-        if (x > 5) {
-            result = mul(result, x);
-        }
-        printf(result); //show the result
-    }
-    return 0;
+	int x = 0;
+	int* xp = &x;
+	f(xp);
+	printf(x);
+	return 1;
 }

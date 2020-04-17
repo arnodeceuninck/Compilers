@@ -1,8 +1,9 @@
 from src.Node.AST import Operator, Variable, AST, BoolClasses
 from src.Node.constant import CBool
 from src.Node.Variable import VFloat
-from src.Utils import printString
 from src.ErrorListener import RerefError
+
+printString = '\tcall i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str{format_type}, i32 0, i32 0), {print_type} {value})\n'
 
 
 class Unary(Operator):

@@ -181,7 +181,7 @@ class AST:
     # Get the variable for the node (and load it from memory if required)
     # Store must be true when you want to store into the variable
     def variable(self, store: bool = False):
-        # TOdo: move this to their own classes (virtual functions)
+        # TODO: move this to their own classes (virtual functions)
         if isinstance(self, Variable):
             if store:
                 # We need to check if the variable is a global one or a local one
@@ -533,6 +533,18 @@ class Function(AST):
     def get_type(self):
         return self.return_type
 
+    def get_llvm_type(self) -> str:
+        if self.return_type == "int":
+            return 'i32'
+        elif self.return_type == "bool":
+            return 'i1'
+        elif self.return_type == "float":
+            return 'float'
+        elif self.return_type == "char":
+            return 'i8'
+        elif self.return_type == "void":
+            return 'void'
+
     def comments(self, comment_out: bool = True) -> str:
         # Add the arguments for a function in a string
         function_arguments = ""
@@ -551,14 +563,47 @@ class Function(AST):
                                                                   function_arguments=function_arguments)
 
     def get_llvm_template(self):
-        return "define {return_type} @{name}({arg_list}) #0"
+        # if we declare a function then we that we declare it
+        if self.function_type == "declare":
+            return "declare {return_type} @{name}({arg_list})"
+        elif self.function_type == "use":  # We call a function
+            return "call {return_type} @{name}({arg_list})"
+        return "define {return_type} @{name}({arg_list})"
 
     # The llvm code needs to be generated a special way and not in the main function
     # TODO: Duplicate functions are possible so naming scheme needs to change
     # TODO: Functions declarations/use need to point to the definition in order to call the correct function
-    # TODO: Forward declaring
     def llvm_code(self):
         AST.llvm_output += self.comments()
+        if self.function_type == "use":
+            # Add the arguments for a function in a string
+            # TODO: Check llvm arguments structure
+            function_arguments = ""
+            for child in self.children[0]:
+                if len(function_arguments):
+                    # Add a separator to the arguments, because there was a previous argument
+                    function_arguments += ", "
+                # Add the type of the variable
+                # Add the argument to the function arguments
+                # If the child is a constant put the constant value in the argument
+                if isinstance(child, Constant):
+                    function_arguments += child.get_llvm_type() + " " + child.value
+                elif isinstance(child,
+                                Variable):  # If it is a variable then put the LLVM value in the function argument
+                    function_arguments += child.get_llvm_type() + " " + child.variable()
+
+            initialization_line = self.get_llvm_template()
+            initialization_line = initialization_line.format(return_type=self.get_llvm_type(), name=self.value,
+                                                             arg_list=function_arguments)
+            function_call = initialization_line
+            # Store this value in a llvm variable if the return value is not a void otherwise
+            # it just will be a function call
+            if self.return_type != "void":
+                function_call = "\t" + self.variable() + " = " + initialization_line
+            AST.llvm_output += function_call
+            return
+        elif self.function_type == "declare":
+            return
 
         # Add the arguments for a function in a string
         # TODO: Check llvm arguments structure
@@ -569,17 +614,19 @@ class Function(AST):
                 function_arguments += ", "
             # Add the type of the variable
             function_arguments += child.get_llvm_type()
+            # Set this child already used in llvm as a variable
+            child.get_symbol_table().get_symbol_table(child.value)[child.value].llvm_defined = True
 
         initialization_line = self.get_llvm_template()
-        initialization_line = initialization_line.format(return_type="i32", name=self.value,
+        initialization_line = initialization_line.format(return_type=self.get_llvm_type(), name=self.value,
                                                          arg_list=function_arguments)
         AST.llvm_output += initialization_line
 
         AST.llvm_output += " {\n"
 
-        # First get all arguments
+        # First get all arguments and store them in their variables to be readable
         if len(self[0].children):
-            AST.llvm_output += "; fetching all arguments\n"
+            AST.llvm_output += "\t; fetching all arguments\n"
         for i in range(len(self[0].children)):
             code = "\t{variable} = alloca {type}, align {align}\n"
             code += "\tstore {type} %{arg_nr}, {type}* {variable}\n"
@@ -591,6 +638,7 @@ class Function(AST):
 
             AST.llvm_output += code
 
+        # Generate the llvm code
         for child in self.children:
             child.llvm_code()
         AST.llvm_output += "}\n"

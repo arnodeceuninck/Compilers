@@ -131,8 +131,8 @@ def checkAssigns(ast):
         type_rvalue = ast.children[1].get_type()
         if type_lvalue == type_rvalue:
             pass
-        elif type_lvalue == "float" and type_rvalue == "int":
-            pass
+        # elif type_lvalue == "float" and type_rvalue == "int":
+        #     pass
         else:
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
