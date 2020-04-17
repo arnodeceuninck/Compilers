@@ -1,11 +1,7 @@
 #include <stdio.h>
 
-int i = 0;
-int j = 1+1;
-
 int main(){
-    int x = 0;
-	int* xp = &x;
-	printf("%d", x);
-	return 0;
+    float x[] = {1.0, 2.0, 3.0};
+    float y = x[0];
+    printf("%f", y);
 }
