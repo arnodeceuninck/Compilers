@@ -1,13 +1,13 @@
 void f(int* a){
 	int b = 43;
-	a = &b;
+	*a = b;
 	return;
 }
 
 int main(){
-	int x = 0;
+    int x = 0;
 	int* xp = &x;
 	f(xp);
 	printf(x);
-	return 1;
+	return 0;
 }

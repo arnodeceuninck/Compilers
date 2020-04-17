@@ -491,6 +491,17 @@ class Assign(Binary):
         self[1].llvm_code()
 
         output = self.comments()
+        if isinstance(self[0], UReref):
+            # First we need to load the variable into a temporary var in which we can store the new value
+            # Then we store the recently created value into the pointer
+            code = self.get_llvm_template()
+            code = code.format(type=self.children[0].children[0].get_llvm_type()[:-1],
+                               temp=self[1].variable(store=False),
+                               location=self[0].children[0].variable())  # This line will do a lot more than expected
+            output += code
+
+            AST.llvm_output += output
+            return
 
         # If the variable is not in the global scope then we need to make a variable
         # And check if the corresponding item has already been defined in llvm

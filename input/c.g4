@@ -36,7 +36,7 @@ print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME) ')';
 
 assignment: lvalue ('=' operation_logic_or)?;
 
-lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)?)? variable=VAR_NAME;
+lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? variable=VAR_NAME;
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;

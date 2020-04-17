@@ -150,7 +150,8 @@ class customListener(ParseTreeListener):
         if has_children(ctx):
             if ctx.ASSIGN():
                 node = Assign()
-                if ctx.children[0].getChildCount() == 1:
+                # If the lhs is not a declaration then mark is at false
+                if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*":
                     node.declaration = False
                 self.add(node)
 
@@ -171,20 +172,19 @@ class customListener(ParseTreeListener):
         const = False
         node = None
         for child in ctx.getChildren():
-            if child.symbol == ctx.variable:
-                # Get the name of variable
-                value = child.getText()
-                if ctx.getChildCount() == 1:
-                    # Case: assignment (no declaration)
-                    node = Variable()
-
             # Try to find the type of the variable
-            elif child.getText() == str(ctx.INT_TYPE()):
+            if child.getText() == str(ctx.INT_TYPE()):
                 node = VInt()
             elif child.getText() == str(ctx.FLOAT_TYPE()):
                 node = VFloat()
             elif child.getText() == str(ctx.CHAR_TYPE()):
                 node = VChar()
+            elif child.symbol == ctx.variable:
+                # Get the name of variable
+                value = child.getText()
+                if ctx.getChildCount() == 1 or ctx.getChild(0).getText() == "*":
+                    # Case: assignment (no declaration)
+                    node = Variable(value)
 
             # Check whether it's a pointer
             elif child.getText() == "*":
@@ -197,6 +197,13 @@ class customListener(ParseTreeListener):
         node.value = value
         node.const = const
         node.ptr = ptr
+        # when the righthand side is dereferenced then we need to add the deref node together with the variable node
+        if ctx.getChild(0).getText() == "*":
+            self.add(UReref())
+            self.add(node)
+            # Combine these two nodes
+            self.simplify(1)
+            return
         self.add(node)
 
     # Enter a parse tree produced by cParser#operation_logic_or.

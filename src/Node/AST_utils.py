@@ -52,7 +52,8 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
-        # Check if the parent of the parent is a function, if it is then check if it conflicts with one of the passed variables
+        # Check if the parent of the parent is a function,
+        # if it is then check if it conflicts with one of the passed variables
         if isinstance(parent.parent, Function):
             pass
         # return not required here, but otherwise pycharm thinks the statement is useless
@@ -63,6 +64,11 @@ def assignment(ast):
         # improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]
+        # When the left child is a * then we need to look at it's child which is the real location
+        if location == "*":
+            location = ast.children[0][0].value
+            type = ast.children[0][0]
+
         # The supposedly statement sequence in which we need to put the variable
         parent = ast.parent
         # Insert the variable into the nearest parent ast symbol table that is a statement sequence
@@ -123,6 +129,9 @@ def convertVar(ast):
 # A function to check whether you're always assigning to the right type and not to a const value
 def checkAssigns(ast):
     # Check for const assigns
+    # If the child is of the type * then we need to take the child of UReref
+    if isinstance(ast, Assign) and isinstance(ast.children[0], UReref):
+        ast = ast.children[0]
     # On assignments that are declarations, but the leftmost child is a const variable
     if isinstance(ast, Assign) and ast.children[0].const and not ast.declaration:
         raise ConstError(ast.children[0].value)

@@ -7,9 +7,9 @@ void f(int* a){
 }
 
 int main(){
-	int x = 0;
+    int x = 0;
 	int* xp = &x;
 	f(xp);
 	printf("%d", x);
-	return 1;
+	return 0;
 }
