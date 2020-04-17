@@ -341,9 +341,9 @@ class customListener(ParseTreeListener):
             character = character[1:-1]  # e.g. a
             self.add(CChar(character))
         elif ctx.BREAK():
-            self.add(Break())
+            self.add(Break("break"))
         elif ctx.CONTINUE():
-            self.add(Continue())
+            self.add(Continue("continue"))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
         # Handling operation of orders with brackets is already assured by the grammar
@@ -351,7 +351,7 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#return_op.
     def enterReturn_op(self, ctx: cParser.Return_opContext):
-        self.add(Return())
+        self.add(Return("return"))
         if has_children(ctx):
             if ctx.INT_ID():
                 self.add(CInt(ctx.getText()[6:]))

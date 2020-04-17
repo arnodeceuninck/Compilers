@@ -268,9 +268,9 @@ class StatementSequence(AST):
         i = 0
         # Using a while loop because in range doesn't update every iteration
         while i < len(self.children):
-            if isinstance(self[i], Return):
-                # Remove all code after a return
-                self.children = self.children[:i + 1]  # TODO: Check whether +1 required
+            if isinstance(self[i], (Return, Break, Continue)):
+                # Remove all code after a return, break or continue
+                self.children = self.children[:i + 1]
                 break
             self[i].optimize()
             i += 1

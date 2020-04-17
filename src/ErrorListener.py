@@ -70,6 +70,16 @@ class SyntaxCompilerError(CompilerError):
             self.column) + ": " + self.msg
 
 
+class ReservedVariableOutOfScope(CompilerError):
+    def __init__(self, reserved_value):
+        super().__init__()
+        self.reserved_value = reserved_value
+
+    def __str__(self):
+        return "[ERROR] The reserved variable '{reserved_value}' used is out of scope".format(
+            reserved_value=self.reserved_value)
+
+
 class CustomErrorListener(ErrorListener):
 
     def __init__(self):

@@ -1,7 +1,7 @@
 from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
-    SyntaxCompilerError
+    SyntaxCompilerError, ReservedVariableOutOfScope
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -196,6 +196,29 @@ def link_function(ast):
         cur_ast = cur_ast.parent
 
 
+def checkReserved(ast):
+    # If the current instance is not a return break or continue then do not proceed with checking
+    if not isinstance(ast, (Return, Break, Continue)):
+        return
+    # If the reserved type is used in an expression then also raise an error
+    if not isinstance(ast.parent, StatementSequence):
+        raise ReservedVariableOutOfScope(ast.value)
+
+    cur_parent = ast.parent
+    while cur_parent:
+        # If the reserved type is of type return and we find ourselves in a function then return
+        if isinstance(ast, Return) and isinstance(cur_parent, Function):
+            return
+        # If the reserved type is a continue or a break and we find ourselves in a function then raise an error
+        elif isinstance(ast, (Continue, Break)) and isinstance(cur_parent, Function):
+            raise ReservedVariableOutOfScope(ast.value)
+        # If the reserved type is a continue or a break and we find ourselves in a for or while loop then return
+        elif isinstance(ast, (Continue, Break)) and isinstance(cur_parent, (For, While)):
+            return
+        cur_parent = cur_parent.parent
+    raise ReservedVariableOutOfScope(ast.value)
+
+
 # return an ast tree from an input file
 def compile(input_file: str, catch_error=True):
     input_stream = FileStream(input_file)
@@ -232,7 +255,8 @@ def make_ast(tree, optimize: bool = True):
     # Gives all the function uses correct return types
     communismForLife.traverse(link_function)
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
-
+    communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
+    # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()
     return communismForLife
