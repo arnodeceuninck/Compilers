@@ -32,7 +32,7 @@ while_statement: 'while' '(' condition=operation_logic_or ')' '{' operation_sequ
 
 for_statement: 'for' '(' initialization=operation ';' condition=operation ';' step=operation ')' '{' operation_sequence '}';
 
-print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME) ')';
+print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME) ')';
 
 assignment: lvalue ('=' operation_logic_or)?;
 
@@ -66,9 +66,9 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation_logic_or ')'
-                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
+                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME | ARRAY_ID);
 
-return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
+return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID|ARRAY_VAR_NAME))?;
 //return_op: RETURN (return_val=operation_logic_or)?;
 
 DOUBLE_PLUS: '++';
@@ -96,6 +96,7 @@ INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';
 VOID_TYPE: 'void';
+ARRAY_ID: '{' (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)* '}';
 CONST: 'const';
 BREAK: 'break';
 CONTINUE: 'continue';
