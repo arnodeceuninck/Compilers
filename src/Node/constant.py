@@ -60,13 +60,13 @@ class Constant(AST):
     # Returns a constant based of of the type passed through
     def create_constant(self, type):
         if type == "int":
-            return CInt()
+            return CInt("0")
         elif type == "float":
-            return CFloat()
+            return CFloat("0.0")
         elif type == "char":
-            return CChar()
+            return CChar("0")
         elif type == "bool":
-            return CBool()
+            return CBool("0")
         return None
 
 

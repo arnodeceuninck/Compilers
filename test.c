@@ -1,15 +1,11 @@
 #include <stdio.h>
 
-void f(int* a){
-	int b = 43;
-	*a = b;
-	return;
-}
+int i = 0;
+int j = 1+1;
 
 int main(){
     int x = 0;
 	int* xp = &x;
-	f(xp);
 	printf("%d", x);
 	return 0;
 }

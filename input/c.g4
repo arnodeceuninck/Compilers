@@ -36,7 +36,7 @@ print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME) ')';
 
 assignment: lvalue ('=' operation_logic_or)?;
 
-lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? variable=VAR_NAME;
+lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? variable=(VAR_NAME|ARRAY_VAR_NAME);
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
@@ -101,6 +101,7 @@ BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
 RESERVED_WORD: ('if' | 'else' | 'while' | 'for' | 'printf'); //https://stackoverflow.com/questions/9726620/how-can-i-differentiate-between-reserved-words-and-variables-using-antlr
+ARRAY_VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]* '[' (INT_ID)? ']';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;

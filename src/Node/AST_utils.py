@@ -1,7 +1,7 @@
 from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
-    SyntaxCompilerError, ReservedVariableOutOfScope
+    SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -52,10 +52,7 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
-        # Check if the parent of the parent is a function,
-        # if it is then check if it conflicts with one of the passed variables
-        if isinstance(parent.parent, Function):
-            pass
+
         # return not required here, but otherwise pycharm thinks the statement is useless
         return parent.symbol_table[ast.value]  # Raises an error if not yet declared
 
@@ -75,6 +72,24 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
+
+        # Check if the parent of the parent is a function,
+        # if it is then check if it conflicts with one of the passed variables
+        if isinstance(parent.parent, Function):
+            # Store the symbol table of the function
+            function_symbol_table = parent.parent.symbol_table
+            double_declared = True
+            # If the value is in the symbol table of the function then it will not throw
+            # an exception and thus declare the variable as in the symbol table of the function
+            # which means that we cannot create this variable in this scope anymore and must raise
+            # an error
+            try:
+                function_symbol_table[ast[0].value]
+            except:
+                double_declared = False
+            # We raise an error because the variable is double declared
+            if double_declared:
+                raise VariableRedeclarationError(location)
 
         parent.symbol_table.insert(location, type)
 
@@ -228,6 +243,61 @@ def checkReserved(ast):
     raise ReservedVariableOutOfScope(ast.value)
 
 
+# The goal of this function is trying to fix add a return to the end of every function so
+# that llvm can correctly generate functions and do it without an error
+def adding_return(ast):
+    # If the ast parent isn't a function and the current ast is not a statement sequence then do nothing
+    if not isinstance(ast, StatementSequence) or not isinstance(ast.parent, Function):
+        return
+    elif ast.parent.function_type != "definition":  # If the function type is not a definition then return
+        return
+
+    # Take the last child and check if it is a return
+    last_child = ast.children[len(ast.children) - 1]
+    if isinstance(last_child, Return):
+        return
+
+    # If the last child is not a return then we need to add the return
+    # First we need to construct the return node
+    return_node = Return()
+    # Then we put create the return value if there is any
+    if ast.parent.return_type != "void":
+        return_value_node = Constant().create_constant(ast.parent.return_type)
+        # Link the two nodes together to form a return node
+        return_node.children.append(return_value_node)
+        return_value_node.parent = return_node
+    # Link the function statement together
+    return_node.parent = ast
+    ast.children.append(return_node)
+
+
+# Checks the ast for variables
+def has_variable(ast):
+    has_var = isinstance(ast, (Variable, Function))
+    for child in ast.children:
+        has_var += has_variable(ast)
+    return has_var
+
+
+def check_global_scope(ast):
+    # If the ast is not the global scope then just return
+    if ast.parent:
+        return
+    # Iterate over every child to check if it belongs to the global scope
+    for child in ast.children:
+        # If the code is a function then continue to the next child
+        if isinstance(child, Function):
+            continue
+        # When you encounter an assign things get more complicated. The rhs of an assign can only contain
+        # constants and no variables
+        elif isinstance(child, Assign):
+            # Check if the rhs has a variable in the expression
+            if has_variable(child[1]):
+                raise ExpressionOutOfScope(child.value)
+        else:  # The child that doesnt belong here should raise an error
+            raise ExpressionOutOfScope(child.value)
+
+
 # return an ast tree from an input file
 def compile(input_file: str, catch_error=True):
     input_stream = FileStream(input_file)
@@ -265,6 +335,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(link_function)
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
+    communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()

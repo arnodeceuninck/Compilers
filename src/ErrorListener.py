@@ -80,6 +80,16 @@ class ReservedVariableOutOfScope(CompilerError):
             reserved_value=self.reserved_value)
 
 
+class ExpressionOutOfScope(CompilerError):
+    def __init__(self, expression):
+        super().__init__()
+        self.expression = expression
+
+    def __str__(self):
+        return "[ERROR] The expression '{expression}' used is out of scope".format(
+            expression=self.expression)
+
+
 class CustomErrorListener(ErrorListener):
 
     def __init__(self):
