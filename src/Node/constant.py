@@ -29,9 +29,9 @@ class Constant(AST):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = fadd {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fadd {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = add {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = add {type} {lvalue}, {rvalue}\n"
 
     def llvm_code(self) -> int:
         output = self.comments()
@@ -86,18 +86,21 @@ class CInt(Constant):
     def get_format_type(self):
         return "d"
 
+    def get_align(self):
+        return 4
+
     @staticmethod
     def convert_template(type):
         if type == "int":
             return None
         elif type == "char":
-            return "{result} = trunc i32 {value} to i8\n"
+            return "\t{result} = trunc i32 {value} to i8\n"
         elif type == "float":
-            return "{result} = sitofp i32 {value} to float\n"
+            return "\t{result} = sitofp i32 {value} to float\n"
         elif type == "double":
-            return "{result} = sitofp i32 {value} to double\n"
+            return "\t{result} = sitofp i32 {value} to double\n"
         elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
-            return "{result} = icmp ne i32 {value}, 0\n"
+            return "\t{result} = icmp ne i32 {value}, 0\n"
 
 
 class CFloat(Constant):
@@ -122,18 +125,21 @@ class CFloat(Constant):
     def get_neutral(self) -> str:
         return "0.0"
 
+    def get_align(self):
+        return 4
+
     @staticmethod
     def convert_template(type):
         if type == "int":
-            return "{result} = fptosi float {value} to i32\n"
+            return "\t{result} = fptosi float {value} to i32\n"
         elif type == "char":
-            return "{result} = fptoui float {value} to i8\n"
+            return "\t{result} = fptoui float {value} to i8\n"
         elif type == "float":
             return None
         elif type == "double":
-            return "{result} = fpext float {value} to double\n"
+            return "\t{result} = fpext float {value} to double\n"
         elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
-            return "{result} = fcmp one float {value}, 0.0\n"
+            return "\t{result} = fcmp one float {value}, 0.0\n"
 
 
 class CChar(Constant):
@@ -149,16 +155,19 @@ class CChar(Constant):
     def get_format_type(self):
         return "c"
 
+    def get_align(self):
+        return 1
+
     @staticmethod
     def convert_template(type):
         if type == "int":
-            return "{result} = zext i8 {value} to i32\n"
+            return "\t{result} = zext i8 {value} to i32\n"
         elif type == "char":
             return None
         elif type == "float":
-            return "{result} = uitofp i8 {value} to float\n"
+            return "\t{result} = uitofp i8 {value} to float\n"
         elif type == "double":
-            return "{result} = uitofp i8 {value} to double\n"
+            return "\t{result} = uitofp i8 {value} to double\n"
         elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
             return "{result} = icmp ne i8 {value}, 0\n"
 
@@ -187,12 +196,12 @@ class CBool(Constant):
     @staticmethod
     def convert_template(type):
         if type == "int":
-            return "{result} = zext i1 {value} to i32\n"
+            return "\t{result} = zext i1 {value} to i32\n"
         elif type == "char":
-            return "{result} = zext i1 {value} to i8\n"
+            return "\t{result} = zext i1 {value} to i8\n"
         elif type == "float":
-            return "{result} = uitofp i1 {value} to float\n"
+            return "\t{result} = uitofp i1 {value} to float\n"
         elif type == "double":
-            return "{result} = uitofp i1 {value} to double\n"
+            return "\t{result} = uitofp i1 {value} to double\n"
         elif type == "bool":
             return ""

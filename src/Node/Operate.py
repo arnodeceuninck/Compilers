@@ -52,9 +52,9 @@ class BMinus(Operate):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = fsub {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fsub {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = sub {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = sub {type} {lvalue}, {rvalue}\n"
 
 
 class BPlus(Operate):
@@ -64,9 +64,9 @@ class BPlus(Operate):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = fadd {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fadd {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = add {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = add {type} {lvalue}, {rvalue}\n"
 
 
 class Div(Operate):
@@ -76,9 +76,9 @@ class Div(Operate):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = fdiv {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fdiv {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = sdiv {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = sdiv {type} {lvalue}, {rvalue}\n"
 
 
 class Mult(Operate):
@@ -88,9 +88,9 @@ class Mult(Operate):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = fmul {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fmul {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = mul {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = mul {type} {lvalue}, {rvalue}\n"
 
 
 class Mod(Operate):
@@ -103,6 +103,6 @@ class Mod(Operate):
 
     def get_llvm_template(self):
         if self.get_type() == "float":
-            return "{result} = frem {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = frem {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = srem {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = srem {type} {lvalue}, {rvalue}\n"

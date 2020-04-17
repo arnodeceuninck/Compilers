@@ -3,7 +3,7 @@ from src.Node.AST import AST, For, While
 
 class ReservedType(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#46ff8a")
+        AST.__init__(self, value, "#adff76")
 
     def __str__(self):
         return '{name}[label="Reserved Word: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
@@ -21,7 +21,7 @@ class Break(ReservedType):
         return None  # Has no type
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; break\n"
+        return "\t; break\n"
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
@@ -45,7 +45,7 @@ class Continue(ReservedType):
         return None  # Has no type
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; continue\n"
+        return "\t; continue\n"
 
     def llvm_code(self):
         AST.llvm_output += self.comments()
@@ -73,16 +73,16 @@ class Return(ReservedType):
         return "void"
 
     def get_llvm_template(self):
-        return "ret {type} {temp}\n"
+        return "\tret {type} {temp}\n"
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; return\n"
+        return "\t; return\n"
 
     def llvm_code(self):
         # If we find that the return has no children then return a void type
         if not self.children:
             AST.llvm_output += self.comments()
-            AST.llvm_output += "ret void\n"
+            AST.llvm_output += "\tret void\n"
             return
 
         # Generate code for the only child of return
@@ -91,7 +91,7 @@ class Return(ReservedType):
         AST.llvm_output += self.comments()
 
         # The loop in which the user situates itself
-        code = "ret " + self[0].get_llvm_type() + " " + self[0].variable()
+        code = "\tret " + self[0].get_llvm_type() + " " + self[0].variable()
         AST.llvm_output += code
 
 
@@ -106,7 +106,7 @@ class Void(ReservedType):
         return "void"
 
     def comments(self, comment_out: bool = True) -> str:
-        return "; void\n"
+        return "\t; void\n"
 
     def llvm_code(self):
         AST.llvm_output += self.comments()

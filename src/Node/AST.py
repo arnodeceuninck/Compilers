@@ -164,13 +164,13 @@ class AST:
     def comment_out(comments: str, comment_out: bool):
         if not comment_out:
             return comments
-        comments = "; " + comments
+        comments = "\t; " + comments
         return comments + '\n'
 
     # The llvm template for loading a variable from storage
     def llvm_load_template(self):
         # Code for loading a variable (default is no loading required)
-        return "{result} = load {type}, {type}* {var}\n"
+        return "\t{result} = load {type}, {type}* {var}\n"
 
     # Get the unique ID of this subtree
     def id(self):
@@ -207,7 +207,7 @@ class AST:
     # Jump to a given label
     @staticmethod
     def goto(label: str):
-        AST.llvm_output += "br label %" + label + "\n"
+        AST.llvm_output += "\tbr label %" + label + "\n"
 
     # Create a new label
     @staticmethod
@@ -298,7 +298,7 @@ class If(AST):
         # Make both labels unique
         label_true = "iftrue" + str(self.id())
         label_false = "iffalse" + str(self.id())
-        code = "br {type} {var}, label %{label_true}, label %{label_false}\n"
+        code = "\tbr {type} {var}, label %{label_true}, label %{label_false}\n"
         code = code.format(type="i1",
                            var=condition.variable(),
                            label_true=label_true,
@@ -356,7 +356,7 @@ class For(AST):
         # Make a unique label for the end
         label_end = "end" + str(self.id())
         # Check if we can go further with the loop
-        code = "br {type} {var}, label %{label_while}, label %{label_end}\n"
+        code = "\tbr {type} {var}, label %{label_while}, label %{label_end}\n"
         code = code.format(type="i1",
                            var=condition.variable(),
                            label_while=label_after_check,
@@ -406,7 +406,7 @@ class While(AST):
         # Make a unique label for the end
         label_end = "end" + str(self.id())
         # Check if we can go further with the loop
-        code = "br {type} {var}, label %{label_while}, label %{label_end}\n"
+        code = "\tbr {type} {var}, label %{label_while}, label %{label_end}\n"
         code = code.format(type="i1",
                            var=condition.variable(),
                            label_while=label_after_check,
@@ -479,7 +479,7 @@ class Assign(Binary):
         return '{name}[label="Assign", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
 
     def get_llvm_template(self):
-        return "store {type} {temp}, {type}* {location}\n"
+        return "\tstore {type} {temp}, {type}* {location}\n"
 
     def collapse_comment(self, ast):
         self.comment = ast.children[0].node.collapse_comment(ast.children[0]) + self.value + \
@@ -496,7 +496,7 @@ class Assign(Binary):
         # And check if the corresponding item has already been defined in llvm
         if not self.get_symbol_table().is_global(self[0].value) and not \
                 self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined:
-            create_var = "{variable} = alloca {llvm_type}, align {align}\n".format(
+            create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self[0].variable(store=True),
                 llvm_type=self[0].get_llvm_type(),
                 align=self[0].get_align())
@@ -581,8 +581,8 @@ class Function(AST):
         if len(self[0].children):
             AST.llvm_output += "; fetching all arguments\n"
         for i in range(len(self[0].children)):
-            code = "{variable} = alloca {type}, align {align}\n"
-            code += "store {type} %{arg_nr}, {type}* {variable}\n"
+            code = "\t{variable} = alloca {type}, align {align}\n"
+            code += "\tstore {type} %{arg_nr}, {type}* {variable}\n"
             code = code.format(
                 variable=self[0][i].variable(store=True),
                 type=self[0][i].get_llvm_type(),

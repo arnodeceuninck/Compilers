@@ -61,9 +61,9 @@ class LessT(Compare):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp olt {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp olt {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp slt {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp slt {type} {lvalue}, {rvalue}\n"
 
 
 class MoreT(Compare):
@@ -73,14 +73,14 @@ class MoreT(Compare):
 
     def get_LLVM(self, is_float=False):
         if is_float:
-            return "{}{} = fcmp ogt {} {}{}, {}{}\n"
-        return "{}{} = icmp sgt {} {}{}, {}{}\n"
+            return "\t{}{} = fcmp ogt {} {}{}, {}{}\n"
+        return "\t{}{} = icmp sgt {} {}{}, {}{}\n"
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp ogt {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp ogt {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp sgt {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp sgt {type} {lvalue}, {rvalue}\n"
 
 
 class LessOrEq(Compare):
@@ -90,14 +90,14 @@ class LessOrEq(Compare):
 
     def get_LLVM(self, is_float=False):
         if is_float:
-            return "{}{} = fcmp ole {} {}{}, {}{}\n"
-        return "{}{} = icmp sle {} {}{}, {}{}\n"
+            return "\t{}{} = fcmp ole {} {}{}, {}{}\n"
+        return "\t{}{} = icmp sle {} {}{}, {}{}\n"
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp ole {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp ole {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp sle {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp sle {type} {lvalue}, {rvalue}\n"
 
 
 class MoreOrEq(Compare):
@@ -107,9 +107,9 @@ class MoreOrEq(Compare):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp oge {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp oge {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp sge {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp sge {type} {lvalue}, {rvalue}\n"
 
 
 class Equal(Compare):
@@ -119,9 +119,9 @@ class Equal(Compare):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp oeq {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp oeq {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp eq {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp eq {type} {lvalue}, {rvalue}\n"
 
 
 class NotEqual(Compare):
@@ -131,9 +131,9 @@ class NotEqual(Compare):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fcmp one {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = fcmp one {type} {lvalue}, {rvalue}\n"
         else:
-            return "{result} = icmp ne {type} {lvalue}, {rvalue}\n"
+            return "\t{result} = icmp ne {type} {lvalue}, {rvalue}\n"
 
 
 class LogicAnd(Compare):
@@ -144,11 +144,11 @@ class LogicAnd(Compare):
     def get_llvm_template(self) -> str:
         # A and B <=> A*B != 0
         if self.get_type() == "float":
-            template = "{result_temp} = fmul {type} {lvalue}, {rvalue}\n"
-            template += "{result} = fcmp one {type} {result_temp}, " + str(self.get_neutral()) + "\n"
+            template = "\t{result_temp} = fmul {type} {lvalue}, {rvalue}\n"
+            template += "\t{result} = fcmp one {type} {result_temp}, " + str(self.get_neutral()) + "\n"
         else:
-            template = "{result_temp} = mul {type} {lvalue}, {rvalue}\n"
-            template += "{result} = icmp ne {type} {result_temp}, " + str(self.get_neutral()) + "\n"
+            template = "\t{result_temp} = mul {type} {lvalue}, {rvalue}\n"
+            template += "\t{result} = icmp ne {type} {result_temp}, " + str(self.get_neutral()) + "\n"
         return template
 
     def llvm_code(self):
@@ -186,11 +186,11 @@ class LogicOr(Compare):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            template = "{temp} = fadd {{type}} {{lvalue}}, {{rvalue}}\n"
-            template += "{{result}} = fcmp one {{type}} {temp}, {neutral}\n"
+            template = "\t{temp} = fadd {{type}} {{lvalue}}, {{rvalue}}\n"
+            template += "\t{{result}} = fcmp one {{type}} {temp}, {neutral}\n"
         else:
-            template = "{temp} = add {{type}} {{lvalue}}, {{rvalue}}\n"
-            template += "{{result}} = icmp ne {{type}} {temp}, {neutral}\n"
+            template = "\t{temp} = add {{type}} {{lvalue}}, {{rvalue}}\n"
+            template += "\t{{result}} = icmp ne {{type}} {temp}, {neutral}\n"
         temp = self.get_temp()
         template = template.format(temp=temp, neutral=self.get_neutral())
         return template

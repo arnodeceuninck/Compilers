@@ -14,10 +14,10 @@ class Variable(AST):
     def __str__(self):
         var_type = "const " if self.const else ""
         var_type += self.get_type()
-        return '{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                               type=var_type,
-                                                                                               value=self.value,
-                                                                                               color=self.color)
+        return '\t{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                                 type=var_type,
+                                                                                                 value=self.value,
+                                                                                                 color=self.color)
 
     def constant_folding(self):
         return False
@@ -75,13 +75,13 @@ class VInt(Variable):
         if type == "int":
             return ""
         elif type == "char":
-            return "{}{} = trunc i32 {}{} to i8\n"
+            return "\t{}{} = trunc i32 {}{} to i8\n"
         elif type == "float":
-            return "{}{} = sitofp i32 {}{} to float\n"
+            return "\t{}{} = sitofp i32 {}{} to float\n"
         elif type == "double":
-            return "{}{} = sitofp i32 {}{} to double\n"
+            return "\t{}{} = sitofp i32 {}{} to double\n"
         elif type == "bool":
-            return "{}{} = trunc i32 {}{} to i1\n"
+            return "\t{}{} = trunc i32 {}{} to i1\n"
 
 
 class VChar(Variable):
@@ -105,15 +105,15 @@ class VChar(Variable):
 
     def convert_template(self, type):
         if type == "int":
-            return "{result} = zext i8 {value} to i32\n"
+            return "\t{result} = zext i8 {value} to i32\n"
         elif type == "char":
             return None
         elif type == "float":
-            return "{result} = uitofp i8 {value} to float\n"
+            return "\t{result} = uitofp i8 {value} to float\n"
         elif type == "double":
-            return "{result} = uitofp i8 {value} to double\n"
+            return "\t{result} = uitofp i8 {value} to double\n"
         elif type == "bool":
-            return "{result} = trunc i8 {value} to i1\n"
+            return "\t{result} = trunc i8 {value} to i1\n"
 
 
 class VFloat(Variable):
@@ -138,12 +138,12 @@ class VFloat(Variable):
     @staticmethod
     def convert_template(type):
         if type == "int":
-            return "{result} = fptosi float {value} to i32\n"
+            return "\t{result} = fptosi float {value} to i32\n"
         elif type == "char":
-            return "{result} = fptoui float {value} to i8\n"
+            return "\t{result} = fptoui float {value} to i8\n"
         elif type == "float":
             return ""
         elif type == "double":
-            return "{result} = fpext float {value} to double\n"
+            return "\t{result} = fpext float {value} to double\n"
         elif type == "bool":
-            return "{result} = fptoui float {value} to i1\n"
+            return "\t{result} = fptoui float {value} to i1\n"

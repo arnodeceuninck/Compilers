@@ -11,9 +11,9 @@ class Unary(Operator):
         self.funct = None
 
     def __str__(self):
-        return '{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                        value=self.value,
-                                                                                        color=self.color)
+        return '\t{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
+                                                                                          value=self.value,
+                                                                                          color=self.color)
 
     def get_type(self):
         return self[0].get_type()  # Only one type as argument
@@ -42,9 +42,9 @@ class UPlus(Unary):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fadd {type} {value}, 0.0\n"
+            return "\t{result} = fadd {type} {value}, 0.0\n"
         else:
-            return "{result} = add {type} {value}, 0\n"
+            return "\t{result} = add {type} {value}, 0\n"
 
 
 class UMinus(Unary):
@@ -54,9 +54,9 @@ class UMinus(Unary):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            return "{result} = fsub {type} 0.0, {value}\n"
+            return "\t{result} = fsub {type} 0.0, {value}\n"
         else:
-            return "{result} = sub {type} 0, {value}\n"
+            return "\t{result} = sub {type} 0, {value}\n"
 
 
 class UDMinus(Unary):
@@ -78,9 +78,9 @@ class UNot(Unary):
 
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
-            template = "{{result}} = fcmp oeq {{type}} {neutral}, {{value}}\n"
+            template = "\t{{result}} = fcmp oeq {{type}} {neutral}, {{value}}\n"
         else:
-            template = "{{result}} = icmp eq {{type}} {neutral}, {{value}}\n"
+            template = "\t{{result}} = icmp eq {{type}} {neutral}, {{value}}\n"
         template = template.format(neutral=str(self.get_neutral()))
         return template
 
@@ -124,7 +124,7 @@ class UDeref(Unary):
     def llvm_code(self):
         self[0].llvm_code()
         self[0].variable()
-        pass # TODO: fix it
+        pass  # TODO: fix it
 
 
 class UReref(Unary):
@@ -135,7 +135,7 @@ class UReref(Unary):
         child_type = self[0].get_type()
         if child_type[len(child_type) - 1] != "*":
             raise RerefError()
-        return child_type[:len(child_type)-1]
+        return child_type[:len(child_type) - 1]
 
     def get_llvm_type(self):
         child_type = self[0].get_llvm_type()
