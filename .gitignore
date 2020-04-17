@@ -1,5 +1,12 @@
 .idea/
+**/output/*
+test/output/
 gen/
+test.c
+test.ll
+test.s
+classes_node.dot
+packages_node.dot
 c_tree*.dot
 
 # Created by https://www.gitignore.io/api/python,pycharm

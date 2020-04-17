@@ -392,7 +392,7 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#function_definition.
     def enterFunction_definition(self, ctx: cParser.Function_definitionContext):
-        self.add(Function(value=ctx.children[1], return_type=ctx.children[0], function_type="definition"))
+        self.add(Function(value=str(ctx.children[1]), return_type=str(ctx.children[0]), function_type="definition"))
         pass
 
     # Exit a parse tree produced by cParser#function_definition.
@@ -402,7 +402,7 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#function_declaration.
     def enterFunction_declaration(self, ctx: cParser.Function_declarationContext):
-        self.add(Function(value=ctx.children[1], return_type=ctx.children[0], function_type="declaration"))
+        self.add(Function(value=str(ctx.children[1]), return_type=str(ctx.children[0]), function_type="declaration"))
         pass
 
     # Exit a parse tree produced by cParser#function_declaration.
@@ -413,7 +413,7 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#function_use.
     def enterFunction_use(self, ctx: cParser.Function_useContext):
         # TODO: update the return type of this function, needs to be searched
-        self.add(Function(value=ctx.children[0], function_type="use"))
+        self.add(Function(value=str(ctx.children[0]), function_type="use"))
         pass
 
     # Exit a parse tree produced by cParser#function_use.

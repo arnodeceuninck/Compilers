@@ -137,6 +137,65 @@ def checkAssigns(ast):
             raise IncompatibleTypesError(type_lvalue, type_rvalue)
 
 
+def match_function(function1: AST, function2: AST):
+    # If one of the 2 ast trees isn't a function then do not proceed with matching
+    if not isinstance(function1, Function) or not isinstance(function2, Function):
+        return False
+    elif function1.function_type == "use":  # If the type of the 1st function is use then do not proceed
+        return False
+    # Check if the names of the function match
+    # If they do not match then return
+    if function1.value != function2.value:
+        return False
+    # Check if both argument lists match
+    arg_list1 = function1.children[0]
+    arg_list2 = function2.children[0]
+    # So we need to check if their lengths are the same if not return
+    if len(arg_list1.children) != len(arg_list2.children):
+        return False
+    # Go over all the arguments and check if their types match
+    for i in range(len(arg_list1.children)):
+        # If their types do not match then return
+        if arg_list1[i].get_type() != arg_list2[i].get_type():
+            return False
+    # The functions match!
+    return True
+
+
+# Will link the function use to its declaration to get the right type
+def link_function(ast):
+    # If the ast isn't a function then do nothing
+    if not isinstance(ast, Function):
+        return
+    elif ast.function_type != "use":  # If the function is not a use then also return
+        return
+
+    # Begin with trying to link the function
+    # Find the first statement sequence and search for a compatible declaration there, before this function
+    prev_ast = ast
+    cur_ast = ast.parent
+    while True:
+        while not isinstance(cur_ast, StatementSequence) and cur_ast:
+            prev_ast = cur_ast
+            cur_ast = cur_ast.parent
+        if not cur_ast:
+            break
+        # Iterate over the children of the statement sequence
+        for child in cur_ast.children:
+            # If we surpass the child where we came from then continue
+            if child == prev_ast:
+                continue
+            elif match_function(child, ast):  # This will try to match the two functions based on the arguments
+                # Both functions match so we can give the return type of the found function to the
+                # return type of the use function
+                ast.return_type = child.return_type
+                # We have linked the functions so we can return
+                return
+        # Go to the parents of the AST to search further
+        prev_ast = cur_ast
+        cur_ast = cur_ast.parent
+
+
 # return an ast tree from an input file
 def compile(input_file: str, catch_error=True):
     input_stream = FileStream(input_file)
@@ -168,10 +227,12 @@ def make_ast(tree, optimize: bool = True):
     # The two methods of below should be combined in order to make it one pass and apply error checking
     # Create symbol table
     communismForLife.traverse(assignment)  # Symbol table checks
-    # Apply symbol table to all the variables
-    communismForLife.traverse(
-        convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type based on the symbol table
+    # Convert Variables into their right type based on the symbol table
+    communismForLife.traverse(convertVar)
+    # Gives all the function uses correct return types
+    communismForLife.traverse(link_function)
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+
     if optimize:
         communismForLife.optimize()
     return communismForLife
@@ -221,14 +282,3 @@ def to_LLVM(ast, filename):
     outputFile = open(filename, "w")
     outputFile.write(AST.llvm_output)
     outputFile.close()
-
-
-# Will link the function use to its declaration to get the right type
-def link_function(ast):
-    # If the ast isn't a function then do nothing
-    if not isinstance(ast, Function):
-        return
-    elif ast.function.function_type != "use":  # If the function is not a use then also return
-        return
-
-    # Begin with trying to link the function
