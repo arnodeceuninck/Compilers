@@ -10,7 +10,11 @@ function_definition: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argu
 
 function_declaration: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' argument_list ')';
 
-function_use: VAR_NAME '(' (INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME)?(',' INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME)* ')';
+function_use: VAR_NAME '(' use_argument_list ')';
+
+use_argument_list: (use_argument)?(',' use_argument)*;
+
+use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME;
 
 argument_list: (argument)?(',' argument)*;
 
@@ -64,8 +68,8 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
 operation_brackets: '(' operation_logic_or ')'
                   | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME);
 
-//return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
-return_op: RETURN (return_val=operation_logic_or)?;
+return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID))?;
+//return_op: RETURN (return_val=operation_logic_or)?;
 
 DOUBLE_PLUS: '++';
 DOUBLE_MIN: '--';

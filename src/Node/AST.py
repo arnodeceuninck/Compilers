@@ -270,7 +270,8 @@ class StatementSequence(AST):
         while i < len(self.children):
             if isinstance(self[i], Return):
                 # Remove all code after a return
-                self.children = self.children[:len(self.children) - i + 1]  # TODO: Check whether +1 required
+                self.children = self.children[:i + 1]  # TODO: Check whether +1 required
+                break
             self[i].optimize()
             i += 1
 

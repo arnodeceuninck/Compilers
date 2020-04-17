@@ -158,6 +158,7 @@ class customListener(ParseTreeListener):
         # print("Exit Assignment")
         if has_children(ctx):
             self.simplify(2)
+            pass
 
     # Enter a parse tree produced by cParser#lvalue.
     def enterLvalue(self, ctx: cParser.LvalueContext):
@@ -417,17 +418,18 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#function_use.
     def exitFunction_use(self, ctx: cParser.Function_useContext):
-        self.simplify(1)
+        # If we have arguments that are passed through
+        if has_children(ctx):
+            self.simplify(1)
         pass
 
     # Enter a parse tree produced by cParser#argument_list.
-    def enterArgument_list(self, ctx: cParser.Argument_listContext):
-        print("enter argument list")
+    def enterArgument_list(self, ctx: cParser.Argument_listContext = None):
         self.add(Arguments())
         pass
 
     # Exit a parse tree produced by cParser#argument_list.
-    def exitArgument_list(self, ctx: cParser.Argument_listContext):
+    def exitArgument_list(self, ctx: cParser.Argument_listContext = None):
         # Find the number of children
         children = 0
         tree = self.trees[len(self.trees) - 1]
@@ -450,7 +452,6 @@ class customListener(ParseTreeListener):
                 node = VInt()
             elif child.getText() == str(ctx.FLOAT_TYPE()):
                 node = VFloat()
-
             elif child.getText() == str(ctx.CHAR_TYPE()):
                 node = VChar()
             # Check whether it's a pointer
@@ -475,4 +476,32 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#argument.
     def exitArgument(self, ctx: cParser.ArgumentContext):
+        pass
+
+    # Enter a parse tree produced by cParser#use_argument_list.
+    def enterUse_argument_list(self, ctx: cParser.Use_argument_listContext):
+        self.enterArgument_list()
+        pass
+
+    # Exit a parse tree produced by cParser#use_argument_list.
+    def exitUse_argument_list(self, ctx: cParser.Use_argument_listContext):
+        self.exitArgument_list()
+        pass
+
+    # Enter a parse tree produced by cParser#use_argument.
+    def enterUse_argument(self, ctx: cParser.Use_argumentContext):
+        # TODO fix that it supports operation sequences and such
+        if ctx.INT_ID():
+            self.add(CInt(ctx.getText()))
+        elif ctx.FLOAT_ID():
+            self.add(CFloat(ctx.getText()))
+        elif ctx.CHAR_ID():
+            character = ctx.CHAR_ID().getText()  # e.g. 'a'
+            character = character[1:-1]  # e.g. a
+            self.add(CChar(character))
+        elif ctx.VAR_NAME():
+            self.add(Variable(ctx.getText()))
+
+    # Exit a parse tree produced by cParser#use_argument.
+    def exitUse_argument(self, ctx: cParser.Use_argumentContext):
         pass

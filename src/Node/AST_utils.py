@@ -1,6 +1,7 @@
 from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
-from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, SyntaxCompilerError
+from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
+    SyntaxCompilerError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -11,16 +12,17 @@ from src.Node.Operate import *
 from src.Node.Comments import *
 from src.Node.ReservedType import *
 
+
 def connect_symbol_table(ast):
     # If we know that the symbol table is at global level then we do not need to connect it to any table
     # Or if the ast node is not a statement sequence then we do not need to search for a parent
     if not ast.parent or not isinstance(ast, has_symbol_table):
         return
-    # Checks wheter the ast is a function, if it is then we need to check if it defines a function
-    # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
-    if isinstance(ast, Function):
-        if ast.function_type == "declaration" or ast.function_type == "use":
-            return
+    # # Checks whether the ast is a function, if it is then we need to check if it defines a function
+    # # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
+    # if isinstance(ast, Function):
+    #     if ast.function_type == "declaration" or ast.function_type == "use":
+    #         return
 
     # The supposedly statement sequence which we need to connect the current symbol table with
     parent = ast.parent
@@ -50,7 +52,7 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
-        # Check if the parent is a function, if it is then check if it conflicts with one of the passed variables
+        # Check if the parent of the parent is a function, if it is then check if it conflicts with one of the passed variables
         if isinstance(parent.parent, Function):
             pass
         # return not required here, but otherwise pycharm thinks the statement is useless
@@ -82,6 +84,9 @@ def assignment(ast):
         # This is because they define scopes
         while not isinstance(parent, has_symbol_table):
             parent = parent.parent
+            # When the parent is a use function then do not use its symbol table and quit this function
+            if isinstance(parent, Function) and parent.function_type == "use":
+                return
 
         parent.symbol_table.insert(location, type)
 
@@ -164,7 +169,8 @@ def make_ast(tree, optimize: bool = True):
     # Create symbol table
     communismForLife.traverse(assignment)  # Symbol table checks
     # Apply symbol table to all the variables
-    communismForLife.traverse(convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type
+    communismForLife.traverse(
+        convertVar)  # Qua de la fuck does this? -> Convert Variables into their right type based on the symbol table
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     if optimize:
         communismForLife.optimize()
@@ -215,3 +221,14 @@ def to_LLVM(ast, filename):
     outputFile = open(filename, "w")
     outputFile.write(AST.llvm_output)
     outputFile.close()
+
+
+# Will link the function use to its declaration to get the right type
+def link_function(ast):
+    # If the ast isn't a function then do nothing
+    if not isinstance(ast, Function):
+        return
+    elif ast.function.function_type != "use":  # If the function is not a use then also return
+        return
+
+    # Begin with trying to link the function

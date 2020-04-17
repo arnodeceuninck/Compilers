@@ -6,10 +6,8 @@ int mul(int x, int y){
 * My program
 */
 int main(){
-int x = 1;
-while (x < 10) {
-int result = mul(x, 2);
-if ( x > 5) {
-result = mul(result, x);
+    int a = 0;
+    int b = 0;
+    mul(a, b);
+    return 0;
 }
-printf(result); //show the result
