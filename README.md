@@ -39,7 +39,7 @@ Arno Deceuninck & Basil Rommens
 
 #### Optional
 - [ ] Retaining comments in compilation process
-- [ ] Comment after every instruction that contains the statement from the input code
+- [x] Comment after every instruction that contains the statement from the input code
 
 
 ### 4. Loops and conditionals
@@ -51,7 +51,7 @@ Arno Deceuninck & Basil Rommens
 - [x] Reserved words: Break
 - [x] Reserved words: Continue
 - [x] Scopes: unnamed scopes
-- [ ] Scopes: Loops
+- [x] Scopes: Loops
 - [x] Scopes: Conditionals
 
 #### Optional
@@ -62,13 +62,13 @@ Arno Deceuninck & Basil Rommens
 
 ### 5. Functions
 #### Mandatory
-- [ ] Reserved words: return
-- [ ] Reserved words: void
-- [ ] Scopes: function
-- [ ] Local and global variables
-- [ ] Functions
-- [ ] Do not generate code after return statement
-- [ ] Do not generate code after break or continue
+- [x] Reserved words: return
+- [x] Reserved words: void
+- [x] Scopes: function
+- [x] Local and global variables
+- [x] Functions
+- [x] Do not generate code after return statement
+- [x] Do not generate code after break or continue
 
 #### Optional
 - [ ] Do not generate code for variables that are not used
@@ -78,14 +78,30 @@ Arno Deceuninck & Basil Rommens
 ### 6. Arrays
 #### Mandatory
 - [ ] Arrays
-- [ ] Import: printf(char *format, ...)
-- [ ] Import: intf(const char *format, ...)
+- [x] Import: printf(char *format, ...)
+- [x] Import: intf(const char *format, ...)
 
 #### Optional
 - [ ] Arrays: Multi-dimensional
 - [ ] Arrays: assignments of complete arrays or array rows in case of multi-dimensional arrays
 - [ ] Arrays: Dynamic arrays
 
+## LLVM Generatie
+Om llvm leesbaar te houden voor ons en het eenvoudig te houden in presentatie, maken we gebruik van verschillende middelen.
+### Variabelen
+Voor de llvm generatie van variabelen zorgen we er voor dat er geen overlap gebeurt tussen de variabelen op de volgende manier.
+Het **eerste** wat we doen is **globale variabelen** hun gewone naam laten houden _(<var_name>)_. **Andere variabelen** worden anders behandeld.
+Indien we deze tegenkomen nemen we de variabele naam en plakken we achter de variabele een . en dan nog de id van de node waar ze
+in zitten _(<var_name> + . + <node_id>)_. Het punt dient er voor dat variabelen niet met een getal kunnen overeenkomen als we dit op een of andere manier proberen te bereiken.
+Het punt kan je niet in c gebruiken bij een variabele naam. Dan hebben we de **automatisch gegenereerde variabelen** die beginnen altijd
+met een punt en worden gevolgd door een letter, dit kan een _v_ of een _t_ zijn. _v_ wijst op een variabele die wordt later meestal gebruikt, terwijl t wijst 
+op een tijdelijke variabele, deze is altijd anders wanneer men die genereerd van een node. Na deze letter volgt een unieke id
+bij een _t_ is die bij elke generatie anders, maar bij een _v_ is die gelijk aan de id van de node zo blijft deze variabele herbruikbaard _(. + t|v + <id>)_.
+Tot slot hebben we nog de strings die er gebruikt worden in `printf` en `scanf`. Deze zijn van de volgende structuur (. + str + . + <node_id>).
+### Comentaren
+We zorgen er ook voor dat er bij de llvm generatie commentaren bij komen, dit zorgt er grotendeels voor dat we de snel kunnen terugvinden
+waar we eventueel een fout in hebben gemaakt. Ook worden code blokken aangeduid, let wel op dat dit niet enorm betrouwbaar is.
+Het enigste waar we in commentaren generatie in verschillen is dat deze voor de llvm statements gebeurd.
 
 ## Opmerkingen
 Indien er een bewerking wordt gedaan op 2 integer getallen, wordt de uitkomst afgerond en omgezet naar een int
