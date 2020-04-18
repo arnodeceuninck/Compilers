@@ -357,6 +357,8 @@ class customListener(ParseTreeListener):
             self.add(Continue("continue"))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
+        elif ctx.STR_ID():
+            self.add(CString(ctx.getText()[1:-1]))
         # Handling operation of orders with brackets is already assured by the grammar
         pass
 

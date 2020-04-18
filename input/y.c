@@ -7,6 +7,6 @@ void f(int x) {
 
 int main(){
     int x =1;
-    f(x);
+    f(x+1);
     return 0;
 }
