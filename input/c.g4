@@ -16,7 +16,9 @@ function_use: VAR_NAME '(' use_argument_list ')';
 
 use_argument_list: (use_argument)?(',' use_argument)*;
 
-use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME|STR_ID;
+use_argument: operation_logic_or;
+
+//use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME|STR_ID;
 
 argument_list: (argument)?(',' argument)*;
 
@@ -68,7 +70,7 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation_logic_or ')'
-                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME | ARRAY_ID);
+                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME | ARRAY_ID | STR_ID);
 
 return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID|ARRAY_VAR_NAME))?;
 //return_op: RETURN (return_val=operation_logic_or)?;

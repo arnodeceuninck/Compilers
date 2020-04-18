@@ -327,21 +327,21 @@ def check_function(ast):
         # If the function is not defined yet the throw an undefined error
         if not matched_function:
             raise FunctionUndefinedError(ast.value)
-    elif function_type == "defined":
+    elif function_type == "definition":
         # If stdio is included then we need to throw an error because we try to redefine the stdio
         if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
             raise FunctionRedeclarationError(ast.value)
-            # We need to find put this defined function at the back of the AST functions if it  not found in the
-            # array of functions
-            in_array = False  # Variable for indicating if the function is in the array
-            for function in AST.functions:
-                if match_function(function, ast):
-                    in_array = True
-                    break
-            # We did not find the function in the array so append it to the other functions
-            if not in_array:
-                AST.functions.append(ast)
-    elif function_type == "declared":
+        # We need to find put this defined function at the back of the AST functions if it  not found in the
+        # array of functions
+        in_array = False  # Variable for indicating if the function is in the array
+        for function in AST.functions:
+            if match_function(function, ast):
+                in_array = True
+                break
+        # We did not find the function in the array so append it to the other functions
+        if not in_array:
+            AST.functions.append(ast)
+    elif function_type == "declaration":
         # If stdio is included then we need to throw an error because we try to redeclare the stdio
         if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
             raise FunctionRedeclarationError(ast.value)

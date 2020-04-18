@@ -1,8 +1,12 @@
 #include <stdio.h>
 
+void f(int x) {
+    printf("%d", x);
+    return;
+}
+
 int main(){
     int x =1;
-    test(x);
-    test(x);
-    printf("%d %d", x, 0);
+    f(x);
+    return 0;
 }
