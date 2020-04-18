@@ -1,7 +1,8 @@
 from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
-    SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope
+    SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
+    FunctionRedeclarationError, FunctionUndefinedError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -165,8 +166,6 @@ def match_function(function1: AST, function2: AST):
     # If one of the 2 ast trees isn't a function then do not proceed with matching
     if not isinstance(function1, Function) or not isinstance(function2, Function):
         return False
-    elif function1.function_type == "use":  # If the type of the 1st function is use then do not proceed
-        return False
     # Check if the names of the function match
     # If they do not match then return
     if function1.value != function2.value:
@@ -279,6 +278,13 @@ def has_variable(ast):
     return has_var
 
 
+def has_been_included_stdio(ast):
+    for child in ast.children:
+        if isinstance(child, Include):
+            return True
+    return False
+
+
 def check_global_scope(ast):
     # If the ast is not the global scope then just return
     if ast.parent:
@@ -296,6 +302,67 @@ def check_global_scope(ast):
                 raise ExpressionOutOfScope(child.value)
         else:  # The child that doesnt belong here should raise an error
             raise ExpressionOutOfScope(child.value)
+
+
+# This function will store all the declared and defined functions in order to check for the use functions
+# if no declared or defined function is found for the use function then there needs to be an error
+# if at the end the list does not only exist of defined functions then there is also an error
+def check_function(ast):
+    # We need to check if the ast is a function otherwise it will be useless to proceed in this function
+    if not isinstance(ast, Function):
+        return
+    # Next we need to check of which type the function is depending on its use we execute different
+    # actions
+    function_type = ast.function_type
+    if function_type == "use":
+        # If stdio is included then do not worry about the implementation of printf
+        if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
+            return
+        matched_function = False
+        # Iterate over the functions to check if they are defined
+        for function in AST.functions:
+            # Once we found a match we do not throw an error
+            if match_function(function, ast) and not matched_function:
+                matched_function = True
+        # If the function is not defined yet the throw an undefined error
+        if not matched_function:
+            raise FunctionUndefinedError(ast.value)
+    elif function_type == "defined":
+        # If stdio is included then we need to throw an error because we try to redefine the stdio
+        if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
+            raise FunctionRedeclarationError(ast.value)
+            # We need to find put this defined function at the back of the AST functions if it  not found in the
+            # array of functions
+            in_array = False  # Variable for indicating if the function is in the array
+            for function in AST.functions:
+                if match_function(function, ast):
+                    in_array = True
+                    break
+            # We did not find the function in the array so append it to the other functions
+            if not in_array:
+                AST.functions.append(ast)
+    elif function_type == "declared":
+        # If stdio is included then we need to throw an error because we try to redeclare the stdio
+        if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
+            raise FunctionRedeclarationError(ast.value)
+        # We need to find put this declared function at the back of the AST functions if it  not found in the
+        # array of functions
+        in_array = False  # Variable for indicating if the function is in the array
+        for function in AST.functions:
+            if match_function(function, ast):
+                in_array = True
+                break
+        # We did not find the function in the array so append it to the other functions
+        if not in_array:
+            AST.functions.append(ast)
+
+
+# This function will check if the entire AST array contains definitions
+def verify_AST_array():
+    # Iterate over every function in this array and check if it is defined if it is not then raise an error
+    for function in AST.functions:
+        if function.function_type == "declared":
+            raise FunctionUndefinedError(function)
 
 
 # return an ast tree from an input file
@@ -336,6 +403,9 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
+    AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
+    communismForLife.traverse(check_function)  # Checks if all the functions are defined
+    verify_AST_array()
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()
@@ -376,11 +446,8 @@ def to_LLVM(ast, filename):
 
     # If we need to print then create the print function
     if AST.print:
-        print = "@.strc = private unnamed_addr constant [3 x i8] c\"%c\\00\", align 1\n"
-        print += "@.strd = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n"
-        print += "@.strf = private unnamed_addr constant [3 x i8] c\"%f\\00\", align 1\n"
-        print += "declare i32 @printf(i8*, ...)\n"
-        AST.llvm_output += print
+        print_declaration = "declare i32 @printf(i8*, ...)\n"
+        AST.llvm_output += print_declaration
 
     # Write output to the outputfile
     outputFile = open(filename, "w")

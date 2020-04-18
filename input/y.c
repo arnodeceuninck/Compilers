@@ -1,10 +1,8 @@
-void f(int* a){
-	int b = 43;
-}
+#include <stdio.h>
 
 int main(){
-    int x = 0;
-	int* xp = &x;
-	f(xp);
-	printf(x);
+    int x =1;
+    test(x);
+    test(x);
+    printf("%d %d", x, 0);
 }

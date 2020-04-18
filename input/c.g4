@@ -1,8 +1,10 @@
 grammar c;
 
-start_rule: operation_sequence;
+start_rule: (include)? operation_sequence;
 
 operation_sequence: (operation ';' | function |  if_statement | for_statement | while_statement | unnamed_scope)*;
+
+include: '#include <stdio.h>';
 
 function: function_declaration ';' | function_definition;
 
@@ -14,7 +16,7 @@ function_use: VAR_NAME '(' use_argument_list ')';
 
 use_argument_list: (use_argument)?(',' use_argument)*;
 
-use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME;
+use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME|STR_ID;
 
 argument_list: (argument)?(',' argument)*;
 
@@ -22,7 +24,7 @@ argument: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE) (MULT)?) VAR_NAM
 
 unnamed_scope: '{' operation_sequence '}';
 
-operation: (assignment | operation_logic_or | print_statement | return_op);
+operation: (assignment | operation_logic_or | return_op);
 
 if_statement: 'if' '(' condition=operation_logic_or ')' '{' operation_sequence '}' (else_statement)?;
 
@@ -32,7 +34,7 @@ while_statement: 'while' '(' condition=operation_logic_or ')' '{' operation_sequ
 
 for_statement: 'for' '(' initialization=operation ';' condition=operation ';' step=operation ')' '{' operation_sequence '}';
 
-print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME) ')';
+//print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME) ')';
 
 assignment: lvalue ('=' operation_logic_or)?;
 
@@ -101,12 +103,13 @@ CONST: 'const';
 BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
-RESERVED_WORD: ('if' | 'else' | 'while' | 'for' | 'printf'); //https://stackoverflow.com/questions/9726620/how-can-i-differentiate-between-reserved-words-and-variables-using-antlr
+RESERVED_WORD: ('if' | 'else' | 'while' | 'for'); //https://stackoverflow.com/questions/9726620/how-can-i-differentiate-between-reserved-words-and-variables-using-antlr
 ARRAY_VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]* '[' (INT_ID)? ']';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 CHAR_ID: '\'' . '\'';
+STR_ID: '"' .*? '"';
 WS: [ \t\r\n]+ -> skip;
 MULTI_CMNT: '/*' .*? '*/' -> skip;
 ONE_CMNT: '//' .*? '\n' -> skip;

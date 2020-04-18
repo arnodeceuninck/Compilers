@@ -205,3 +205,19 @@ class CBool(Constant):
             return "\t{result} = uitofp i1 {value} to double\n"
         elif type == "bool":
             return ""
+
+
+# This really shouldn't exist
+# TODO: Replace this with another type see printf and scanf for dependencies
+class CString(Constant):
+    def __init__(self, value=""):
+        Constant.__init__(self, value)
+
+    def get_type(self):
+        return "string"
+
+    def get_llvm_type(self) -> str:
+        return "s"
+
+    def get_format_type(self):
+        return "s"

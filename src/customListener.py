@@ -4,7 +4,7 @@ from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
     UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
-    has_symbol_table, Return, Function, Arguments
+    has_symbol_table, Return, Function, Arguments, Include, CString
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -52,6 +52,10 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_sequence.
     def enterOperation_sequence(self, ctx: cParser.Operation_sequenceContext):
         self.scope_count += 1
+        # We need to check if we are in the global scope, if so then we need to check if include already inserted something
+        # If include already did then we need to do nothing because there is already a statement sequence
+        if len(self.trees) and self.scope_count == 1:
+            return
         self.add(StatementSequence(self.scope_count))
 
     # Exit a parse tree produced by cParser#operation_sequence.
@@ -239,23 +243,23 @@ class customListener(ParseTreeListener):
             elif ctx.NEQ():
                 self.add(NotEqual())
 
-    # Enter a parse tree produced by cParser#print_statement.
-    def enterPrint_statement(self, ctx: cParser.Print_statementContext):
-        self.add(Print())
-
-    # Exit a parse tree produced by cParser#print_statement.
-    def exitPrint_statement(self, ctx: cParser.Print_statementContext):
-        if ctx.INT_ID():
-            self.add(CInt(ctx.INT_ID().getText()))
-        elif ctx.FLOAT_ID():
-            self.add(CFloat(ctx.FLOAT_ID().getText()))
-        elif ctx.CHAR_ID():
-            character = ctx.CHAR_ID().getText()  # e.g. 'a'
-            character = character[1:-1]  # e.g. a
-            self.add(CChar(character))
-        elif ctx.VAR_NAME():
-            self.add(Variable(ctx.VAR_NAME().getText()))
-        self.simplify(1)
+    # # Enter a parse tree produced by cParser#print_statement.
+    # def enterPrint_statement(self, ctx: cParser.Print_statementContext):
+    #     self.add(Print())
+    #
+    # # Exit a parse tree produced by cParser#print_statement.
+    # def exitPrint_statement(self, ctx: cParser.Print_statementContext):
+    #     if ctx.INT_ID():
+    #         self.add(CInt(ctx.INT_ID().getText()))
+    #     elif ctx.FLOAT_ID():
+    #         self.add(CFloat(ctx.FLOAT_ID().getText()))
+    #     elif ctx.CHAR_ID():
+    #         character = ctx.CHAR_ID().getText()  # e.g. 'a'
+    #         character = character[1:-1]  # e.g. a
+    #         self.add(CChar(character))
+    #     elif ctx.VAR_NAME():
+    #         self.add(Variable(ctx.VAR_NAME().getText()))
+    #     self.simplify(1)
 
     # Exit a parse tree produced by cParser#operation_compare_eq_neq.
     def exitOperation_compare_eq_neq(self, ctx: cParser.Operation_compare_eq_neqContext):
@@ -508,7 +512,22 @@ class customListener(ParseTreeListener):
             self.add(CChar(character))
         elif ctx.VAR_NAME():
             self.add(Variable(ctx.getText()))
+        elif ctx.STR_ID():
+            self.add(CString(ctx.getText()[1:-1]))
 
     # Exit a parse tree produced by cParser#use_argument.
     def exitUse_argument(self, ctx: cParser.Use_argumentContext):
+        pass
+
+    # Enter a parse tree produced by cParser#include.
+    def enterInclude(self, ctx: cParser.IncludeContext):
+        # If we detect no trees then we must add a statement sequence
+        # We do this in order to avoid that the include comes in front of the first statement sequence
+        if not len(self.trees):
+            self.add(StatementSequence(self.scope_count + 1))
+        self.add(Include())
+        pass
+
+    # Exit a parse tree produced by cParser#include.
+    def exitInclude(self, ctx: cParser.IncludeContext):
         pass

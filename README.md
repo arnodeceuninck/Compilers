@@ -98,7 +98,15 @@ Indien er een bewerking wordt gedaan op 2 integer getallen, wordt de uitkomst af
 - ![#ffd885](https://placehold.it/15/ffd885/000000?text=+) Constanten
 - ![#87f5ff](https://placehold.it/15/87f5ff/000000?text=+) Operatoren
 - ![#af93ff](https://placehold.it/15/af93ff/000000?text=+) Variabelen
+- ![#ff6486](https://placehold.it/15/ff6486/000000?text=+) Gereserveeerde types
+- ![#adff77](https://placehold.it/15/adff77/000000?text=+) Functies en argumentenlijst
+- ![#38A038](https://placehold.it/15/38A038/000000?text=+) Commentaren
+- ![#000000](https://placehold.it/15/000000/000000?text=+) Include
 - ![#9f9f9f](https://placehold.it/15/9f9f9f/000000?text=+) Default Nodes
+
+## Escape Sequences
+Omdat het ridicuul zou zijn om elke mogelijke escape sequence van c te implementeren, hebben we er slechts eensubset van geimplementeerd. Deze subset is in de afbeelding hieronder afgebeeld.
+![alt text](doc/escape_sequences.png)
 
 ## Testen
 In de tests folder vind je een bestand ```test.py```. Als je dit runt, runnen er ineens een paar testen. De uitleg waarvoor

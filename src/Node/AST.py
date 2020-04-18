@@ -4,13 +4,23 @@
 
 from src.symbolTable import SymbolTable
 
+# NOTE the parts referenced here are the parts described in the function get_llvm_print of the class Function
+# This string belongs to the first part
+stringVar = '@.str.{string_id} = private unnamed_addr constant [{string_len} x i8] c"{string_val}", align 1\n'
+# This string belongs to the second part
+stringArg = 'i8* getelementptr inbounds ([{string_len} x i8], [{string_len} x i8]* @.str.{string_id}, i32 0, i32 0)'
+stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
+
 
 class AST:
     _id = 0
     llvm_output = ""
-    # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable -> found in the statement sequences
+    # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable
+    # -> found in the statement sequences
     print = False
     contains_function = False  # Check whether you have to manually add the int main()
+    stdio = False  # Indicates if stdio is used
+    functions = list()  # This list contains all the functions that it are declared on the pre-order traversal
 
     # Resets the global class variables (must be used with tests)
     @staticmethod
@@ -568,7 +578,7 @@ class Function(AST):
             # Add space between the type and the arguments variable name
             function_arguments += " "
             # Add the value of the child
-            function_arguments += child.value
+            function_arguments += str(child.value)
 
         return "; {function_name}({function_arguments})\n".format(function_name=self.value,
                                                                   function_arguments=function_arguments)
@@ -581,11 +591,138 @@ class Function(AST):
             return "call {return_type} @{name}({arg_list})"
         return "define {return_type} @{name}({arg_list})"
 
+    def to_llvm_string(self, string) -> str:
+        i = 0
+        ret_string = str()
+        while i < len(string):
+            # If we find that the string is a \ then we need to check what translation of it will be in llvm
+            if string[i] == "\\":
+                if string[i + 1] == "n":  # endl
+                    ret_string += "\\A0"
+                elif string[i + 1] == "b":  # backspace
+                    ret_string += "\\08"
+                elif string[i + 1] == "e":  # escape character
+                    ret_string += "\\1B"
+                elif string[i + 1] == "a":  # alert beep
+                    ret_string += "\\07"
+                elif string[i + 1] == "f":  # Formfeed pagebreak
+                    ret_string += "\\0C"
+                elif string[i + 1] == "r":  # carriage return
+                    ret_string += "\\0D"
+                elif string[i + 1] == "t":  # horizontal tab
+                    ret_string += "\\09"
+                elif string[i + 1] == "v":  # Vertical tab
+                    ret_string += "\\0B"
+                elif string[i + 1] == "\\":  # backslash
+                    ret_string += "\\5C"
+                elif string[i + 1] == "\'":  # apostrophe
+                    ret_string += "\\27"
+                elif string[i + 1] == "\"":  # double quotation mark
+                    ret_string += "\\22"
+                elif string[i + 1] == "?":  # questionmark
+                    ret_string += "\\3F"
+                # In all other cases just take the last letter
+                else:
+                    ret_string += string[i + 1]
+                # Because we checked 2 letters we need to go one letter further to get to the next letter
+                i += 1
+            # If we just find a character then we need to add the character instead of a hexadecimal value
+            else:
+                ret_string += string[i]
+            # Go one letter further
+            i += 1
+        # A \00 needs to be added in order to mark the end of the string because every string is null terminated
+        ret_string += "\\00"
+        return ret_string
+
+    def get_llvm_string_len(self, string) -> int:
+        nr_backslashes = 0
+        # We need to count the \ in the string in order to get the right amount of characters
+        for character in string:
+            if character == "\\":
+                nr_backslashes += 1
+        # The total length will be the actual length of the string minus 2 * nr_backslashes
+        # this is because each backslash sequence contains 3 characters which should in fact be 1
+        return len(string) - 2 * nr_backslashes
+
+    # This piece of code will create a printf statement if it is necessary
+    def get_llvm_print(self):
+        # We need to indicate that we are printing so we need to set the ast value of print to true
+        AST.print = True
+        # In order to get the correct code there are 2 parts in the equation
+        # The first one is creating the string to call
+        # The second part is making the call to the function with the left over arguments
+
+        # PART 1
+        # Get the string value
+        custom_string = self[0][0].value
+        custom_string = self.to_llvm_string(custom_string)
+        string_count = self.get_llvm_string_len(custom_string)
+        # Create an unique id based on the id of the current function node
+        custom_string_id = str(self.id())
+        llvm_string_var = stringVar.format(string_id=custom_string_id, string_len=string_count,
+                                           string_val=custom_string)
+        # Because this does belong in the global scope we will prepend it to the current
+        temp_llvm_output = llvm_string_var
+        temp_llvm_output += AST.llvm_output
+        AST.llvm_output = temp_llvm_output
+
+        # PART 2
+        function_arguments = ""
+        for child in self.children[0]:
+            # If we are in the first child it means we are in the string, we do NOT need to pass this as an argument
+            # so we use this to set the first argument of the string arguments with the right values in it
+            if not len(function_arguments):
+                function_arguments = stringArg.format(string_len=string_count, string_id=custom_string_id,
+                                                      string_val=child.value)
+                continue
+            if len(function_arguments):
+                # Add a separator to the arguments, because there was a previous argument
+                function_arguments += ", "
+            # Add the type of the variable
+            # Add the argument to the function arguments
+            # If the child is a constant put the constant value in the argument
+            if isinstance(child, Constant):
+                function_arguments += child.get_llvm_print_type() + " " + str(child.value)
+            # If it is a variable then put the LLVM value in the function argument
+            elif isinstance(child, Variable):
+                print_type = child.get_llvm_print_type()
+                variable = ""
+                # Because you can't print floats only doubles, we need to first extend it to a double
+                if print_type == "double":
+                    convert_code = VFloat.convert_template("double")
+                    convert_code = convert_code.format(result=child.parent.variable(), value=child.variable())
+                    variable = child.parent.variable()
+                    AST.llvm_output += convert_code
+                else:  # This is the default case
+                    variable = child.variable()
+
+                function_arguments += child.get_llvm_print_type() + " " + variable
+
+        # We created all the arguments that should go into the function call right now we need to put them in there
+        # then we append it to the output of the llvm generation
+        insert_string = stringCall.format(string_arg=function_arguments)
+        AST.llvm_output += insert_string
+
+    # This piece of code will create the scan of the code
+    def get_llvm_scan(self):
+        pass
+
     # The llvm code needs to be generated a special way and not in the main function
     # TODO: Duplicate functions are possible so naming scheme needs to change
     # TODO: Functions declarations/use need to point to the definition in order to call the correct function
     def llvm_code(self):
         AST.llvm_output += self.comments()
+        # Check if stdio is included if yes then use printf
+        if AST.stdio:
+            # Check if the function is either printf or scanf then try to use them
+            if self.value == "printf":
+                self.get_llvm_print()
+                return
+            if self.value == "scanf":
+                self.get_llvm_scan()
+                return
+
         if self.function_type == "use":
             # Add the arguments for a function in a string
             # TODO: Check llvm arguments structure
@@ -661,6 +798,28 @@ class Arguments(AST):
 
     def __str__(self):
         return '{name}[label="Argument List", fillcolor="{color}"] \n'.format(
+            name=self.id(),
+            color=self.color)
+
+    def get_type(self):
+        return None
+
+    def comments(self, comment_out: bool = True) -> str:
+        return ""
+
+    def get_llvm_template(self):
+        return ""
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
+
+
+class Include(AST):
+    def __init__(self, value=""):
+        AST.__init__(self, value, "#000000")
+
+    def __str__(self):
+        return '{name}[label= <<font color="white">include stdio.h</font>>, fillcolor="{color}"] \n'.format(
             name=self.id(),
             color=self.color)
 
