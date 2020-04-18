@@ -586,10 +586,10 @@ class Function(AST):
     def get_llvm_template(self):
         # if we declare a function then we that we declare it
         if self.function_type == "declare":
-            return "declare {return_type} @{name}({arg_list})"
+            return "declare {return_type} @{name}({arg_list})\n"
         elif self.function_type == "use":  # We call a function
-            return "call {return_type} @{name}({arg_list})"
-        return "define {return_type} @{name}({arg_list})"
+            return "\tcall {return_type} @{name}({arg_list})\n"
+        return "define {return_type} @{name}({arg_list})\n"
 
     def to_llvm_string(self, string) -> str:
         i = 0
@@ -679,15 +679,13 @@ class Function(AST):
             if len(function_arguments):
                 # Add a separator to the arguments, because there was a previous argument
                 function_arguments += ", "
-            # Add the type of the variable
-            # Add the argument to the function arguments
-            # If the child is a constant put the constant value in the argument
-            if isinstance(child, Constant):
-                function_arguments += child.get_llvm_print_type() + " " + str(child.value)
-            # If it is a variable then put the LLVM value in the function argument
-            elif isinstance(child, Variable):
+
+            # Generate the llvm code of the child
+            child.llvm_code()
+            # If the type of the child is a float then we need to convert it to a bool
+            if child.get_llvm_type() == "float":
                 print_type = child.get_llvm_print_type()
-                variable = ""
+                variable = str()
                 # Because you can't print floats only doubles, we need to first extend it to a double
                 if print_type == "double":
                     convert_code = VFloat.convert_template("double")
@@ -698,6 +696,9 @@ class Function(AST):
                     variable = child.variable()
 
                 function_arguments += child.get_llvm_print_type() + " " + variable
+            else:
+                # We know that the llvm code that has been generated has stored the value in the child as a variable
+                function_arguments += child.get_llvm_type() + " " + child.variable()
 
         # We created all the arguments that should go into the function call right now we need to put them in there
         # then we append it to the output of the llvm generation
@@ -731,14 +732,10 @@ class Function(AST):
                 if len(function_arguments):
                     # Add a separator to the arguments, because there was a previous argument
                     function_arguments += ", "
-                # Add the type of the variable
-                # Add the argument to the function arguments
-                # If the child is a constant put the constant value in the argument
-                if isinstance(child, Constant):
-                    function_arguments += child.get_llvm_type() + " " + child.value
-                elif isinstance(child,
-                                Variable):  # If it is a variable then put the LLVM value in the function argument
-                    function_arguments += child.get_llvm_type() + " " + child.variable()
+                # Generate the llvm code of the child
+                child.llvm_code()
+                # We know that the llvm code that has been generated has stored the value in the child as a variable
+                function_arguments += child.get_llvm_type() + " " + child.variable()
 
             initialization_line = self.get_llvm_template()
             initialization_line = initialization_line.format(return_type=self.get_llvm_type(), name=self.value,

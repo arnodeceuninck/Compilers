@@ -501,27 +501,6 @@ class customListener(ParseTreeListener):
         self.exitArgument_list()
         pass
 
-    # Enter a parse tree produced by cParser#use_argument.
-    def enterUse_argument(self, ctx: cParser.Use_argumentContext):
-        # TODO fix that it supports operation sequences and such
-        # if ctx.INT_ID():
-        #     self.add(CInt(ctx.getText()))
-        # elif ctx.FLOAT_ID():
-        #     self.add(CFloat(ctx.getText()))
-        # elif ctx.CHAR_ID():
-        #     character = ctx.CHAR_ID().getText()  # e.g. 'a'
-        #     character = character[1:-1]  # e.g. a
-        #     self.add(CChar(character))
-        # elif ctx.VAR_NAME():
-        #     self.add(Variable(ctx.getText()))
-        # elif ctx.STR_ID():
-        #     self.add(CString(ctx.getText()[1:-1]))
-        pass
-
-    # Exit a parse tree produced by cParser#use_argument.
-    def exitUse_argument(self, ctx: cParser.Use_argumentContext):
-        pass
-
     # Enter a parse tree produced by cParser#include.
     def enterInclude(self, ctx: cParser.IncludeContext):
         # If we detect no trees then we must add a statement sequence

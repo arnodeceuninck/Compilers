@@ -14,9 +14,7 @@ function_declaration: (INT_TYPE|FLOAT_TYPE|CHAR_TYPE|VOID_TYPE) VAR_NAME '(' arg
 
 function_use: VAR_NAME '(' use_argument_list ')';
 
-use_argument_list: (use_argument)?(',' use_argument)*;
-
-use_argument: operation_logic_or;
+use_argument_list: (operation_logic_or)?(',' operation_logic_or)*;
 
 //use_argument: INT_ID|FLOAT_ID|CHAR_ID|VAR_NAME|STR_ID;
 
