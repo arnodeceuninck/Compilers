@@ -588,11 +588,11 @@ class Function(AST):
 
     def get_llvm_template(self):
         # if we declare a function then we that we declare it
-        if self.function_type == "declare":
+        if self.function_type == "declaration":
             return "declare {return_type} @{name}({arg_list})\n"
         elif self.function_type == "use":  # We call a function
             return "\tcall {return_type} @{name}({arg_list})\n"
-        return "define {return_type} @{name}({arg_list})\n"
+        return "define {return_type} @{name}({arg_list})"
 
     def to_llvm_string(self, string) -> str:
         i = 0
@@ -781,7 +781,11 @@ class Function(AST):
                 # Generate the llvm code of the child
                 child.llvm_code()
                 # We know that the llvm code that has been generated has stored the value in the child as a variable
-                function_arguments += child.get_llvm_type() + " " + child.variable()
+                if isinstance(child, Variable):
+                    if child.ptr:
+                        function_arguments += child.get_llvm_type() + " " + child.variable()
+                else:
+                    function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
 
             initialization_line = self.get_llvm_template()
             initialization_line = initialization_line.format(return_type=self.get_llvm_type(), name=self.value,
@@ -793,7 +797,7 @@ class Function(AST):
                 function_call = "\t" + self.variable() + " = " + initialization_line
             AST.llvm_output += function_call
             return
-        elif self.function_type == "declare":
+        elif self.function_type == "declaration":
             return
 
         # Add the arguments for a function in a string

@@ -150,7 +150,7 @@ class UReref(Unary):
 
         # Load the value into the ast node
         code = self.llvm_load_template()
-        code = code.format(result=self.variable(), type=type[:-1], var=self[0].variable())
+        code = code.format(result=self.variable(), type=type, var=self[0].variable())
 
         AST.llvm_output += code
 
