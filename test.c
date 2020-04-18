@@ -2,6 +2,6 @@
 
 int main ()
 {
-  int i = f();
+  printf("\n");
   return 0;
 }

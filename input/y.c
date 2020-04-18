@@ -1,12 +1,13 @@
 #include <stdio.h>
 
-void f(int x) {
-    printf("%d %f", x+1, 1.0);
-    return;
+int f(int x) {
+    printf("%d %f\n", x+1, 1.0);
+    return 8;
 }
 
 int main(){
     int x =1;
-    f(x+1*x);
-    return 0;
+    x = f(x+1*x);
+    printf("%d", x);
+    return x+1;
 }

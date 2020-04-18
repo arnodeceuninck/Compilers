@@ -598,7 +598,7 @@ class Function(AST):
             # If we find that the string is a \ then we need to check what translation of it will be in llvm
             if string[i] == "\\":
                 if string[i + 1] == "n":  # endl
-                    ret_string += "\\A0"
+                    ret_string += "\\0A"
                 elif string[i + 1] == "b":  # backspace
                     ret_string += "\\08"
                 elif string[i + 1] == "e":  # escape character
