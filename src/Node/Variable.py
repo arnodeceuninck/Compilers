@@ -1,4 +1,4 @@
-from src.Node.AST import AST
+from src.Node.AST import AST, StatementSequence
 
 
 class Variable(AST):
@@ -44,8 +44,21 @@ class Variable(AST):
         code = code.format(result=variable, type=self.get_llvm_type(), var=self.variable(store=True))
         AST.llvm_output += code
 
+    def get_align(self):
+        return 0
+
+    # The llvm code for a variable will only be generated if the parent is a statement sequence,
+    # because then we will have to allocate the variable
     def llvm_code(self):
-        return ""  # Doesn't have llvm code: The code for loading gets added when doing self.variable()
+        if not isinstance(self.parent, StatementSequence):
+            return ""
+        # Allocate the variable
+        create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
+            variable=self.variable(store=True),
+            llvm_type=self.get_llvm_type(),
+            align=self.get_align())
+        AST.llvm_output += create_var
+        return ""
 
     def comments(self, comment_out: bool = False):
         comment = self.value

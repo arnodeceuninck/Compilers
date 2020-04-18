@@ -11,13 +11,16 @@ stringVar = '@.str.{string_id} = private unnamed_addr constant [{string_len} x i
 stringArg = 'i8* getelementptr inbounds ([{string_len} x i8], [{string_len} x i8]* @.str.{string_id}, i32 0, i32 0)'
 stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
 
+scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
 
 class AST:
     _id = 0
     llvm_output = ""
     # symbol_table = SymbolTable() Removing the symbol table from the ast as a static variable
     # -> found in the statement sequences
+    # These two variables are necessary for supporting scanning and printing with stdio
     print = False
+    scan = False
     contains_function = False  # Check whether you have to manually add the int main()
     stdio = False  # Indicates if stdio is used
     functions = list()  # This list contains all the functions that it are declared on the pre-order traversal
@@ -707,7 +710,50 @@ class Function(AST):
 
     # This piece of code will create the scan of the code
     def get_llvm_scan(self):
-        pass
+        # This is mostly the same as print
+        # We need to indicate that we are printing so we need to set the ast value of print to true
+        AST.scan = True
+        # In order to get the correct code there are 2 parts in the equation
+        # The first one is creating the string to call
+        # The second part is making the call to the function with the left over arguments
+
+        # PART 1
+        # Get the string value
+        custom_string = self[0][0].value
+        custom_string = self.to_llvm_string(custom_string)
+        string_count = self.get_llvm_string_len(custom_string)
+        # Create an unique id based on the id of the current function node
+        custom_string_id = str(self.id())
+        llvm_string_var = stringVar.format(string_id=custom_string_id, string_len=string_count,
+                                           string_val=custom_string)
+        # Because this does belong in the global scope we will prepend it to the current
+        temp_llvm_output = llvm_string_var
+        temp_llvm_output += AST.llvm_output
+        AST.llvm_output = temp_llvm_output
+
+        # PART 2
+        function_arguments = ""
+        for child in self.children[0]:
+            # If we are in the first child it means we are in the string, we do NOT need to pass this as an argument
+            # so we use this to set the first argument of the string arguments with the right values in it
+            if not len(function_arguments):
+                function_arguments = stringArg.format(string_len=string_count, string_id=custom_string_id,
+                                                      string_val=child.value)
+                continue
+            if len(function_arguments):
+                # Add a separator to the arguments, because there was a previous argument
+                function_arguments += ", "
+
+            # Generate the llvm code of the child
+            child.llvm_code()
+
+            # We know that the llvm code that has been generated has stored the value in the child as a variable
+            function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
+
+        # We created all the arguments that should go into the function call right now we need to put them in there
+        # then we append it to the output of the llvm generation
+        insert_string = scanCall.format(scan_arg=function_arguments)
+        AST.llvm_output += insert_string
 
     # The llvm code needs to be generated a special way and not in the main function
     # TODO: Duplicate functions are possible so naming scheme needs to change

@@ -1,13 +1,10 @@
 #include <stdio.h>
 
-int f(int x) {
-    printf("%d %f\n", x+1, 1.0);
-    return 8;
-}
-
 int main(){
-    int x =1;
-    x = f(x+1*x);
-    printf("%d", x);
-    return x+1;
+	int x;
+	int y;
+    printf("Enter two numbers:");
+	scanf("%d%d", &x, &y);
+	printf("%d; %d", x, y);
+	return 1;
 }

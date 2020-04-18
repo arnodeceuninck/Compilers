@@ -444,10 +444,15 @@ def to_LLVM(ast, filename):
         AST.llvm_output += "ret i32 0\n"
         AST.llvm_output += "}\n\n"
 
-    # If we need to print then create the print function
+    # If we need to print then create the print function declaration
     if AST.print:
         print_declaration = "declare i32 @printf(i8*, ...)\n"
         AST.llvm_output += print_declaration
+
+    # If we need to scan then create the scan function declaration
+    if AST.scan:
+        scan_declaration = "declare i32 @__isoc99_scanf(i8*, ...)\n"
+        AST.llvm_output += scan_declaration
 
     # Write output to the outputfile
     outputFile = open(filename, "w")

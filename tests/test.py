@@ -2,6 +2,7 @@ import unittest
 # from src.main import compile
 from src.Node.AST_utils import *
 from src.ErrorListener import *
+import glob
 
 
 class MyTestCase(unittest.TestCase):
@@ -265,6 +266,27 @@ class MyTestCase(unittest.TestCase):
 
     def test_function(self):
         tree = self.helper_test_c("function", cmp=True)
+
+    # This will just compile every single file
+    def test_benchmark_working(self):
+        print(glob.glob('../CompilersBenchmark/CorrectCode/*.ll'))
+        bench_files = list()
+        for file in glob.glob("*.txt"):
+            bench_files.append(str(file))
+
+        # Iterate over all the benchmark files and check if they all do compile
+        for file in bench_files:
+            try:
+                tree: AST = compile(file, catch_error=False)
+                tree.constant_folding()
+                dot(tree, "output/" + file + ".dot")
+                to_LLVM(tree, "output/" + file + ".ll")
+            except:
+                self.assertTrue(False, "could not compile " + file)
+        pass
+
+    def test_benchmark_semantic(self):
+        pass
 
 
 if __name__ == '__main__':

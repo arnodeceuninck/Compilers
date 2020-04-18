@@ -120,7 +120,7 @@ class UDeref(Unary):
         return self[0].get_type() + "*"
 
     def get_llvm_type(self):
-        return self[0].get_type() + "*"
+        return self[0].get_llvm_type() + "*"
 
     def llvm_code(self):
         self[0].llvm_code()
