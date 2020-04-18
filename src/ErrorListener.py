@@ -90,6 +90,24 @@ class ExpressionOutOfScope(CompilerError):
             expression=self.expression)
 
 
+class FunctionRedeclarationError(CompilerError):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " already declared"
+
+
+class FunctionUndefinedError(CompilerError):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " not defined"
+
+
 class CustomErrorListener(ErrorListener):
 
     def __init__(self):

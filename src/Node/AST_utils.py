@@ -405,7 +405,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
-    verify_AST_array()
+    verify_AST_array()  # Checks if the array is empty
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()
