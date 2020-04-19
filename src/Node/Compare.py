@@ -139,7 +139,7 @@ class NotEqual(Compare):
 class LogicAnd(Compare):
     def __init__(self, value="&&"):
         Compare.__init__(self, value)
-        self.funct = lambda args: args[0] and args[1]
+        self.funct = lambda args: (args[0] * args[1]) != 0
 
     def get_llvm_template(self) -> str:
         # A and B <=> A*B != 0
@@ -160,7 +160,12 @@ class LogicAnd(Compare):
         llvm_type = self.get_llvm_type()
 
         temp1 = self.get_temp()
-        temp2 = self.get_temp()
+        # We need to have the variable in order to have the correct translation when the parrent is the BoolClasses
+        # because we do not want to extend the i1 we have to keep it that way
+        if isinstance(self.parent, BoolClasses):
+            temp2 = self.variable(self.id())
+        else:
+            temp2 = self.get_temp()
 
         comp_output = self.get_llvm_template()
 
@@ -170,6 +175,10 @@ class LogicAnd(Compare):
 
         output += comp_output
 
+        # if the parent is an if statement then do not convert the variable
+        if isinstance(self.parent, BoolClasses):
+            AST.llvm_output += output
+            return
         # Now convert the output (i1) we got to the type we need
         bool_to_type = CBool.convert_template(self.get_type())
         bool_to_type = bool_to_type.format(result=self.variable(), value=temp2)
@@ -195,4 +204,3 @@ class LogicOr(Compare):
         template = template.format(temp=temp, neutral=self.get_neutral())
         return template
         # return "{result} = icmp or {type} {lvalue}, {rvalue}\n"
-

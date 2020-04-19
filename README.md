@@ -129,7 +129,23 @@ In de tests folder vind je een bestand ```test.py```. Als je dit runt, runnen er
 welke test specifiek dient kan je terugvinden in het c bestand van de test zelf (in de folder ```tests/input```). Om specifiek te weten waarop de testen werken, kan je een kijkje nemen in het ```tests/test.py```. 
 
 ## Benchmark Result
-### CorrectCode
+### CorrectCode (21/32)
+#### Code with arrays (6/32)
+All these files do not work right now:
+- scanf2.c
+- scoping.c
+- unaryOperations.c
+- variables3.c
+- variables7.c
+- variables8.c
+#### Other files (5/32)
+Did not know that double pointers needed to work. Scoping does not work. The first 2 compares give some weird result because own implementation
+see video. And strings passed as arguments in printf.
+- comparisons1.c
+- comparisons2.c
+- intToFloatConversion.c
+- printf2.c
+- variables6.c
 ### SemanticErrors (17/47)
 Skipped all array files
 

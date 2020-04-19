@@ -61,14 +61,15 @@ class Variable(AST):
     # The llvm code for a variable will only be generated if the parent is a statement sequence,
     # because then we will have to allocate the variable
     def llvm_code(self):
-        if isinstance(self.parent, StatementSequence):
+        if isinstance(self.parent, StatementSequence) and not self.parent.symbol_table.get_symbol_table(self.value)[
+            self.value].llvm_defined:
             # Allocate the variable
             create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self.variable(store=True),
                 llvm_type=self.get_llvm_type(),
                 align=self.get_align())
             AST.llvm_output += create_var
-
+            self.parent.symbol_table.get_symbol_table(self.value)[self.value].llvm_defined = True
         return ""
 
     def comments(self, comment_out: bool = False):

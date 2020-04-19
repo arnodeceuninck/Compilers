@@ -535,7 +535,7 @@ class Assign(Binary):
             # The variable has been defined in llvm, so no more generating hereafter
             self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined = True
         code = self.get_llvm_template()
-        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=True),
+        code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=False),
                            location=self[0].variable(store=True))
 
         output += code
