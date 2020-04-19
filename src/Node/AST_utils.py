@@ -31,11 +31,11 @@ def connect_symbol_table(ast):
     while not isinstance(parent, has_symbol_table):
         parent = parent.parent
 
-    # Checks wheter the parent is a function, if it is then we need to check if it defines a function
-    # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
-    if isinstance(parent, Function):
-        if parent.function_type == "declaration" or parent.function_type == "use":
-            return
+    # # Checks whether the parent is a function, if it is then we need to check if it defines a function
+    # # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
+    # if isinstance(parent, Function):
+    #     if parent.function_type == "declaration" or parent.function_type == "use":
+    #         return
     # Set the parent of the symbol table to the parent just found
     ast.symbol_table.parent = parent.symbol_table
     # Add a child to this parent
@@ -209,12 +209,18 @@ def link_function(ast):
             cur_ast = cur_ast.parent
         if not cur_ast:
             break
+        # The next break means that we need to stop with iterating over the children
+        # Because we surpassed from where we came from
+        next_break = False
         # Iterate over the children of the statement sequence
         for child in cur_ast.children:
-            # If we surpass the child where we came from then continue
+            # Break now, previous loop asked for it
+            if next_break:
+                break
+            # If we surpass the child where we came from then the next child we need to break
             if child == prev_ast:
-                continue
-            elif match_function(child, ast):  # This will try to match the two functions based on the arguments
+                next_break = True
+            if match_function(child, ast):  # This will try to match the two functions based on the arguments
                 # Both functions match so we can give the return type of the found function to the
                 # return type of the use function
                 ast.return_type = child.return_type
@@ -406,7 +412,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(convertVar)
     # Gives all the function uses correct return types
     communismForLife.traverse(link_function)
-    # communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+    communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included

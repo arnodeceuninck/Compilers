@@ -203,7 +203,7 @@ class AST:
                 if self.get_symbol_table().is_global(self.value):
                     return "@" + self.value
                 return "%" + self.value + "." + str(self.get_symbol_table().get_symbol_table_id(self.value))
-            if indexed: # Ale je aan een bepaalde index een waarde wil assignen
+            if indexed:  # Ale je aan een bepaalde index een waarde wil assignen
                 var = "%.t" + str(self.get_unique_id())
                 self.index_load(var, index)
                 return var
@@ -589,9 +589,12 @@ class Function(AST):
             function_arguments += " "
             # Add the value of the child
             function_arguments += str(child.value)
-
-        return "; {function_name}({function_arguments})\n".format(function_name=self.value,
-                                                                  function_arguments=function_arguments)
+        if isinstance(self.parent, Binary) and self.parent.children[0] == self:
+            return "; {function_name}({function_arguments})".format(function_name=self.value,
+                                                                    function_arguments=function_arguments)
+        else:
+            return "; {function_name}({function_arguments})\n".format(function_name=self.value,
+                                                                      function_arguments=function_arguments)
 
     def get_llvm_template(self):
         # if we declare a function then we that we declare it
@@ -789,8 +792,7 @@ class Function(AST):
                 child.llvm_code()
                 # We know that the llvm code that has been generated has stored the value in the child as a variable
                 if isinstance(child, Variable):
-                    if child.ptr:
-                        function_arguments += child.get_llvm_type() + " " + child.variable()
+                    function_arguments += child.get_llvm_type() + " " + child.variable()
                 else:
                     function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
 
