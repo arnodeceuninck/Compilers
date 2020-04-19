@@ -13,6 +13,7 @@ stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
 
 scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
 
+
 class AST:
     _id = 0
     llvm_output = ""
@@ -193,7 +194,7 @@ class AST:
 
     # Get the variable for the node (and load it from memory if required)
     # Store must be true when you want to store into the variable
-    def variable(self, store: bool = False, array: bool = True):
+    def variable(self, store: bool = False, indexed: bool = False, index=0):
         # TODO: move this to their own classes (virtual functions)
         if isinstance(self, Variable):
             if store:
@@ -202,9 +203,14 @@ class AST:
                 if self.get_symbol_table().is_global(self.value):
                     return "@" + self.value
                 return "%" + self.value + "." + str(self.get_symbol_table().get_symbol_table_id(self.value))
-            var = "%.t" + str(self.get_unique_id())
-            self.llvm_load(var)  # Loads the variable in storage into the variable var
-            return var
+            if indexed: # Ale je aan een bepaalde index een waarde wil assignen
+                var = "%.t" + str(self.get_unique_id())
+                self.index_load(var, index)
+                return var
+            else:
+                var = "%.t" + str(self.get_unique_id())
+                self.llvm_load(var)  # Loads the variable in storage into the variable var
+                return var
         elif isinstance(self, UDeref) and store:
             return self[0].variable(store)
 

@@ -49,6 +49,12 @@ class Variable(AST):
         code = code.format(result=variable, type=self.get_llvm_type(), var=self.variable(store=True))
         AST.llvm_output += code
 
+    def index_load(self, result, index):
+        code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+        code = code.format(result=result, array_type=self.get_llvm_type(),
+                           variable=self.variable(store=True), index=index)
+        AST.llvm_output += code
+
     def get_align(self):
         return 0
 
@@ -62,10 +68,7 @@ class Variable(AST):
                 llvm_type=self.get_llvm_type(),
                 align=self.get_align())
             AST.llvm_output += create_var
-        if self.array and isinstance(self.parent, Assign):
-            code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
-            code = code.format(result=self.variable(load=False), array_type=self.get_llvm_type(), variable=self.variable(store=True), index=self.array_number)
-            AST.llvm_output += code
+
         return ""
 
     def comments(self, comment_out: bool = False):
