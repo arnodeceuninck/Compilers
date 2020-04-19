@@ -193,7 +193,7 @@ class AST:
 
     # Get the variable for the node (and load it from memory if required)
     # Store must be true when you want to store into the variable
-    def variable(self, store: bool = False):
+    def variable(self, store: bool = False, array: bool = True):
         # TODO: move this to their own classes (virtual functions)
         if isinstance(self, Variable):
             if store:
@@ -500,6 +500,7 @@ class Assign(Binary):
         return self.comment
 
     def llvm_code(self):
+        self[0].llvm_code()
         # First calculate the value to store
         self[1].llvm_code()
 

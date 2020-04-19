@@ -129,16 +129,22 @@ def convertVar(ast):
         ast_new = VInt(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
+        ast_new.array = element.array
+        ast_new.array_number = element.array_number
         ast.parent.replace_child(ast, ast_new)
     elif type == 'float':
         ast_new = VFloat(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
+        ast_new.array = element.array
+        ast_new.array_number = element.array_number
         ast.parent.replace_child(ast, ast_new)
     elif type == 'char':
         ast_new = VChar(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
+        ast_new.array = element.array
+        ast_new.array_number = element.array_number
         ast.parent.replace_child(ast, ast_new)
 
 
@@ -400,7 +406,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(convertVar)
     # Gives all the function uses correct return types
     communismForLife.traverse(link_function)
-    communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+    # communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included

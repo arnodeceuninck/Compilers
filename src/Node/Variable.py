@@ -1,4 +1,4 @@
-from src.Node.AST import AST, StatementSequence
+from src.Node.AST import AST, StatementSequence, Assign
 
 
 class Variable(AST):
@@ -11,13 +11,18 @@ class Variable(AST):
 
         self.reref = False  # e.g. *a
 
+        self.array = False
+        self.array_number = 0
+
     def __str__(self):
         var_type = "const " if self.const else ""
         var_type += self.get_type()
-        return '\t{name}[label="Variable Type: {type}: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                                 type=var_type,
-                                                                                                 value=self.value,
-                                                                                                 color=self.color)
+        label = "Variable Type: {type}: {value}".format(type=var_type,
+                                                        value=self.value)
+        if self.array:
+            label += "[{nr}]".format(nr=self.array_number)
+        return '\t{name}[label=\"{label}\", fillcolor="{color}"] \n'.format(name=self.id(), label=label,
+                                                                            color=self.color)
 
     def constant_folding(self):
         return False
@@ -26,7 +31,7 @@ class Variable(AST):
         raise Exception("Abstract function")
         # return self.type + ("*" if self.ptr else "")
 
-    def getLLVMType(self):
+    def getLLVMType(self, ignore_array=False):
         return ""
 
     def getFormatType(self):
@@ -50,14 +55,17 @@ class Variable(AST):
     # The llvm code for a variable will only be generated if the parent is a statement sequence,
     # because then we will have to allocate the variable
     def llvm_code(self):
-        if not isinstance(self.parent, StatementSequence):
-            return ""
-        # Allocate the variable
-        create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
-            variable=self.variable(store=True),
-            llvm_type=self.get_llvm_type(),
-            align=self.get_align())
-        AST.llvm_output += create_var
+        if isinstance(self.parent, StatementSequence):
+            # Allocate the variable
+            create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
+                variable=self.variable(store=True),
+                llvm_type=self.get_llvm_type(),
+                align=self.get_align())
+            AST.llvm_output += create_var
+        if self.array and isinstance(self.parent, Assign):
+            code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+            code = code.format(result=self.variable(load=False), array_type=self.get_llvm_type(), variable=self.variable(store=True), index=self.array_number)
+            AST.llvm_output += code
         return ""
 
     def comments(self, comment_out: bool = False):
@@ -69,7 +77,9 @@ class VInt(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
 
-    def get_llvm_type(self) -> str:
+    def get_llvm_type(self, ignore_array=False) -> str:
+        if not ignore_array and self.array:
+            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
         return "i32" + ("*" if self.ptr else "")
 
     def get_llvm_print_type(self) -> str:
@@ -81,7 +91,9 @@ class VInt(Variable):
     def get_format_type(self):
         return "d"
 
-    def get_align(self):
+    def get_align(self, ignore_array=False):
+        if self.array and not ignore_array:
+            return 4 if self.array_number < 4 else 16
         return 4 + 4 * self.ptr
 
     def convert_template(self, type):
@@ -101,7 +113,9 @@ class VChar(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
 
-    def get_llvm_type(self) -> str:
+    def get_llvm_type(self, ignore_array=False) -> str:
+        if not ignore_array and self.array:
+            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
         return "i8" + ("*" if self.ptr else "")
 
     def get_type(self):
@@ -136,7 +150,9 @@ class VFloat(Variable):
     def get_type(self):
         return "float" + ("*" if self.ptr else "")
 
-    def get_llvm_type(self):
+    def get_llvm_type(self, ignore_array=False) -> str:
+        if not ignore_array and self.array:
+            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
         return "float" + ("*" if self.ptr else "")
 
     def get_llvm_print_type(self) -> str:

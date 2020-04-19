@@ -38,7 +38,7 @@ for_statement: 'for' '(' initialization=operation ';' condition=operation ';' st
 
 assignment: lvalue ('=' operation_logic_or)?;
 
-lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? variable=(VAR_NAME|ARRAY_VAR_NAME);
+lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? (variable=VAR_NAME ('[' array_index=INT_ID ']')?);
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
@@ -68,7 +68,12 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
                               | operation_brackets;
 
 operation_brackets: '(' operation_logic_or ')'
-                  | (function_use | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME | ARRAY_ID | STR_ID);
+                  | (function_use | array_var_name | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | const_array | STR_ID);
+
+array_var_name: var=VAR_NAME '[' nr=INT_ID ']';
+
+const_array: '{'  const_array_element (',' const_array_element)* '}';
+const_array_element: (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID);
 
 //return_op: RETURN (return_val=(VAR_NAME|FLOAT_ID|CHAR_ID|INT_ID|ARRAY_VAR_NAME))?;
 return_op: RETURN (return_val=operation_logic_or)?;
@@ -98,13 +103,13 @@ INT_TYPE: 'int';
 FLOAT_TYPE: 'float';
 CHAR_TYPE: 'char';
 VOID_TYPE: 'void';
-ARRAY_ID: '{' (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID)* '}';
+//ARRAY_ID: '{' (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID) (','(VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID))* '}';
 CONST: 'const';
 BREAK: 'break';
 CONTINUE: 'continue';
 RETURN: 'return';
 RESERVED_WORD: ('if' | 'else' | 'while' | 'for'); //https://stackoverflow.com/questions/9726620/how-can-i-differentiate-between-reserved-words-and-variables-using-antlr
-ARRAY_VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]* '[' (INT_ID)? ']';
+//ARRAY_VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]* '[' (INT_ID)? ']';
 VAR_NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;

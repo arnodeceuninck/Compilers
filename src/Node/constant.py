@@ -69,6 +69,25 @@ class Constant(AST):
             return CBool("0")
         return None
 
+class CArray(Constant):
+    def __init__(self, value: str = "Array"):
+        Constant.__init__(self, value)
+
+    def get_llvm_type(self) -> str:
+        if len(self.children) == 0:
+            return None
+        type = self[0].get_llvm_type()
+        for child in self.children:
+            if type != child.get_llvm_type():
+                return None
+        return type
+
+    def get_llvm_template(self):
+        pass
+
+    def llvm_code(self):
+        pass
+
 
 class CInt(Constant):
     def __init__(self, value: str = "0"):

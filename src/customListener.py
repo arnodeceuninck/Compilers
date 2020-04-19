@@ -4,7 +4,7 @@ from src.ErrorListener import CompilerError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
     UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
-    has_symbol_table, Return, Function, Arguments, Include, CString
+    has_symbol_table, Return, Function, Arguments, Include, CString, CArray, ArrayIndex
 
 
 # Check whether a context has real children (and not only a connection to the next node)
@@ -155,7 +155,9 @@ class customListener(ParseTreeListener):
             if ctx.ASSIGN():
                 node = Assign()
                 # If the lhs is not a declaration then mark is at false
-                if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*":
+                if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*" or \
+                        (ctx.children[0].getChildCount() == 4 and  # Assignment
+                         ctx.children[0].getChild(1).getText() == "[" and ctx.children[0].getChild(3).getText() == "]"):
                     node.declaration = False
                 self.add(node)
 
@@ -175,6 +177,7 @@ class customListener(ParseTreeListener):
         ptr = False
         const = False
         node = None
+        array_index = 0
         for child in ctx.getChildren():
             # Try to find the type of the variable
             if child.getText() == str(ctx.INT_TYPE()):
@@ -183,10 +186,14 @@ class customListener(ParseTreeListener):
                 node = VFloat()
             elif child.getText() == str(ctx.CHAR_TYPE()):
                 node = VChar()
+            elif child.symbol == ctx.array_index:
+                array_index = int(child.getText())
             elif child.symbol == ctx.variable:
                 # Get the name of variable
                 value = child.getText()
-                if ctx.getChildCount() == 1 or ctx.getChild(0).getText() == "*":
+                if ctx.getChildCount() == 1 or ctx.getChild(0).getText() == "*" or \
+                        (ctx.getChildCount() == 4 and # Assignment
+                         ctx.getChild(1).getText() == "[" and ctx.getChild(3).getText() == "]"): # Assignment
                     # Case: assignment (no declaration)
                     node = Variable(value)
 
@@ -201,6 +208,9 @@ class customListener(ParseTreeListener):
         node.value = value
         node.const = const
         node.ptr = ptr
+        if array_index:
+            node.array = True
+            node.array_number = array_index
         # when the righthand side is dereferenced then we need to add the deref node together with the variable node
         if ctx.getChild(0).getText() == "*":
             self.add(UReref())
@@ -513,3 +523,56 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#include.
     def exitInclude(self, ctx: cParser.IncludeContext):
         pass
+
+    # Enter a parse tree produced by cParser#const_array.
+    def enterConst_array(self, ctx: cParser.Const_arrayContext):
+        self.add(CArray())
+
+    # Exit a parse tree produced by cParser#const_array.
+    def exitConst_array(self, ctx: cParser.Const_arrayContext):
+        # Find the number of children
+        children = 0
+        tree = self.trees[len(self.trees) - 1]
+        while not isinstance(tree, CArray):
+            children += 1
+            tree = self.trees[len(self.trees) - 1 - children]
+
+        self.simplify(children)
+
+    # Enter a parse tree produced by cParser#const_array_element.
+    def enterConst_array_element(self, ctx: cParser.Const_array_elementContext):
+        pass
+
+    # Exit a parse tree produced by cParser#const_array_element.
+    def exitConst_array_element(self, ctx: cParser.Const_array_elementContext):
+        if ctx.INT_ID():
+            self.add(CInt(ctx.getText()))
+        elif ctx.FLOAT_ID():
+            self.add(CFloat(ctx.getText()))
+        elif ctx.CHAR_ID():
+            character = ctx.CHAR_ID().getText()  # e.g. 'a'
+            character = character[1:-1]  # e.g. a
+            self.add(CChar(character))
+        elif ctx.VAR_NAME():
+            self.add(Variable(ctx.getText()))
+        pass
+
+    # Enter a parse tree produced by cParser#array_var_name.
+    def enterArray_var_name(self, ctx: cParser.Array_var_nameContext):
+        index = None
+        variable = None
+        for child in ctx.getChildren():
+            if child.symbol == ctx.nr:
+                index = int(child.getText())
+            elif child.symbol == ctx.var:
+                variable = Variable(child.getText())
+        self.add(ArrayIndex(index))
+        self.add(variable)
+        self.simplify(1)
+        pass
+
+    # Exit a parse tree produced by cParser#array_var_name.
+    def exitArray_var_name(self, ctx: cParser.Array_var_nameContext):
+        pass
+
+

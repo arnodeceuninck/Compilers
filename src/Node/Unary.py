@@ -155,6 +155,49 @@ class UReref(Unary):
         AST.llvm_output += code
 
 
+class ArrayIndex(Unary):
+    def __init__(self, index):
+        self.index = index
+        Unary.__init__(self, "[{i}]".format(i=index))
+
+    def get_type(self):
+        try:
+            return self[0].get_type()
+        except:
+            return None
+
+    def get_llvm_type(self):
+        try:
+            return self[0].get_llvm_type(ignore_array=True)
+        except:
+            return None
+
+    def get_llvm_template(self):
+        code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+        code += "{result} = load {type}, {type}* {temp}, align {align}\n"  # NOTE: not the array align
+        return code
+
+    def get_align(self):
+        return self[0].get_align(ignore_array=True)
+
+    def comments(self, comment_out=True):
+        comment = self[0].value + self.value
+        return self.comment_out(comment, comment_out)
+
+    def llvm_code(self):
+        AST.llvm_output += self.comments()
+
+        self[0].llvm_code()
+
+        code = self.get_llvm_template()
+        code = code.format(temp=self.get_temp(), array_type=self[0].get_llvm_type(), variable=self[0].variable(),
+                           index=self.index,
+                           result=self.variable(), type=self[0].get_llvm_type(ignore_array=True),
+                           align=self.get_align())
+
+        AST.llvm_output += code
+
+
 class Print(Unary):
     def __init__(self, value="printf"):
         Unary.__init__(self, value)
