@@ -127,3 +127,65 @@ Omdat het ridicuul zou zijn om elke mogelijke escape sequence van c te implement
 ## Testen
 In de tests folder vind je een bestand ```test.py```. Als je dit runt, runnen er ineens een paar testen. De uitleg waarvoor
 welke test specifiek dient kan je terugvinden in het c bestand van de test zelf (in de folder ```tests/input```). Om specifiek te weten waarop de testen werken, kan je een kijkje nemen in het ```tests/test.py```. 
+
+## Benchmark Result
+### CorrectCode
+### SemanticErrors (17/47)
+Skipped all array files
+
+#### Undetected semantic errors:
+- declarationDeclarationMismatch1.c
+- declarationDeclarationMismatch2.c
+- declarationDeclarationMismatch3.c
+- declarationDefinitionMismatch1.c
+- declarationDefinitionMismatch2.c
+- declarationDefinitionMismatch3.c
+- definitionInLocalScope.c
+- dereferenceTypeMismatch2.c
+- functionCallargumentMismatch1.c
+- functionCallargumentMismatch2.c
+- functionCallargumentMismatch3.c
+Note: Not sure about everything above this line whether it's undetected or uncaught
+- functionCallargumentMismatch4.c
+- incompatibleTypes2.c
+- incompatibleTypes4.c
+- incompatibleTypes5.c
+- incompatibleTypes6.c
+- mainNotFound.c
+- pointerOperationError.c
+- returnTypeMismatch.c
+
+####Wrong error:
+- undeclaredVariable1.c
+- undeclaredVariable2.c
+
+####Uncaught errors (much red in Python): 
+!!! Every file with an empty main
+- functionRedefinition1.c
+- functionRedefinition2.c
+- functionRedefinition3.c
+- incompatibleTypes7.c
+
+####Works as they should:
+- dereferenceTypeMismatch1.c
+- incompatibleTypes1.c
+- incompatibleTypes3.c
+- invalidIncludeError.c
+- invalidLoopControlStatement.c
+- parameterRedefinition1.c
+- parameterRedefinition2.c
+- parameterRedefinition3.c
+- returnOutsideFunction.c
+- undeclaredFunction.c
+- undeclaredVariable3.c
+- variableRedefinition1.c
+- variableRedefinition2.c
+- variableRedefinition3.c
+- variableRedefinition4.c
+- variableRedefinition5.c
+- variableRedefinition6.c 
+
+####Unsupported:
+- All array files
+- invalidUnaryOperation.c
+

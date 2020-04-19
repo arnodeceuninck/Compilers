@@ -1,18 +1,7 @@
-#include <stdio.h>
-
+int x = 5;
+// variable redefinition with different type
+float x = 5.0;
 
 int main(){
-	int x = 5;
-	if (x < 5){
-		printf("Something went wrong"); // Should not print
-	}
-	if (x >= 5){
-		printf("Hello world!\n"); // Should print
-	}
-	if (x == 5 && 1){
-		if (x != 4){
-			printf("Hello world!\n"); // Should print
-		}
-	}
-	return 1;
+    return 0;
 }
