@@ -48,6 +48,16 @@ class IncompatibleTypesError(CompilerError):
     def __str__(self):
         return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
 
+class UnknownOperationError(CompilerError):
+    def __init__(self, operation, ltype, rtype):
+        super().__init__()
+        self.operation = operation
+        self.ltype = ltype
+        self.rtype = rtype
+
+    def __str__(self):
+        return "[ERROR] Undified operation \'{op}\' between \'{ltype}\' and \'{rtype}\'"\
+            .format(op=self.operation, ltype=self.ltype, rtype=self.rtype)
 
 class RerefError(CompilerError):
     def __init__(self):

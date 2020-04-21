@@ -167,7 +167,6 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 - incompatibleTypes5.c
 - incompatibleTypes6.c
 - mainNotFound.c
-- pointerOperationError.c
 - returnTypeMismatch.c
 
 ####Wrong error:
@@ -191,6 +190,7 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 - parameterRedefinition1.c
 - parameterRedefinition2.c
 - parameterRedefinition3.c
+- pointerOperationError.c
 - returnOutsideFunction.c
 - undeclaredFunction.c
 - undeclaredVariable3.c

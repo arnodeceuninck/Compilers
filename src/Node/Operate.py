@@ -1,5 +1,6 @@
 from src.Node.AST import Binary, AST, BoolClasses
 from src.Node.constant import Constant
+from src.ErrorListener import UnknownOperationError
 
 
 class Operate(Binary):
@@ -7,13 +8,12 @@ class Operate(Binary):
         Binary.__init__(self, value)
 
     def get_type(self):
-        if self[0].get_type() == self[1].get_type():
+        supported_operations = [("int", "int"), ("char", "char"), ("float", float)]
+        if (self[0].get_type(), self[1].get_type()) in supported_operations:
             return self[0].get_type()
-        elif self[0].get_type() == "int" and self[1].get_type() == "float" or \
-                self[0].get_type() == "float" and self[1].get_type() == "int":
-            return "float"
         else:
-            return "UNKNOWN"
+            raise UnknownOperationError(self.value, self[0].get_type(), self[1].get_type())
+            # return "UNKNOWN"
 
     def llvm_code(self) -> str:
 
