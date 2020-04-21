@@ -155,9 +155,11 @@ class customListener(ParseTreeListener):
             if ctx.ASSIGN():
                 node = Assign()
                 # If the lhs is not a declaration then mark is at false
-                if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*" or \
-                        (ctx.children[0].getChildCount() == 4 and  # Assignment
-                         ctx.children[0].getChild(1).getText() == "[" and ctx.children[0].getChild(3).getText() == "]"):
+                # This should be fixed with my change in the grammar
+                # if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*" or \
+                #         (ctx.children[0].getChildCount() == 4 and  # Assignment
+                #          ctx.children[0].getChild(1).getText() == "[" and ctx.children[0].getChild(3).getText() == "]"):
+                if not isinstance(self.children[0], cParser.declare):
                     node.declaration = False
                 self.add(node)
 
@@ -167,12 +169,7 @@ class customListener(ParseTreeListener):
             self.simplify(2)
             pass
 
-    # Enter a parse tree produced by cParser#lvalue.
-    def enterLvalue(self, ctx: cParser.LvalueContext):
-        pass
-
-    # Exit a parse tree produced by cParser#lvalue.
-    def exitLvalue(self, ctx: cParser.LvalueContext):
+    def help_exit_lvalue_declare(self, ctx, declaration=False):
         value = ""
         ptr = False
         const = False
@@ -191,9 +188,10 @@ class customListener(ParseTreeListener):
             elif child.symbol == ctx.variable:
                 # Get the name of variable
                 value = child.getText()
-                if ctx.getChildCount() == 1 or ctx.getChild(0).getText() == "*" or \
-                        (ctx.getChildCount() == 4 and # Assignment
-                         ctx.getChild(1).getText() == "[" and ctx.getChild(3).getText() == "]"): # Assignment
+                # if ctx.getChildCount() == 1 or ctx.getChild(0).getText() == "*" or \
+                #         (ctx.getChildCount() == 4 and  # Assignment
+                #          ctx.getChild(1).getText() == "[" and ctx.getChild(3).getText() == "]"):  # Assignment
+                if not declaration:
                     # Case: assignment (no declaration)
                     node = Variable(value)
 
@@ -208,6 +206,7 @@ class customListener(ParseTreeListener):
         node.value = value
         node.const = const
         node.ptr = ptr
+        node.declaration = declaration
         if array_index:
             node.array = True
             node.array_number = array_index
@@ -219,6 +218,22 @@ class customListener(ParseTreeListener):
             self.simplify(1)
             return
         self.add(node)
+
+    # Enter a parse tree produced by cParser#lvalue.
+    def enterLvalue(self, ctx: cParser.LvalueContext):
+        pass
+
+    # Exit a parse tree produced by cParser#lvalue.
+    def exitLvalue(self, ctx: cParser.LvalueContext):
+        self.help_exit_lvalue_declare(ctx)
+
+    # Exit a parse tree produced by cParser#declare.
+    def exitDeclare(self, ctx: cParser.DeclareContext):
+        self.help_exit_lvalue_declare(ctx, declaration=True)
+
+    # Enter a parse tree produced by cParser#declare.
+    def enterDeclare(self, ctx: cParser.DeclareContext):
+        pass
 
     # Enter a parse tree produced by cParser#operation_logic_or.
     def enterOperation_logic_or(self, ctx: cParser.Operation_logic_orContext):
@@ -574,5 +589,3 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#array_var_name.
     def exitArray_var_name(self, ctx: cParser.Array_var_nameContext):
         pass
-
-

@@ -96,8 +96,8 @@ def assignment(ast):
 
     # Last minute fix before the evaluation
     # (already forgot what it does)
-    if isinstance(ast, Variable) and ast.parent and not isinstance(ast.parent,
-                                                                   (Assign, Print, If, Unary, Binary, Return)):
+    if isinstance(ast, Variable) and ast.declaration:  # ast.parent and not isinstance(ast.parent,
+        #       (Assign, Print, If, Unary, Binary, Return)):
         location = ast.value
         type = ast
         # The supposedly statement sequence in which we need to put the variable
@@ -121,7 +121,7 @@ def convertVar(ast):
     if isinstance(ast, Print):
         return
     element = ast.get_symbol_table()[ast.value].type
-    # TODO: This should be done from the listener
+
     type = element.get_type()
     while type[len(type) - 1] == "*":
         type = type[:len(type) - 1]
@@ -131,6 +131,7 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = element.array
         ast_new.array_number = element.array_number
+        ast_new.declaration = element.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'float':
         ast_new = VFloat(ast.value)
@@ -138,6 +139,7 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = element.array
         ast_new.array_number = element.array_number
+        ast_new.declaration = element.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'char':
         ast_new = VChar(ast.value)
@@ -145,7 +147,10 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = element.array
         ast_new.array_number = element.array_number
+        ast_new.declaration = element.declaration
         ast.parent.replace_child(ast, ast_new)
+    else:
+        print("[WARNING] Unsupported variable type")
 
 
 # A function to check whether you're always assigning to the right type and not to a const value

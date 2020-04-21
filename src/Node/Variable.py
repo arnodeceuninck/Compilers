@@ -14,6 +14,8 @@ class Variable(AST):
         self.array = False
         self.array_number = 0
 
+        self.declaration = False
+
     def __str__(self):
         var_type = "const " if self.const else ""
         var_type += self.get_type()

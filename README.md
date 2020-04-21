@@ -167,8 +167,7 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 - returnTypeMismatch.c
 
 ####Wrong error:
-- undeclaredVariable1.c
-- undeclaredVariable2.c
+None
 
 ####Uncaught errors (much red in Python): 
 !!! Every file with an empty main
@@ -193,6 +192,8 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 - pointerOperationError.c
 - returnOutsideFunction.c
 - undeclaredFunction.c
+- undeclaredVariable1.c
+- undeclaredVariable2.c
 - undeclaredVariable3.c
 - variableRedefinition1.c
 - variableRedefinition2.c

@@ -19,8 +19,8 @@ def main(argv):
             print("Had to stop because of an error")
     except CompilerError as e:
         print(str(e))
-    except:
-        print(str(sys.exc_info()[0]))
+    # except:
+    #     print(str(sys.exc_info()[0]))
 
 
 if __name__ == '__main__':

@@ -490,7 +490,7 @@ class Binary(Operator):
 class Assign(Binary):
     def __init__(self, value="="):
         Binary.__init__(self, value)
-        self.declaration = True
+        self.declaration = True  # TODO: hoezo staat dit hier? Ik zou eerder houden aan de declaration in Variable
 
     def __str__(self):
         if self.declaration:

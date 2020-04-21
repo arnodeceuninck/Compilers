@@ -1,6 +1,7 @@
-#include <stdio.h>
+void f(){
+   x;
+}
 
 int main(){
-    printf("%s", 5);
-    return 1;
+    return 0;
 }

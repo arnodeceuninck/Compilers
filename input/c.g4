@@ -36,9 +36,13 @@ for_statement: 'for' '(' initialization=operation ';' condition=operation ';' st
 
 //print_statement: 'printf' '(' arg=(INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | ARRAY_VAR_NAME) ')';
 
-assignment: lvalue ('=' operation_logic_or)?;
+assignment: declare | assign; // Must be a difference between them to prevent ambiguity x; (declaration or operation_logic_or?)
+
+assign: lvalue '=' operation_logic_or;
 
 lvalue: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE))? (MULT)? (variable=VAR_NAME ('[' array_index=INT_ID ']')?);
+
+declare: ((CONST)? declaration=(INT_TYPE|FLOAT_TYPE|CHAR_TYPE)) (MULT)? (variable=VAR_NAME ('[' array_index=INT_ID ']')?);
 
 operation_logic_or: left=operation_logic_or '||' right=operation_logic_and
                   | operation_logic_and;
