@@ -2,7 +2,7 @@ from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
-    FunctionRedeclarationError, FunctionUndefinedError
+    FunctionRedeclarationError, FunctionUndefinedError, DerefError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -397,6 +397,15 @@ def compile(input_file: str, catch_error=True):
         return make_ast(tree)
 
 
+def check_only_dereference_lvalues(ast: AST):
+    if not isinstance(ast, UDeref):
+        return
+    child = ast[0]
+    # TODO: Make this work for arrays
+    if not isinstance(child, Variable):
+        raise DerefError()
+
+
 # Convert an antlr tree into our own AST
 def make_ast(tree, optimize: bool = True):
     communismRules = customListener()
@@ -415,6 +424,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
+    communismForLife.traverse(check_only_dereference_lvalues)
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
     verify_AST_array()  # Checks if the array is empty

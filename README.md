@@ -157,7 +157,6 @@ Skipped all array files
 - declarationDefinitionMismatch2.c
 - declarationDefinitionMismatch3.c
 - definitionInLocalScope.c
-- dereferenceTypeMismatch2.c
 - functionCallargumentMismatch1.c
 - functionCallargumentMismatch2.c
 - functionCallargumentMismatch3.c
@@ -184,6 +183,7 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 
 ####Works as they should:
 - dereferenceTypeMismatch1.c
+- dereferenceTypeMismatch2.c
 - incompatibleTypes1.c
 - incompatibleTypes3.c
 - invalidIncludeError.c

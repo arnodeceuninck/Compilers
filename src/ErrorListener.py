@@ -56,6 +56,13 @@ class RerefError(CompilerError):
     def __str__(self):
         return "[ERROR] trying to rereference something that's not a pointer"
 
+class DerefError(CompilerError):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "[ERROR] trying to take the address of something that's not a variable"
+
 
 class SyntaxCompilerError(CompilerError):
     def __init__(self, row, column, offendingSymbol, msg):
