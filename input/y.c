@@ -1,8 +1,6 @@
+#include <stdio.h>
 
 int main(){
-        int* a;
-        int* b;
-        a + b;
-        return 1;
+    printf("%s", 5);
+    return 1;
 }
-

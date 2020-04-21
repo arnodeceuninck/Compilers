@@ -162,9 +162,6 @@ Skipped all array files
 - functionCallargumentMismatch3.c
 Note: Not sure about everything above this line whether it's undetected or uncaught
 - functionCallargumentMismatch4.c
-- incompatibleTypes2.c
-- incompatibleTypes4.c
-- incompatibleTypes5.c
 - incompatibleTypes6.c
 - mainNotFound.c
 - returnTypeMismatch.c
@@ -184,7 +181,10 @@ Note: Not sure about everything above this line whether it's undetected or uncau
 - dereferenceTypeMismatch1.c
 - dereferenceTypeMismatch2.c
 - incompatibleTypes1.c
+- incompatibleTypes2.c
 - incompatibleTypes3.c
+- incompatibleTypes4.c
+- incompatibleTypes5.c
 - invalidIncludeError.c
 - invalidLoopControlStatement.c
 - parameterRedefinition1.c
