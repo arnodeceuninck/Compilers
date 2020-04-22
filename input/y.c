@@ -1,7 +1,9 @@
-void f(){
-   x;
+// definition of f in local scope
+void f(int a){
+    int c;
+    c+a;
 }
 
 int main(){
-    return 0;
+    int x;
 }

@@ -510,6 +510,7 @@ class customListener(ParseTreeListener):
         node.value = value
         node.const = const
         node.ptr = ptr
+        node.declaration = True
         self.add(node)
 
     # Exit a parse tree produced by cParser#argument.
