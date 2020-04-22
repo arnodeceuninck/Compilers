@@ -2,7 +2,7 @@ import unittest
 # from src.main import compile
 from src.Node.AST_utils import *
 from src.ErrorListener import *
-import glob
+
 
 
 class MyTestCase(unittest.TestCase):
@@ -18,15 +18,15 @@ class MyTestCase(unittest.TestCase):
         # Reset node id because it causes errors in llvm creation
         AST.reset()
 
-        input_file: str = "tests/input/" + test_name + ".c"
-        output_file: str = "tests/output/" + test_name + ".dot"
-        output_file_ll: str = "tests/output/" + test_name + ".ll"
-        output_file_folded: str = "tests/output/" + test_name + ".folded.dot"
-        output_file_folded_ll: str = "tests/output/" + test_name + ".folded.ll"
-        expected_output_file: str = "tests/expected_output/" + test_name + ".dot"
-        expected_output_file_ll: str = "tests/expected_output/" + test_name + ".ll"
-        expected_output_file_folded: str = "tests/expected_output/" + test_name + ".folded.dot"
-        expected_output_file_folded_ll: str = "tests/expected_output/" + test_name + ".folded.ll"
+        input_file: str = "input/" + test_name + ".c"
+        output_file: str = "output/" + test_name + ".dot"
+        output_file_ll: str = "output/" + test_name + ".ll"
+        output_file_folded: str = "output/" + test_name + ".folded.dot"
+        output_file_folded_ll: str = "output/" + test_name + ".folded.ll"
+        expected_output_file: str = "expected_output/" + test_name + ".dot"
+        expected_output_file_ll: str = "expected_output/" + test_name + ".ll"
+        expected_output_file_folded: str = "expected_output/" + test_name + ".folded.dot"
+        expected_output_file_folded_ll: str = "expected_output/" + test_name + ".folded.ll"
 
         tree: AST = compile(input_file, catch_error=catch_errors)
         if tree:

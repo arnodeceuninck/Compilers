@@ -370,6 +370,7 @@ def check_function(ast):
         # array of functions
         in_array = False  # Variable for indicating if the function is in the array
         for function in AST.functions:
+
             if match_function(function, ast):
                 in_array = True
                 break

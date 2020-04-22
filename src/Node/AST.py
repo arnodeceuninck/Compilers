@@ -171,7 +171,7 @@ class AST:
 
     def get_llvm_print_type(self) -> str:
         # The only moment when this returns something else is with floats
-        return self.get_llvm_type()
+        return self.children[0].get_llvm_print_type()
 
     # Comment out a given string if required
     @staticmethod
