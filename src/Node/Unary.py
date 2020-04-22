@@ -127,6 +127,9 @@ class UDeref(Unary):
         self[0].variable()
         pass  # TODO: fix it
 
+    def is_declaration(self):
+        return self[0].is_declaration()
+
 
 class UReref(Unary):
     def __init__(self, value="*"):
@@ -153,6 +156,9 @@ class UReref(Unary):
         code = code.format(result=self.variable(), type=type, var=self[0].variable())
 
         AST.llvm_output += code
+
+    def is_declaration(self):
+        return self[0].is_declaration()
 
 
 class ArrayIndex(Unary):

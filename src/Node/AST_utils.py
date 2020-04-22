@@ -58,7 +58,7 @@ def assignment(ast):
         return parent.symbol_table[ast.value]  # Raises an error if not yet declared
 
     # Add symbol to symbol table
-    if ast.value == "=" and (ast.declaration or ast[0].declaration):
+    if ast.value == "=" and (ast.is_declaration() or ast[0].is_declaration()):
         # improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]

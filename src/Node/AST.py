@@ -33,6 +33,9 @@ class AST:
         AST.symbol_table = SymbolTable
         AST._id = 0
 
+    def is_declaration(self):
+        return self.declaration
+
     def __init__(self, value: str = "", color: str = "#9f9f9f"):
 
         self._id = 0
