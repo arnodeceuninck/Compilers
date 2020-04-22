@@ -127,6 +127,9 @@ class UDeref(Unary):
         self[0].variable()
         pass  # TODO: fix it
 
+    def variable(self, store: bool = False, indexed: bool = False, index=0):
+        return self[0].variable(store=True)
+
     def is_declaration(self):
         return self[0].is_declaration()
 
