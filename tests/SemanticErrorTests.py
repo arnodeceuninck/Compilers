@@ -96,7 +96,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'char'")
 
     def test_incompatibleTypes3(self):
-        self.help_test(UnknownOperationError, "")
+        self.help_test(IncompatibleTypesError, "[ERROR] Type int is incompatible with void")
 
     def test_incompatibleTypes4(self):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'int*'")
