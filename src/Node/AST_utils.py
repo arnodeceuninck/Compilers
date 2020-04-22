@@ -269,9 +269,13 @@ def adding_return(ast):
         return
 
     # Take the last child and check if it is a return
-    last_child = ast.children[len(ast.children) - 1]
-    if isinstance(last_child, Return):
-        return
+    try:
+        last_child = ast.children[len(ast.children) - 1]
+        if isinstance(last_child, Return):
+            return
+    except IndexError:
+        # Empty main
+        pass
 
     # If the last child is not a return then we need to add the return
     # First we need to construct the return node
