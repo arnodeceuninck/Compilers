@@ -3,7 +3,7 @@
 // Should print the numbers: 42 42 43 43 44 44 45 45
 
 void f(int* a){
-	(*a)++;
+	*a = *a + 1;
 }
 
 int main(){
