@@ -45,19 +45,19 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UndeclaredVariableError, "")
 
     def test_declarationDeclarationMismatch2(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_declarationDeclarationMismatch3(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_declarationDefinitionMismatch1(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_declarationDefinitionMismatch2(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_declarationDefinitionMismatch3(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_definitionInLocalScope(self):
         self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
@@ -69,10 +69,10 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
 
     def test_functionCallargumentMismatch1(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_functionCallargumentMismatch2(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_functionCallargumentMismatch3(self):
         self.help_test(RerefError, "")
@@ -81,7 +81,6 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(RerefError, "")
 
     def test_functionRedefinition1(self):
-        # TODO: alles van functies heeft iets van "variable a hasn't been declared yet"
         self.help_test(RerefError, "")
 
     def test_functionRedefinition2(self):

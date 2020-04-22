@@ -225,7 +225,11 @@ class customListener(ParseTreeListener):
 
     # Exit a parse tree produced by cParser#lvalue.
     def exitLvalue(self, ctx: cParser.LvalueContext):
-        self.help_exit_lvalue_declare(ctx)
+        declaration = False
+        for child in ctx.children:
+            if child.symbol == ctx.declaration:
+                declaration = True
+        self.help_exit_lvalue_declare(ctx, declaration=declaration)
 
     # Exit a parse tree produced by cParser#declare.
     def exitDeclare(self, ctx: cParser.DeclareContext):
