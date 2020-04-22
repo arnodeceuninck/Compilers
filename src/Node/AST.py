@@ -167,11 +167,15 @@ class AST:
 
     def get_neutral(self) -> str:
         # 0.0 if float
+        if self.children:
+            return self.children[0].get_neutral()
         return "0"
 
     def get_llvm_print_type(self) -> str:
         # The only moment when this returns something else is with floats
-        return self.children[0].get_llvm_print_type()
+        if self.children:
+            return self.children[0].get_llvm_print_type()
+        return None
 
     # Comment out a given string if required
     @staticmethod

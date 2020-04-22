@@ -69,8 +69,7 @@ class CorrectCodeTests(unittest.TestCase):
 
     def test_fibonacciRecursive(self):
         # ++ not supported
-        self.assertTrue(False) # Infinite loop
-        # self.help_test()
+        self.help_test()
 
     def test_floatToIntConversion(self):
         self.help_test()
@@ -98,8 +97,7 @@ class CorrectCodeTests(unittest.TestCase):
         self.help_test()
 
     def test_prime(self):
-        self.assertTrue(False) # infinite loop
-        # self.help_test()
+        self.help_test()
 
     def test_printf1(self):
         self.help_test()
@@ -111,12 +109,10 @@ class CorrectCodeTests(unittest.TestCase):
         self.help_test()
 
     def test_scanf1(self):
-        self.assertTrue(False) # infinite loop
-        # self.help_test()
+        self.help_test()
 
     def test_scanf2(self):
-        self.assertTrue(False) # infinite loop
-        # self.help_test()
+        self.help_test()
 
     def test_scoping(self):
         self.help_test()
