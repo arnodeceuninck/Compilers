@@ -149,8 +149,10 @@ class customListener(ParseTreeListener):
         pass
 
     # Enter a parse tree produced by cParser#assignment.
-    def enterAssignment(self, ctx: cParser.AssignmentContext):
+    def enterAssign(self, ctx: cParser.AssignmentContext):
         # print("Enter Assignment")
+        # for child in ctx.children:
+        #     if child.symbol == ctx.ASSIGN
         if has_children(ctx):
             if ctx.ASSIGN():
                 node = Assign()
@@ -159,11 +161,13 @@ class customListener(ParseTreeListener):
                 # if ctx.children[0].getChildCount() == 1 or ctx.children[0].getChild(0).getText() == "*" or \
                 #         (ctx.children[0].getChildCount() == 4 and  # Assignment
                 #          ctx.children[0].getChild(1).getText() == "[" and ctx.children[0].getChild(3).getText() == "]"):
-                if not isinstance(self.children[0], cParser.declare):
+                if not isinstance(ctx.children[0], cParser.DeclareContext):
                     node.declaration = False
+                else:
+                    node.declaration = True
                 self.add(node)
 
-    def exitAssignment(self, ctx: cParser.AssignmentContext):
+    def exitAssign(self, ctx: cParser.AssignmentContext):
         # print("Exit Assignment")
         if has_children(ctx):
             self.simplify(2)

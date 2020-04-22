@@ -35,6 +35,7 @@ class CorrectCodeTests(unittest.TestCase):
 
         # Get the output from our compiler
         tree: AST = compile(input_file, catch_error=False)
+        # tree.constant_folding()
         to_LLVM(tree, output_file)
 
         pass_arg = ["sh", "CorrectCode.sh", output_file, code_output]

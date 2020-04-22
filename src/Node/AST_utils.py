@@ -58,7 +58,7 @@ def assignment(ast):
         return parent.symbol_table[ast.value]  # Raises an error if not yet declared
 
     # Add symbol to symbol table
-    if ast.value == "=" and ast.declaration:
+    if ast.value == "=" and (ast.declaration or ast[0].declaration):
         # improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]
@@ -437,6 +437,7 @@ def make_ast(tree, optimize: bool = True):
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
     verify_AST_array()  # Checks if the array is empty
+
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()
