@@ -1,11 +1,5 @@
-//// definition of f again, but with different body
-//int f(int a, int b){
-//    int r = a*b;
-//    return r;
-//}
+#include <stdio.h>
 
 int main(){
-    int a;
-    int b;
-    int r = a+b;
+    printf("Hello World!\n");
 }

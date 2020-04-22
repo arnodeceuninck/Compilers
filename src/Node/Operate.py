@@ -8,7 +8,7 @@ class Operate(Binary):
         Binary.__init__(self, value)
 
     def get_type(self):
-        supported_operations = [("int", "int"), ("char", "char"), ("float", float)]
+        supported_operations = [("int", "int"), ("char", "char"), ("float", "float")]
         if (self[0].get_type(), self[1].get_type()) in supported_operations:
             return self[0].get_type()
         else:
