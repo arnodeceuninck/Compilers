@@ -1,4 +1,4 @@
-from tests.test import *
+from test import *
 from src.ErrorListener import *
 import inspect
 import unittest
