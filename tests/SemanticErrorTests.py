@@ -60,7 +60,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UndeclaredVariableError, "")
 
     def test_definitionInLocalScope(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable a hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "")
 
     def test_dereferenceTypeMismatch1(self):
         self.help_test(RerefError, "[ERROR] trying to rereference something that's not a pointer")
@@ -93,79 +93,80 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'char'")
 
     def test_incompatibleTypes2(self):
-        self.help_test(UnknownOperationError, "")
+        self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'char'")
 
     def test_incompatibleTypes3(self):
         self.help_test(UnknownOperationError, "")
 
     def test_incompatibleTypes4(self):
-        self.help_test(RerefError, "")
+        self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'int*'")
 
     def test_incompatibleTypes5(self):
-        self.help_test(RerefError, "")
+        self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'char' and 'int'")
 
     def test_incompatibleTypes6(self):
         self.help_test(RerefError, "")
 
     def test_incompatibleTypes7(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_invalidIncludeError(self):
-        self.help_test(RerefError, "")
+        self.help_test(SyntaxCompilerError, "[ERROR] Oh no!! You've used the wrong syntax at line 1, column 26: missing ';' at 'h'")
 
     def test_invalidLoopControlStatement(self):
-        self.help_test(RerefError, "")
+        self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'continue' used is out of scope")
 
     def test_invalidUnaryOperation(self):
+        # Unsupported '++'
         self.help_test(RerefError, "")
 
     def test_mainNotFound(self):
         self.help_test(RerefError, "")
 
     def test_parameterRedefinition1(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
     def test_parameterRedefinition2(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
     def test_parameterRedefinition3(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
     def test_pointerOperationError(self):
-        self.help_test(RerefError, "")
+        self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int*' and 'int*'")
 
     def test_returnOutsideFunction(self):
-        self.help_test(RerefError, "")
+        self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'return' used is out of scope")
 
     def test_returnTypeMismatch(self):
         self.help_test(RerefError, "")
 
     def test_undeclaredFunction(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_undeclaredVariable1(self):
-        self.help_test(RerefError, "")
+        self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
     def test_undeclaredVariable2(self):
-        self.help_test(RerefError, "")
+        self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
     def test_undeclaredVariable3(self):
-        self.help_test(RerefError, "")
+        self.help_test(UndeclaredVariableError, "[ERROR] Variable z hasn't been declared yet")
 
     def test_variableRedefinition1(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
     def test_variableRedefinition2(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
     def test_variableRedefinition3(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
     def test_variableRedefinition4(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
     def test_variableRedefinition5(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
     def test_variableRedefinition6(self):
-        self.help_test(RerefError, "")
+        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
