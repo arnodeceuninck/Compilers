@@ -32,6 +32,15 @@ class AST:
         AST.llvm_output = ""
         AST.symbol_table = SymbolTable
         AST._id = 0
+        # These two variables are necessary for supporting scanning and printing with stdio
+        AST.print = False
+        AST.scan = False
+        # Check whether you have to manually add the int main()
+        AST.contains_function = False
+        # Indicates if stdio is used
+        AST.stdio = False
+        # This list contains all the functions that it are declared on the pre-order traversal
+        AST.functions = list()
 
     def is_declaration(self):
         return self.declaration
