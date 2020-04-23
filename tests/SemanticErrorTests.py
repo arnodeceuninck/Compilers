@@ -42,25 +42,25 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(RerefError, "")
 
     def test_declarationDeclarationMismatch1(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionRedeclarationError, "[ERROR] Function f already declared")
 
     def test_declarationDeclarationMismatch2(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionRedeclarationError, "[ERROR] Function f already declared")
 
     def test_declarationDeclarationMismatch3(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionRedeclarationError, "[ERROR] Function f already declared")
 
     def test_declarationDefinitionMismatch1(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionWrongDefinedError, "[ERROR] Function f not defined correctly")
 
     def test_declarationDefinitionMismatch2(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionWrongDefinedError, "[ERROR] Function f not defined correctly")
 
     def test_declarationDefinitionMismatch3(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionWrongDefinedError, "[ERROR] Function f not defined correctly")
 
     def test_definitionInLocalScope(self):
-        self.help_test(UndeclaredVariableError, "")
+        self.help_test(FunctionDefinitionOutOfScope, "[ERROR] Function f defined out of scope")
 
     def test_dereferenceTypeMismatch1(self):
         self.help_test(RerefError, "[ERROR] trying to rereference something that's not a pointer")
@@ -75,19 +75,19 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_functionCallargumentMismatch3(self):
-        self.help_test(RerefError, "")
+        self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 1 instead")
 
     def test_functionCallargumentMismatch4(self):
-        self.help_test(RerefError, "")
+        self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 3 instead")
 
     def test_functionRedefinition1(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionRedefinitionError, "[ERROR] Function f is redefined")
 
     def test_functionRedefinition2(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionRedefinitionError, "[ERROR] Function f is redefined")
 
     def test_functionRedefinition3(self):
-        self.help_test(RerefError, "")
+        self.help_test(FunctionRedefinitionError, "[ERROR] Function f is redefined")
 
     def test_incompatibleTypes1(self):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int' and 'char'")
@@ -111,7 +111,8 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
     def test_invalidIncludeError(self):
-        self.help_test(SyntaxCompilerError, "[ERROR] Oh no!! You've used the wrong syntax at line 1, column 26: missing ';' at 'h'")
+        self.help_test(SyntaxCompilerError,
+                       "[ERROR] Oh no!! You've used the wrong syntax at line 1, column 26: missing ';' at 'h'")
 
     def test_invalidLoopControlStatement(self):
         self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'continue' used is out of scope")
@@ -121,7 +122,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(RerefError, "")
 
     def test_mainNotFound(self):
-        self.help_test(RerefError, "")
+        self.help_test(MainNotFoundError, "[ERROR] Main not found")
 
     def test_parameterRedefinition1(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
@@ -139,7 +140,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'return' used is out of scope")
 
     def test_returnTypeMismatch(self):
-        self.help_test(RerefError, "")
+        self.help_test(ReturnValueError, "[ERROR] Undefined return of 'int': expected 'void'")
 
     def test_undeclaredFunction(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")

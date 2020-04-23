@@ -2,7 +2,8 @@ from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
-    FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError
+    FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
+    FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -181,6 +182,32 @@ def match_function(function1: AST, function2: AST):
     # If they do not match then return
     if function1.value != function2.value:
         return False
+    # Check the return types of both functions
+    if function1.return_type != function2.return_type:
+        return False
+    # Check if both argument lists match
+    arg_list1 = function1.children[0]
+    arg_list2 = function2.children[0]
+    # So we need to check if their lengths are the same if not return
+    if len(arg_list1.children) != len(arg_list2.children):
+        return False
+    # Go over all the arguments and check if their types match
+    for i in range(len(arg_list1.children)):
+        # If their types do not match then return
+        if arg_list1[i].get_type() != arg_list2[i].get_type():
+            return False
+    # The functions match!
+    return True
+
+
+def soft_match_function(function1: AST, function2: AST):
+    # If one of the 2 ast trees isn't a function then do not proceed with matching
+    if not isinstance(function1, Function) or not isinstance(function2, Function):
+        return False
+    # Check if the names of the function match
+    # If they do not match then return
+    if function1.value != function2.value:
+        return False
     # Check if both argument lists match
     arg_list1 = function1.children[0]
     arg_list2 = function2.children[0]
@@ -244,7 +271,9 @@ def link_function(ast):
             # If we surpass the child where we came from then the next child we need to break
             if child == prev_ast:
                 next_break = True
-            if match_function(child, ast):  # This will try to match the two functions based on the arguments
+            # This will try to match the two functions based on the arguments
+            # and the function name
+            if soft_match_function(child, ast):
                 # Both functions match so we can give the return type of the found function to the
                 # return type of the use function
                 ast.return_type = child.return_type
@@ -314,7 +343,7 @@ def adding_return(ast):
 def has_variable(ast):
     has_var = isinstance(ast, (Variable, Function))
     for child in ast.children:
-        has_var += has_variable(ast)
+        has_var += has_variable(child)
     return has_var
 
 
@@ -331,9 +360,12 @@ def check_global_scope(ast):
         return
     # Iterate over every child to check if it belongs to the global scope
     for child in ast.children:
-        # If the code is a function then continue to the next child
+        # If the code is a function then check if it is not a use, otherwise just continue
         if isinstance(child, Function):
-            continue
+            if child.function_type == "use":
+                if child.value == "printf":
+                    continue
+                raise ExpressionOutOfScope(child.value)
         # When you encounter an assign things get more complicated. The rhs of an assign can only contain
         # constants and no variables
         elif isinstance(child, Assign):
@@ -368,6 +400,9 @@ def check_function(ast):
         if not matched_function:
             raise FunctionUndefinedError(ast.value)
     elif function_type == "definition":
+        # We need to check if the Function definition only has 1 parent and is defined in the global scope
+        if ast.parent.parent:
+            raise FunctionDefinitionOutOfScope(ast.value)
         # If stdio is included then we need to throw an error because we try to redefine the stdio
         if (ast.value == "printf" or ast.value == "scanf") and AST.stdio:
             raise FunctionRedeclarationError(ast.value)
@@ -375,7 +410,16 @@ def check_function(ast):
         # array of functions
         in_array = False  # Variable for indicating if the function is in the array
         for function in AST.functions:
-            if match_function(function, ast):
+            function_matched = match_function(function, ast)
+            # If the functions did not match while the names are the same then raise an error
+            if not function_matched and function.value == ast.value:
+                raise FunctionWrongDefinedError(ast.value)
+            elif function_matched:  # If the functions matched then we will put it in the array
+                # but first check if the function is not already defined
+                # We will achieve this by checking if the function that is matched against is not a defined function
+                # if it is then raise an error
+                if function.function_type == "definition":
+                    raise FunctionRedefinitionError(function.value)
                 in_array = True
                 break
         # We did not find the function in the array so append it to the other functions
@@ -389,8 +433,11 @@ def check_function(ast):
         # array of functions
         in_array = False  # Variable for indicating if the function is in the array
         for function in AST.functions:
-
-            if match_function(function, ast):
+            function_matched = match_function(function, ast)
+            # If the functions did not match while the names are the same then raise an error
+            if not function_matched and function.value == ast.value:
+                raise FunctionRedeclarationError(ast.value)
+            elif function_matched:  # If the functions matched then we will put it in the array
                 in_array = True
                 break
         # We did not find the function in the array so append it to the other functions
@@ -398,12 +445,25 @@ def check_function(ast):
             AST.functions.append(ast)
 
 
-# This function will check if the entire AST array contains definitions
-def verify_AST_array():
-    # Iterate over every function in this array and check if it is defined if it is not then raise an error
-    for function in AST.functions:
-        if function.function_type == "declared":
-            raise FunctionUndefinedError(function)
+def check_only_dereference_lvalues(ast: AST):
+    if not isinstance(ast, UDeref):
+        return
+    child = ast[0]
+    # TODO: Make this work for arrays
+    if not isinstance(child, Variable):
+        raise DerefError()
+
+
+# Checks if there is a main defined in the AST
+def check_main(ast: AST):
+    if not isinstance(ast, Function):
+        return
+    if ast.function_type == "definition":
+        if ast.value == "main":
+            if ast.return_type == "int":
+                AST.main = True  # Main has been defined
+            else:  # Main has the wrong return type
+                raise ReturnValueError(ast.value, "int")
 
 
 # return an ast tree from an input file
@@ -426,15 +486,6 @@ def compile(input_file: str, catch_error=True):
         return make_ast(tree)
 
 
-def check_only_dereference_lvalues(ast: AST):
-    if not isinstance(ast, UDeref):
-        return
-    child = ast[0]
-    # TODO: Make this work for arrays
-    if not isinstance(child, Variable):
-        raise DerefError()
-
-
 # Convert an antlr tree into our own AST
 def make_ast(tree, optimize: bool = True):
     communismRules = customListener()
@@ -454,11 +505,12 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     communismForLife.traverse(check_only_dereference_lvalues)
+    communismForLife.traverse(check_main)  # Checks if there is a main defined
     communismForLife.traverse(return_check)
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
-    verify_AST_array()  # Checks if the array is empty
-
+    if not AST.main:
+        raise MainNotFoundError()
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
         communismForLife.optimize()

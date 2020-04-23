@@ -3,6 +3,7 @@
 """
 
 from src.symbolTable import SymbolTable
+from src.ErrorListener import CallAmountMismatchError
 
 # NOTE the parts referenced here are the parts described in the function get_llvm_print of the class Function
 # This string belongs to the first part
@@ -22,6 +23,7 @@ class AST:
     # These two variables are necessary for supporting scanning and printing with stdio
     print = False
     scan = False
+    main = False  # Value for if main is in the AST
     contains_function = False  # Check whether you have to manually add the int main()
     stdio = False  # Indicates if stdio is used
     functions = list()  # This list contains all the functions that it are declared on the pre-order traversal
@@ -35,6 +37,8 @@ class AST:
         # These two variables are necessary for supporting scanning and printing with stdio
         AST.print = False
         AST.scan = False
+        # Value for if main is in the AST
+        AST.main = False
         # Check whether you have to manually add the int main()
         AST.contains_function = False
         # Indicates if stdio is used
@@ -674,6 +678,14 @@ class Function(AST):
         # this is because each backslash sequence contains 3 characters which should in fact be 1
         return len(string) - 2 * nr_backslashes
 
+    # Gets the total amount of format tags in a printf string
+    def get_format_count(self, format_string):
+        format_count = 0
+        for character in format_string:
+            if character == '%':
+                format_count += 1
+        return format_count
+
     # This piece of code will create a printf statement if it is necessary
     def get_llvm_print(self):
         # We need to indicate that we are printing so we need to set the ast value of print to true
@@ -681,10 +693,17 @@ class Function(AST):
         # In order to get the correct code there are 2 parts in the equation
         # The first one is creating the string to call
         # The second part is making the call to the function with the left over arguments
-
-        # PART 1
+        # Set up
         # Get the string value
         custom_string = self[0][0].value
+
+        # Error part
+        format_count = self.get_format_count(custom_string)
+        child_count = len(self[0].children) - 1
+        if format_count != child_count:
+            raise CallAmountMismatchError(self.value, format_count, child_count)
+        # PART 1
+
         custom_string = self.to_llvm_string(custom_string)
         string_count = self.get_llvm_string_len(custom_string)
         # Create an unique id based on the id of the current function node
@@ -742,7 +761,15 @@ class Function(AST):
         # In order to get the correct code there are 2 parts in the equation
         # The first one is creating the string to call
         # The second part is making the call to the function with the left over arguments
+        # Set up
+        # Get the string value
+        custom_string = self[0][0].value
 
+        # Error part
+        format_count = self.get_format_count(custom_string)
+        child_count = len(self[0].children) - 1
+        if format_count != child_count:
+            raise OperatorAmountMismatchError(self.value, format_count, child_count)
         # PART 1
         # Get the string value
         custom_string = self[0][0].value

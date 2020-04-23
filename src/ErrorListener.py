@@ -128,6 +128,15 @@ class FunctionUndefinedError(CompilerError):
         return "[ERROR] Function " + self.function + " not defined"
 
 
+class FunctionWrongDefinedError(CompilerError):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " not defined correctly"
+
+
 class ReturnValueError(CompilerError):
     def __init__(self, ret_val, expected):
         super().__init__()
@@ -137,6 +146,44 @@ class ReturnValueError(CompilerError):
     def __str__(self):
         return "[ERROR] Undefined return of \'{ltype}\': expected \'{rtype}\'" \
             .format(ltype=self.ret_val, rtype=self.expected)
+
+
+class FunctionDefinitionOutOfScope(CompilerError):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " defined out of scope"
+
+
+class CallAmountMismatchError(CompilerError):
+    def __init__(self, function, expected_operators, get_operators):
+        super().__init__()
+        self.function = function
+        self.expected_operators = expected_operators
+        self.get_operators = get_operators
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " expects " + str(self.expected_operators) + \
+               " operators but gets " + str(self.get_operators) + " instead"
+
+
+class FunctionRedefinitionError(CompilerError):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function + " is redefined"
+
+
+class MainNotFoundError(CompilerError):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "[ERROR] Main not found"
 
 
 class CustomErrorListener(ErrorListener):

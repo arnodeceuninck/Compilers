@@ -1,7 +1,8 @@
-float f() {
-    return 'c';
-}
+#include <stdio.h>
+
+int f();
 
 int main(){
-return 0;
+    int x;
+    int x = 0;
 }
