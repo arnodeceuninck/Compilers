@@ -1,5 +1,4 @@
 from test import *
-# from tests.test import *
 from src.ErrorListener import *
 import inspect
 import unittest
@@ -150,7 +149,4 @@ class CorrectCodeTests(unittest.TestCase):
         self.help_test()
 
     def test_while(self):
-        self.help_test()
-
-    def test_y(self):
         self.help_test()

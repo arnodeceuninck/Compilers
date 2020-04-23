@@ -1,8 +1,7 @@
-// Declaration of f
-void f(int a, int b);
-
-// declaration of f with wrong return type
-int f(int a, int b);
+float f() {
+    return 'c';
+}
 
 int main(){
+return 0;
 }

@@ -69,7 +69,7 @@ class Return(ReservedType):
         # If the return has a child then we return the type of that child else we return a void type
         if self.children:
             # The type is the type of the only child
-            return self.children[0].get_type
+            return self[0].get_type()
         return "void"
 
     def get_llvm_template(self):

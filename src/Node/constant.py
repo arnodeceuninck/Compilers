@@ -69,6 +69,7 @@ class Constant(AST):
             return CBool("0")
         return None
 
+
 class CArray(Constant):
     def __init__(self, value: str = "Array"):
         Constant.__init__(self, value)

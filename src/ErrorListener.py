@@ -48,6 +48,7 @@ class IncompatibleTypesError(CompilerError):
     def __str__(self):
         return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
 
+
 class UnknownOperationError(CompilerError):
     def __init__(self, operation, ltype, rtype):
         super().__init__()
@@ -56,8 +57,9 @@ class UnknownOperationError(CompilerError):
         self.rtype = rtype
 
     def __str__(self):
-        return "[ERROR] Undified operation \'{op}\' between \'{ltype}\' and \'{rtype}\'"\
+        return "[ERROR] Undified operation \'{op}\' between \'{ltype}\' and \'{rtype}\'" \
             .format(op=self.operation, ltype=self.ltype, rtype=self.rtype)
+
 
 class RerefError(CompilerError):
     def __init__(self):
@@ -65,6 +67,7 @@ class RerefError(CompilerError):
 
     def __str__(self):
         return "[ERROR] trying to rereference something that's not a pointer"
+
 
 class DerefError(CompilerError):
     def __init__(self):
@@ -123,6 +126,17 @@ class FunctionUndefinedError(CompilerError):
 
     def __str__(self):
         return "[ERROR] Function " + self.function + " not defined"
+
+
+class ReturnValueError(CompilerError):
+    def __init__(self, ret_val, expected):
+        super().__init__()
+        self.ret_val = ret_val
+        self.expected = expected
+
+    def __str__(self):
+        return "[ERROR] Undefined return of \'{ltype}\': expected \'{rtype}\'" \
+            .format(ltype=self.ret_val, rtype=self.expected)
 
 
 class CustomErrorListener(ErrorListener):

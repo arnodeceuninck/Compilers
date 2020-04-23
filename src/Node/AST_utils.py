@@ -2,7 +2,7 @@ from gen import cParser, cLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
-    FunctionRedeclarationError, FunctionUndefinedError, DerefError
+    FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -194,6 +194,25 @@ def match_function(function1: AST, function2: AST):
             return False
     # The functions match!
     return True
+
+
+# We check if the return type of a return matches the one of the function definition return value
+def return_check(ast):
+    # Checks for a return
+    if not isinstance(ast, Return):
+        return
+
+    return_type = ast.get_type()
+    cur_parent = ast.parent
+    # Climb up the syntax tree in order to get to the function we have a function
+    while not isinstance(cur_parent, Function):
+        cur_parent = cur_parent.parent
+
+    # Store the functions return type
+    function_return_type = cur_parent.return_type
+    # If the two values do not match then raise an error
+    if return_type != function_return_type:
+        raise ReturnValueError(return_type, function_return_type)
 
 
 # Will link the function use to its declaration to get the right type
@@ -435,6 +454,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
     communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
     communismForLife.traverse(check_only_dereference_lvalues)
+    communismForLife.traverse(return_check)
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
     verify_AST_array()  # Checks if the array is empty
