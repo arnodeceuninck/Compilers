@@ -560,6 +560,6 @@ def to_LLVM(ast, filename):
         AST.llvm_output += scan_declaration
 
     # Write output to the outputfile
-    outputFile = open(filename, "w+")
+    outputFile = open(filename, "w")
     outputFile.write(AST.llvm_output)
     outputFile.close()

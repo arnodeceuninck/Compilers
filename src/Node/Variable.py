@@ -52,9 +52,8 @@ class Variable(AST):
         AST.llvm_output += code
 
     def index_load(self, result, index):
-        code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
-        code += "{result} = load {type}, {type}* {temp}, align 4\n"
-        code = code.format(result=result, temp=self.get_temp(), array_type=self.get_llvm_type(),
+        code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+        code = code.format(result=result, array_type=self.get_llvm_type(),
                            variable=self.variable(store=True), index=index)
         AST.llvm_output += code
 

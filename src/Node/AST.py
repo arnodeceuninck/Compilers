@@ -224,9 +224,9 @@ class AST:
                     return "@" + self.value
                 return "%" + self.value + "." + str(self.get_symbol_table().get_symbol_table_id(self.value))
             if indexed:  # Ale je aan een bepaalde index een waarde wil assignen
-                result = self.variable()
-                self.index_load(result, index)
-                return result
+                var = "%.t" + str(self.get_unique_id())
+                self.index_load(var, index)
+                return var
             else:
                 var = "%.t" + str(self.get_unique_id())
                 self.llvm_load(var)  # Loads the variable in storage into the variable var
