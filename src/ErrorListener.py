@@ -29,6 +29,20 @@ class ConstError(CompilerError):
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " is const and can't be assigned after declaration"
 
+class ArrayIndexError(CompilerError):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "[ERROR] Array index must be int"
+
+class NoArrayError(CompilerError):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return "[ERROR] Trying to take the index of something that's not an array"
+
 
 class UndeclaredVariableError(CompilerError):
     def __init__(self, variable):

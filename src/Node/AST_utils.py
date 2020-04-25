@@ -3,7 +3,7 @@ from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
-    FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError
+    FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError
 from src.Node.AST import *
 from src.customListener import customListener
 from src.Node.Variable import *
@@ -459,6 +459,13 @@ def check_only_dereference_lvalues(ast: AST):
     if not isinstance(child, Variable):
         raise DerefError()
 
+def check_arrays(ast: AST):
+    if isinstance(ast, ArrayIndex):
+        if not ast[1].get_type() == "int":
+            raise ArrayIndexError()
+
+        if not ast[0].array:
+            raise NoArrayError()
 
 # Checks if there is a main defined in the AST
 def check_main(ast: AST):
@@ -513,6 +520,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(check_only_dereference_lvalues)
     communismForLife.traverse(check_main)  # Checks if there is a main defined
     communismForLife.traverse(return_check)
+    communismForLife.traverse(check_arrays)
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
     if not AST.main:

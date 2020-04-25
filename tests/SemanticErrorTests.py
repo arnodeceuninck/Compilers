@@ -30,10 +30,10 @@ class SemanticErrorTests(unittest.TestCase):
         self.assertTrue(errored)
 
     def test_arrayAccessTypeMismatch(self):
-        self.help_test(RerefError, "")
+        self.help_test(ArrayIndexError, "[ERROR] Array index must be int")
 
     def test_arrayAccessTypeMismatch2(self):
-        self.help_test(RerefError, "")
+        self.help_test(NoArrayError, "[ERROR] Trying to take the index of something that's not an array")
 
     def test_arrayCompareError(self):
         self.help_test(RerefError, "")

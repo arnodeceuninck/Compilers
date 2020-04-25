@@ -98,7 +98,7 @@ class VInt(Variable):
         return "i32"
 
     def get_type(self):
-        return "int" + ("*" if self.ptr else "")
+        return "int" + ("*" if self.ptr else "") # TODO: arrays should also include a '*', but this lets 3 tests fail
 
     def get_format_type(self):
         return "d"
@@ -127,7 +127,7 @@ class VChar(Variable):
 
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
+            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
         return "i8" + ("*" if self.ptr else "")
 
     def get_type(self):
@@ -164,7 +164,7 @@ class VFloat(Variable):
 
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
+            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
         return "float" + ("*" if self.ptr else "")
 
     def get_llvm_print_type(self) -> str:
