@@ -3,7 +3,8 @@
 int main(){
     int x[3];
     x[2] = 3;
-    int y = x[2];
+    int z = 2;
+    int y = x[2] + z;
     printf("%d", y);
 //    int y = x[2];
 }
