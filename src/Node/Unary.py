@@ -199,7 +199,7 @@ class ArrayIndex(Unary):
         self[0].llvm_code()
 
         code = self.get_llvm_template()
-        code = code.format(temp=self.get_temp(), array_type=self[0].get_llvm_type(), variable=self[0].variable(),
+        code = code.format(temp=self.get_temp(), array_type=self[0].get_llvm_type(), variable=self[0].variable(store=True),
                            index=self.index,
                            result=self.variable(), type=self[0].get_llvm_type(ignore_array=True),
                            align=self.get_align())

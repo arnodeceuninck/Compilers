@@ -130,25 +130,25 @@ def convertVar(ast):
         ast_new = VInt(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = element.array
-        ast_new.array_number = element.array_number
-        ast_new.declaration = element.declaration
+        ast_new.array = ast.array
+        ast_new.array_number = ast.array_number
+        ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'float':
         ast_new = VFloat(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = element.array
-        ast_new.array_number = element.array_number
-        ast_new.declaration = element.declaration
+        ast_new.array = ast.array
+        ast_new.array_number = ast.array_number
+        ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'char':
         ast_new = VChar(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = element.array
-        ast_new.array_number = element.array_number
-        ast_new.declaration = element.declaration
+        ast_new.array = ast.array
+        ast_new.array_number = ast.array_number
+        ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     else:
         print("[WARNING] Unsupported variable type")

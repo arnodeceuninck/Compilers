@@ -543,6 +543,19 @@ class Assign(Binary):
             AST.llvm_output += output
             return
 
+        if isinstance(self[0], Variable) and self[0].array:
+            code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
+            code += "store {type} 1, {type}* {temp}, align 4"
+            code = code.format(type=self.children[0].get_llvm_type(ignore_array=True),
+                               array_type=self.children[0].get_llvm_type(),
+                               temp=self.get_temp(),
+                               var_location=self[0].variable(store=True),
+                               index=self[0].array_number)
+            output += code
+
+            AST.llvm_output += output
+            return
+
         # If the variable is not in the global scope then we need to make a variable
         # And check if the corresponding item has already been defined in llvm
         if not self.get_symbol_table().is_global(self[0].value) and not \

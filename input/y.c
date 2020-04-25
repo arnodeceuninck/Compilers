@@ -1,8 +1,5 @@
-// Declaration of f
-void f(int a, int b);
-
-// declaration of f with wrong return type
-int f(int a, int b);
-
 int main(){
+    int x[3];
+    x[2] = 1;
+//    int y = x[2];
 }
