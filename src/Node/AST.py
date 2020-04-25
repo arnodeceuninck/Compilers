@@ -545,12 +545,13 @@ class Assign(Binary):
 
         if isinstance(self[0], Variable) and self[0].array:
             code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
-            code += "store {type} 1, {type}* {temp}, align 4"
+            code += "store {type} {value}, {type}* {temp}, align 4"
             code = code.format(type=self.children[0].get_llvm_type(ignore_array=True),
                                array_type=self.children[0].get_llvm_type(),
                                temp=self.get_temp(),
                                var_location=self[0].variable(store=True),
-                               index=self[0].array_number)
+                               index=self[0].array_number,
+                               value=self[1].variable())
             output += code
 
             AST.llvm_output += output

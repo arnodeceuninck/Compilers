@@ -12,7 +12,8 @@ class Variable(AST):
         self.reref = False  # e.g. *a
 
         self.array = False
-        self.array_number = 0
+        self.array_number = 0 # The index or the size in case of declaration
+        self.array_size = 0 # The size of the array
 
         self.declaration = False
 
@@ -57,6 +58,11 @@ class Variable(AST):
                            variable=self.variable(store=True), index=index)
         AST.llvm_output += code
 
+    def max_array_size(self):
+        if not self.array:
+            return 0
+        return self.array_size
+
     def get_align(self):
         return 0
 
@@ -85,7 +91,7 @@ class VInt(Variable):
 
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.array_number, type=self.get_llvm_type(ignore_array=True))
+            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
         return "i32" + ("*" if self.ptr else "")
 
     def get_llvm_print_type(self) -> str:

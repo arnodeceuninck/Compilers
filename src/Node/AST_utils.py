@@ -123,6 +123,7 @@ def convertVar(ast):
         return
     element = ast.get_symbol_table()[ast.value].type
 
+    array_size = element.array_number
     type = element.get_type()
     while type[len(type) - 1] == "*":
         type = type[:len(type) - 1]
@@ -130,8 +131,11 @@ def convertVar(ast):
         ast_new = VInt(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = ast.array
+        ast_new.array = element.array
         ast_new.array_number = ast.array_number
+        ast_new.array_size = element.array_number
+        if isinstance(element.parent, ArrayIndex):
+            ast_new.array_number = element.parent.index
         ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'float':
@@ -140,6 +144,7 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = ast.array
         ast_new.array_number = ast.array_number
+        ast_new.array_size = element.array_number
         ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'char':
@@ -148,6 +153,7 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = ast.array
         ast_new.array_number = ast.array_number
+        ast_new.array_size = element.array_number
         ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     else:
