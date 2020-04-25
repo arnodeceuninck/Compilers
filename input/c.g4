@@ -74,7 +74,7 @@ operation_unary_plus_minus_not: '++' right=operation_unary_plus_minus_not
 operation_brackets: '(' operation_logic_or ')'
                   | (function_use | array_var_name | BREAK | CONTINUE | INT_ID | FLOAT_ID | CHAR_ID | VAR_NAME | const_array | STR_ID);
 
-array_var_name: var=VAR_NAME '[' nr=INT_ID ']';
+array_var_name: var=VAR_NAME '[' nr=operation_logic_or ']';
 
 const_array: '{'  const_array_element (',' const_array_element)* '}';
 const_array_element: (VAR_NAME|INT_ID|FLOAT_ID|CHAR_ID);

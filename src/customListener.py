@@ -586,15 +586,18 @@ class customListener(ParseTreeListener):
         index = None
         variable = None
         for child in ctx.getChildren():
-            if child.symbol == ctx.nr:
-                index = int(child.getText())
-            elif child.symbol == ctx.var:
-                variable = Variable(child.getText())
+            # if child.symbol == ctx.nr:
+            #     index = int(child.getText())
+            try:
+                if child.symbol == ctx.var:
+                    variable = Variable(child.getText())
+            except AttributeError:
+                pass # Because an Operation_logic_orContext object has no attribute 'symbol'
         self.add(ArrayIndex(index))
         self.add(variable)
-        self.simplify(1)
         pass
 
     # Exit a parse tree produced by cParser#array_var_name.
     def exitArray_var_name(self, ctx: cParser.Array_var_nameContext):
+        self.simplify(2)
         pass

@@ -182,7 +182,8 @@ class ArrayIndex(Unary):
             return None
 
     def get_llvm_template(self):
-        code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+        code = "{temp_index} = sext {index_type} {index} to i64\n"
+        code += "{temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {temp_index}\n"
         code += "{result} = load {type}, {type}* {temp}, align {align}\n"  # NOTE: not the array align
         return code
 
@@ -196,13 +197,14 @@ class ArrayIndex(Unary):
     def llvm_code(self):
         AST.llvm_output += self.comments()
 
+        self[1].llvm_code()
         self[0].llvm_code()
 
         code = self.get_llvm_template()
         code = code.format(temp=self.get_temp(), array_type=self[0].get_llvm_type(), variable=self[0].variable(store=True),
-                           index=self.index,
+                           index=self[1].variable(),
                            result=self.variable(), type=self[0].get_llvm_type(ignore_array=True),
-                           align=self.get_align())
+                           align=self.get_align(), temp_index=self.get_temp(), index_type=self[1].get_llvm_type())
 
         AST.llvm_output += code
 
