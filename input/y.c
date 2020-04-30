@@ -1,9 +1,8 @@
 #include <stdio.h>
 
-int x = 10;
+
 
 // Should print the numbers 10 20 30 40
-
 int main(){
 	printf("%d;", x);
 	int x = 20;

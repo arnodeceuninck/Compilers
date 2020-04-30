@@ -27,6 +27,7 @@ class AST:
     contains_function = False  # Check whether you have to manually add the int main()
     stdio = False  # Indicates if stdio is used
     functions = list()  # This list contains all the functions that it are declared on the pre-order traversal
+    global_llvm = ""  # Global llvm code
 
     # Resets the global class variables (must be used with tests)
     @staticmethod
@@ -45,6 +46,7 @@ class AST:
         AST.stdio = False
         # This list contains all the functions that it are declared on the pre-order traversal
         AST.functions = list()
+        AST.global_llvm = ""
 
     # This method tries to find the position of a node with respect to the first node with a symbol table in it
     # The parent nr is a way of saying which parent we need to use, first we seek the parent then we go digging
@@ -256,7 +258,8 @@ class AST:
 
                 # Fetch the symbol table of the ast node
                 symbol_table = self.get_symbol_table()
-                # We need to get the position of the variable as a child of the symbol_table node which is somewhere a parent
+                # We need to get the position of the variable as a child of
+                # the symbol_table node which is somewhere a parent
                 var_position = self.get_position()
                 symbol_table_position = symbol_table[self.value].position
                 parent_nr = 1
@@ -268,9 +271,19 @@ class AST:
                     # Get the previous symbol table and get its parent to seek there
                     symbol_table = symbol_table.parent
                     symbol_table_position = symbol_table[self.value].position
+                    if symbol_table.get_symbol_table(self.value) != symbol_table:
+                        # Ensure we will go 1 ast node higher
+                        var_position = -1
+                        # Increase the parent_nr so it will seek 1 parent deeper
+                        parent_nr += 1
+                        continue
                     # Increase the parent_nr so it will seek 1 parent deeper
                     parent_nr += 1
-                return "%" + self.value + "." + str(symbol_table.get_symbol_table_id(self.value))
+                # Checks if the symbol table is in the global scope
+                # It is the same as checking if the symbol table having parents
+                if symbol_table.parent:
+                    return "%" + self.value + "." + str(symbol_table.get_symbol_table_id(self.value))
+                return "@" + self.value
             if indexed:  # Ale je aan een bepaalde index een waarde wil assignen
                 var = "%.t" + str(self.get_unique_id())
                 self.index_load(var, index)
@@ -889,8 +902,6 @@ class Function(AST):
         AST.llvm_output += insert_string
 
     # The llvm code needs to be generated a special way and not in the main function
-    # TODO: Duplicate functions are possible so naming scheme needs to change
-    # TODO: Functions declarations/use need to point to the definition in order to call the correct function
     def llvm_code(self):
         AST.llvm_output += self.comments()
         # Check if stdio is included if yes then use printf
@@ -950,6 +961,10 @@ class Function(AST):
         AST.llvm_output += initialization_line
 
         AST.llvm_output += " {\n"
+
+        # If we have global llvm variables then we need to insert the code to make them here
+        if AST.global_llvm:
+            AST.llvm_output += AST.global_llvm
 
         # First get all arguments and store them in their variables to be readable
         if len(self[0].children):
