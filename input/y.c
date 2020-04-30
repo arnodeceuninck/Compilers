@@ -1,10 +1,18 @@
 #include <stdio.h>
 
+int x = 10;
+
+// Should print the numbers 10 20 30 40
+
 int main(){
-    int x[3];
-    x[2] = 3;
-    int z = 2;
-    int y = x[z];
-    printf("%d", y);
-//    int y = x[2];
+	printf("%d;", x);
+	int x = 20;
+	printf("%d;", x);
+    x = 30;
+	if (1){
+		printf("%d;", x);
+		int x = 40;
+		printf("%d;", x);
+	}
+	return 1;
 }

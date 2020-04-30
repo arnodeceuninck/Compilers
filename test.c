@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-int f();
-
 int main(){
-    int x;
-    int x = 0;
+        int x = 11;
+        printf("%d; ", +9);
+        printf("%d; ", -x);
+        return 1;
 }

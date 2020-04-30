@@ -46,6 +46,37 @@ class AST:
         # This list contains all the functions that it are declared on the pre-order traversal
         AST.functions = list()
 
+    # This method tries to find the position of a node with respect to the first node with a symbol table in it
+    # The parent nr is a way of saying which parent we need to use, first we seek the parent then we go digging
+    def get_position(self, parent_nr=0):
+        # Seek the position of this statement in the statement sequence, we need this because we
+        # need to find the file
+        parent = self.parent
+        child = self
+        while parent_nr:
+            # If the current parent has a symbol table then we need to decrease the parent nr by 1
+            if isinstance(parent, has_symbol_table):
+                parent_nr -= 1
+            child = parent
+            parent = parent.parent
+        position = 0
+
+        # make the current child the previous parent in order to find the correct child to seek for a position
+        while not isinstance(parent, has_symbol_table):
+            child = parent
+            parent = parent.parent
+            # # When the parent is a use function then do not use its symbol table and quit this function
+            # if isinstance(parent, Function) and parent.function_type == "use":
+            #     return None
+
+        # Iterate over all the children of the statement sequence and check if the ast node is met
+        # If it is met then this will be the final position at which the variable is declared
+        for _child in parent:
+            if _child == child:
+                break
+            position += 1
+        return position
+
     def is_declaration(self):
         return self.declaration
 
@@ -222,7 +253,24 @@ class AST:
                 # If the symbol table is global then we need to return a global variable form
                 if self.get_symbol_table().is_global(self.value):
                     return "@" + self.value
-                return "%" + self.value + "." + str(self.get_symbol_table().get_symbol_table_id(self.value))
+
+                # Fetch the symbol table of the ast node
+                symbol_table = self.get_symbol_table()
+                # We need to get the position of the variable as a child of the symbol_table node which is somewhere a parent
+                var_position = self.get_position()
+                symbol_table_position = symbol_table[self.value].position
+                parent_nr = 1
+                # We iterate over all the symbol tables and check if the item is already in the symbol table or not
+                # we do this by checking if the position of the variable is before the declaration. If that is the case
+                # Then we need to check the parent of the symbol table and so on so forth
+                while var_position is None or var_position < symbol_table_position:
+                    var_position = self.get_position(parent_nr)
+                    # Get the previous symbol table and get its parent to seek there
+                    symbol_table = symbol_table.parent
+                    symbol_table_position = symbol_table[self.value].position
+                    # Increase the parent_nr so it will seek 1 parent deeper
+                    parent_nr += 1
+                return "%" + self.value + "." + str(symbol_table.get_symbol_table_id(self.value))
             if indexed:  # Ale je aan een bepaalde index een waarde wil assignen
                 var = "%.t" + str(self.get_unique_id())
                 self.index_load(var, index)
@@ -557,17 +605,35 @@ class Assign(Binary):
             AST.llvm_output += output
             return
 
+        # We need to fetch the correct symbol table for the definition
+        # Fetch the symbol table of the ast node
+        symbol_table = self.get_symbol_table()
+        # We need to get the position of the variable as a child of the symbol_table node which is somewhere a parent
+        var_position = self.get_position()
+        symbol_table_position = symbol_table[self[0].value].position
+        parent_nr = 1
+        # We iterate over all the symbol tables and check if the item is already in the symbol table or not
+        # we do this by checking if the position of the variable is before the declaration. If that is the case
+        # Then we need to check the parent of the symbol table and so on so forth
+        while var_position < symbol_table_position:
+            var_position = self.get_position(parent_nr)
+            # Get the previous symbol table and get its parent to seek there
+            symbol_table = symbol_table.parent
+            symbol_table_position = symbol_table[self[0].value].position
+            # Increase the parent_nr so it will seek 1 parent deeper
+            parent_nr += 1
+
         # If the variable is not in the global scope then we need to make a variable
         # And check if the corresponding item has already been defined in llvm
-        if not self.get_symbol_table().is_global(self[0].value) and not \
-                self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined:
+        if not symbol_table.is_global(self[0].value) and not \
+                symbol_table[self[0].value].llvm_defined:
             create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self[0].variable(store=True),
                 llvm_type=self[0].get_llvm_type(),
                 align=self[0].get_align())
             output += create_var
             # The variable has been defined in llvm, so no more generating hereafter
-            self.get_symbol_table().get_symbol_table(self[0].value)[self[0].value].llvm_defined = True
+            symbol_table[self[0].value].llvm_defined = True
         code = self.get_llvm_template()
         code = code.format(type=self[0].get_llvm_type(), temp=self[1].variable(store=False),
                            location=self[0].variable(store=True))

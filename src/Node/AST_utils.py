@@ -20,11 +20,6 @@ def connect_symbol_table(ast):
     # Or if the ast node is not a statement sequence then we do not need to search for a parent
     if not ast.parent or not isinstance(ast, has_symbol_table):
         return
-    # # Checks whether the ast is a function, if it is then we need to check if it defines a function
-    # # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
-    # if isinstance(ast, Function):
-    #     if ast.function_type == "declaration" or ast.function_type == "use":
-    #         return
 
     # The supposedly statement sequence which we need to connect the current symbol table with
     parent = ast.parent
@@ -32,11 +27,6 @@ def connect_symbol_table(ast):
     while not isinstance(parent, has_symbol_table):
         parent = parent.parent
 
-    # # Checks whether the parent is a function, if it is then we need to check if it defines a function
-    # # If the function does not define anything (it is used or declared), then there is no symbol table to be linked
-    # if isinstance(parent, Function):
-    #     if parent.function_type == "declaration" or parent.function_type == "use":
-    #         return
     # Set the parent of the symbol table to the parent just found
     ast.symbol_table.parent = parent.symbol_table
     # Add a child to this parent
@@ -46,23 +36,46 @@ def connect_symbol_table(ast):
 # An error checking functions to check whether all symbols are already in the symbol table
 # (or insert them when declaring)
 def assignment(ast):
+    # Return if we do not encounter a variable or an assign
+    if not isinstance(ast, Variable) and not isinstance(ast, Assign):
+        return
     # Check whether any other symbol is already in the symbol table
-    if isinstance(ast, Variable) and ast.parent and isinstance(ast.parent, Assign):
-        # The supposedly statement sequence in which we need to put the variable
-        parent = ast.parent
-        # Insert the variable into the nearest parent ast symbol table that is a statement sequence
-        # This is because they define scopes
-        while not isinstance(parent, has_symbol_table):
-            parent = parent.parent
-
+    if ((isinstance(ast, Variable) and isinstance(ast.parent, Assign) and (ast.declaration or not ast.declaration)) or (
+            isinstance(ast, Variable))) and not isinstance(ast.parent.parent, Function):
+        # Fetch the symbol table of the ast node
+        symbol_table = ast.get_symbol_table()
+        # We need to get the position of the variable as a child of the symbol_table node which is somewhere a parent
+        var_position = ast.get_position()
+        symbol_table_position = symbol_table[ast.value].position
+        parent_nr = 1
+        # We iterate over all the symbol tables and check if the item is already in the symbol table or not
+        # we do this by checking if the position of the variable is before the declaration. If that is the case
+        # Then we need to check the parent of the symbol table and so on so forth
+        while var_position < symbol_table_position:
+            var_position = ast.get_position(parent_nr)
+            # Get the previous symbol table and get its parent to seek there
+            symbol_table = symbol_table.parent
+            # If we do not ge the right symbol table then we need to look for the parent
+            if symbol_table != symbol_table.get_symbol_table(ast.value):
+                # Assure that we get the next symbol table
+                var_position = -1
+                parent_nr += 1
+                continue
+            symbol_table_position = symbol_table[ast.value].position
+            # Increase the parent_nr so it will seek 1 parent deeper
+            parent_nr += 1
         # return not required here, but otherwise pycharm thinks the statement is useless
-        return parent.symbol_table[ast.value]  # Raises an error if not yet declared
+        return symbol_table[ast.value]  # Raises an error if not yet declared
 
     # Add symbol to symbol table
     if ast.value == "=" and (ast.is_declaration() or ast[0].is_declaration()):
-        # improve type without constant and ptr
+        # TODO improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]
+        # This variable is needed to indicate when we have declared the variable
+        # If we have assignments and use the variable we can then check the parent instead
+        position = ast.get_position()
+
         # When the left child is a * then we need to look at it's child which is the real location
         if location == "*":
             location = ast.children[0][0].value
@@ -78,40 +91,34 @@ def assignment(ast):
         # Check if the parent of the parent is a function,
         # if it is then check if it conflicts with one of the passed variables
         if isinstance(parent.parent, Function):
+            if parent.parent.function_type == 'use':
+                return
             # Store the symbol table of the function
             function_symbol_table = parent.parent.symbol_table
-            double_declared = True
-            # If the value is in the symbol table of the function then it will not throw
-            # an exception and thus declare the variable as in the symbol table of the function
-            # which means that we cannot create this variable in this scope anymore and must raise
-            # an error
-            try:
-                function_symbol_table[ast[0].value]
-            except:
-                double_declared = False
+            # If the value is in the symbol table of the function then it we will get true otherwise false
+            double_declared = function_symbol_table.in_this(ast[0].value)
+
             # We raise an error because the variable is double declared
             if double_declared:
                 raise VariableRedeclarationError(location)
 
-        parent.symbol_table.insert(location, type)
+        parent.symbol_table.insert(location, type, position)
 
     # Last minute fix before the evaluation
-    # (already forgot what it does)
+    # This checks if the variable is declared, like int x; without a definition
+    # And then adds it to the syntax tree
     if isinstance(ast, Variable) and ast.declaration:  # ast.parent and not isinstance(ast.parent,
         #       (Assign, Print, If, Unary, Binary, Return)):
         location = ast.value
         type = ast
-        # The supposedly statement sequence in which we need to put the variable
-        parent = ast.parent
-        # Insert the variable into the nearest parent ast symbol table that is a statement sequence
-        # This is because they define scopes
-        while not isinstance(parent, has_symbol_table):
-            parent = parent.parent
-            # When the parent is a use function then do not use its symbol table and quit this function
-            if isinstance(parent, Function) and parent.function_type == "use":
-                return
+        symbol_table = ast.get_symbol_table()
+        # This variable is needed to indicate when we have declared the variable
+        # If we have assignments and use the variable we can then check the parent instead
+        position = ast.get_position()
+        if position is None:
+            return
 
-        parent.symbol_table.insert(location, type)
+        symbol_table.insert(location, type, position)
 
 
 # Converts all variables into the right type.
@@ -459,6 +466,7 @@ def check_only_dereference_lvalues(ast: AST):
     if not isinstance(child, Variable):
         raise DerefError()
 
+
 def check_arrays(ast: AST):
     if isinstance(ast, ArrayIndex):
         if not ast[1].get_type() == "int":
@@ -466,6 +474,7 @@ def check_arrays(ast: AST):
 
         if not ast[0].array:
             raise NoArrayError()
+
 
 # Checks if there is a main defined in the AST
 def check_main(ast: AST):
