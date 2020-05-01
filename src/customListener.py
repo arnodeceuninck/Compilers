@@ -186,7 +186,7 @@ class customListener(ParseTreeListener):
         elif ctx.type_().float_:
             node = VFloat()
         elif ctx.type_().char_:
-            node = CChar()
+            node = VChar()
         else:
             raise CompilerError
 
