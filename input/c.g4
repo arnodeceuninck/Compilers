@@ -16,13 +16,12 @@ function_declaration: type_ var=VAR_NAME '(' argument_list ')';
 
 type_: (int_='int'|float_='float'|char_='char'|void_='void');
 
-variable_declaration: ((const_='const')? declaration=type_ (pointer)*) variable_use;  // TODO: int f[0](){} shouldn't be allowed.
+variable_declaration: ((const_='const')? declaration=type_) variable_use;  // TODO: int f[0](){} shouldn't be allowed.
 
-variable_use: (deref)* var=VAR_NAME (array=array_index)?;
+variable_use: (pointer)* var=VAR_NAME (array=array_index)?;
 
 array_index: '[' index=operation_logic_or ']';
 
-deref: '*';
 pointer: '*';
 
 function_use: var=VAR_NAME '(' use_argument_list ')';

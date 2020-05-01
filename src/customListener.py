@@ -251,16 +251,6 @@ class customListener(ParseTreeListener):
         self.add(variable)
         pass
 
-    # Enter a parse tree produced by cParser#deref.
-    def enterDeref(self, ctx: cParser.DerefContext):
-        variable = self.trees.pop()
-        variable.reref += 1
-        self.add(variable)
-        pass
-
-    # Exit a parse tree produced by cParser#deref.
-    def exitDeref(self, ctx: cParser.DerefContext):
-        pass
 
     # Enter a parse tree produced by cParser#function_use.
     def enterFunction_use(self, ctx: cParser.Function_useContext):

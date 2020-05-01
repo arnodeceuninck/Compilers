@@ -9,7 +9,7 @@ class Variable(AST):
         self.defined = False
         self.llvm_defined = False  # If the variable is already defined in llvm code
 
-        self.reref = 0  # e.g. *a
+        self.reref = 0  # TODO: This is illegal to use, you should use ptr counter instead (to prevent ambiguity)
 
         self.array = False
         self.array_number = 0 # The index or the size in case of declaration
