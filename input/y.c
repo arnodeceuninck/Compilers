@@ -1,10 +1,23 @@
 #include <stdio.h>
 
-// Should print the numbers 5, 0.5 and the char c
+void f();
+
+void g();
+
+void f(){
+	printf("Hello ");
+	return;
+}
+
+void g(){
+	printf("World\n");
+	f();
+	printf("World\n");
+}
 
 int main(){
-    int x = 5;
-    float y = 0.5;
-    char c = 'c';
-    printf("%d; %f; %c", x, y, c);
+    // Should print "hello world" twice
+	f();
+	g();
+	return 1;
 }
