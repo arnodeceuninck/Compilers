@@ -1,4 +1,6 @@
-from test import *
+import unittest
+
+from src.Node.AST_utils import *
 from src.ErrorListener import *
 import inspect
 import unittest
@@ -150,3 +152,7 @@ class CorrectCodeTests(unittest.TestCase):
 
     def test_while(self):
         self.help_test()
+
+
+if __name__ == '__main__':
+    unittest.main()

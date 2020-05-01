@@ -46,6 +46,16 @@ class AST:
         # This list contains all the functions that it are declared on the pre-order traversal
         AST.functions = list()
 
+    def get_llvm_string_len(self, string) -> int:
+        nr_backslashes = 0
+        # We need to count the \ in the string in order to get the right amount of characters
+        for character in string:
+            if character == "\\":
+                nr_backslashes += 1
+        # The total length will be the actual length of the string minus 2 * nr_backslashes
+        # this is because each backslash sequence contains 3 characters which should in fact be 1
+        return len(string) - 2 * nr_backslashes
+
     def global_llvm(self):
         llvm_output = AST.llvm_output
         AST.llvm_output = ""
@@ -795,16 +805,6 @@ class Function(AST):
         ret_string += "\\00"
         return ret_string
 
-    def get_llvm_string_len(self, string) -> int:
-        nr_backslashes = 0
-        # We need to count the \ in the string in order to get the right amount of characters
-        for character in string:
-            if character == "\\":
-                nr_backslashes += 1
-        # The total length will be the actual length of the string minus 2 * nr_backslashes
-        # this is because each backslash sequence contains 3 characters which should in fact be 1
-        return len(string) - 2 * nr_backslashes
-
     # Gets the total amount of format tags in a printf string
     def get_format_count(self, format_string):
         format_count = 0
@@ -857,8 +857,11 @@ class Function(AST):
 
             # Generate the llvm code of the child
             child.llvm_code()
+            # If the type of the child is a string then we need to generate a custom argument
+            if child.get_type() == "string":
+                function_arguments += child.llvm_argument()
             # If the type of the child is a float then we need to convert it to a bool
-            if child.get_llvm_type() == "float":
+            elif child.get_llvm_type() == "float":
                 print_type = child.get_llvm_print_type()
                 variable = str()
                 # Because you can't print floats only doubles, we need to first extend it to a double
@@ -1068,7 +1071,7 @@ class Include(AST):
 
 # Variable to indicate that these classes need a bool for branching instead of original value
 BoolClasses = (If, For, While)
-has_symbol_table = (StatementSequence, For, Function) #, If, For, While)
+has_symbol_table = (StatementSequence, For, Function)  # , If, For, While)
 
 # Use these imports to make these classes appear here
 from src.Node.Variable import *

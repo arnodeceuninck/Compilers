@@ -1,4 +1,58 @@
-from src.Node.AST import AST, StatementSequence, Assign
+from src.Node.AST import AST, StatementSequence
+from src.Node.Unary import Unary
+from src.ErrorListener import RerefError
+
+
+class UDeref(Unary):
+    def __init__(self, value="&"):
+        Unary.__init__(self, value)
+
+    def get_type(self):
+        return self[0].get_type() + "*"
+
+    def get_llvm_type(self):
+        return self[0].get_llvm_type() + "*"
+
+    def llvm_code(self):
+        self[0].llvm_code()
+        self[0].variable()
+        pass  # TODO: fix it
+
+    def variable(self, store: bool = False, indexed: bool = False, index=0):
+        return self[0].variable(store=True)
+
+    def is_declaration(self):
+        return self[0].is_declaration()
+
+
+class UReref(Unary):
+    def __init__(self, value="*"):
+        Unary.__init__(self, value)
+
+    def get_type(self):
+        child_type = self[0].get_type()
+        if child_type[len(child_type) - 1] != "*":
+            raise RerefError()
+        return child_type[:len(child_type) - 1]
+
+    def get_llvm_type(self):
+        child_type = self[0].get_llvm_type()
+        if child_type[len(child_type) - 1] != "*":
+            raise RerefError()
+        return child_type[:len(child_type) - 1]
+
+    def llvm_code(self):
+        self[0].llvm_code()
+        type = self.get_llvm_type()
+
+        # Load the value into the ast node
+        code = self.llvm_load_template()
+        code = code.format(result=self.variable(), type=type, var=self[0].variable())
+
+        AST.llvm_output += code
+
+    def is_declaration(self):
+        return self[0].is_declaration()
 
 
 class Variable(AST):
@@ -12,7 +66,7 @@ class Variable(AST):
         self.reref = 0
 
         self.array = False
-        self.array_number = 0 # The index or the size in case of declaration
+        self.array_number = 0  # The index or the size in case of declaration
         self.array_size = 0  # The size of the array
 
         self.declaration = False

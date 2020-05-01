@@ -1,7 +1,5 @@
-from src.Node.AST import Operator, Variable, AST, BoolClasses
+from src.Node.AST import Operator, AST, BoolClasses
 from src.Node.constant import CBool
-from src.Node.Variable import VFloat
-from src.ErrorListener import RerefError
 
 printString = '\tcall i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str{format_type}, i32 0, i32 0), {print_type} {value})\n'
 
@@ -112,58 +110,6 @@ class UNot(Unary):
         AST.llvm_output += bool_to_type
 
 
-class UDeref(Unary):
-    def __init__(self, value="&"):
-        Unary.__init__(self, value)
-
-    def get_type(self):
-        return self[0].get_type() + "*"
-
-    def get_llvm_type(self):
-        return self[0].get_llvm_type() + "*"
-
-    def llvm_code(self):
-        self[0].llvm_code()
-        self[0].variable()
-        pass  # TODO: fix it
-
-    def variable(self, store: bool = False, indexed: bool = False, index=0):
-        return self[0].variable(store=True)
-
-    def is_declaration(self):
-        return self[0].is_declaration()
-
-
-class UReref(Unary):
-    def __init__(self, value="*"):
-        Unary.__init__(self, value)
-
-    def get_type(self):
-        child_type = self[0].get_type()
-        if child_type[len(child_type) - 1] != "*":
-            raise RerefError()
-        return child_type[:len(child_type) - 1]
-
-    def get_llvm_type(self):
-        child_type = self[0].get_llvm_type()
-        if child_type[len(child_type) - 1] != "*":
-            raise RerefError()
-        return child_type[:len(child_type) - 1]
-
-    def llvm_code(self):
-        self[0].llvm_code()
-        type = self.get_llvm_type()
-
-        # Load the value into the ast node
-        code = self.llvm_load_template()
-        code = code.format(result=self.variable(), type=type, var=self[0].variable())
-
-        AST.llvm_output += code
-
-    def is_declaration(self):
-        return self[0].is_declaration()
-
-
 class ArrayIndex(Unary):
     def __init__(self, index):
         self.index = index
@@ -230,7 +176,7 @@ class Print(Unary):
         variable = self[0].variable()
         # Because you can't print floats
         if print_type == "double":
-            convert_code = VFloat.convert_template("double")
+            convert_code = self[0].convert_template("double")
             convert_code = convert_code.format(result=self.variable(), value=self[0].variable())
             variable = self.variable()
             AST.llvm_output += convert_code

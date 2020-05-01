@@ -540,6 +540,3 @@ class customListener(ParseTreeListener):
             return
         self.simplify(1)
         pass
-
-
-# del cParser

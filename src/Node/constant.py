@@ -1,4 +1,4 @@
-from src.Node.AST import AST, BoolClasses
+from src.Node.AST import AST, BoolClasses, stringVar, stringArg
 
 
 class Constant(AST):
@@ -237,7 +237,20 @@ class CString(Constant):
         return "string"
 
     def get_llvm_type(self) -> str:
-        return "s"
+        return ""
 
     def get_format_type(self):
         return "s"
+
+    def llvm_argument(self):
+        argument = stringArg.format(string_id=self.variable(True)[2:],
+                                    string_len=str(self.get_llvm_string_len(self.value) + 1))
+        return argument
+
+    def llvm_code(self):
+        # We need to prepend the variable to the AST output llvm code
+        temp_llvm_code = AST.llvm_output
+        AST.llvm_output = stringVar.format(string_id=self.variable(True)[2:],
+                                           string_len=str(self.get_llvm_string_len(self.value) + 1),
+                                           string_val=self.value + "\\00")
+        AST.llvm_output += temp_llvm_code
