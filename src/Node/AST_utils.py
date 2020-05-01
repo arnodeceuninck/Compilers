@@ -39,6 +39,7 @@ def assignment(ast):
     # Return if we do not encounter a variable or an assign
     if not isinstance(ast, Variable) and not isinstance(ast, Assign):
         return
+
     # Check whether any other symbol is already in the symbol table
     if (not ast.is_declaration() and isinstance(ast, Variable) and not isinstance(ast.parent, Assign)) or \
             (ast.is_declaration() and isinstance(ast, Variable) and isinstance(ast.parent, Assign)):

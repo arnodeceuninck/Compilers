@@ -69,7 +69,7 @@ operation_unary_plus_minus_not: pp='++' right=operation_unary_plus_minus_not
                               | plus='+' right=operation_unary_plus_minus_not
                               | minus='-' right=operation_unary_plus_minus_not
                               | not_='!' right=operation_unary_plus_minus_not
-                              | rref='*' right=operation_unary_plus_minus_not
+//                              | rref='*' right=operation_unary_plus_minus_not
                               | dref='&' right=operation_unary_plus_minus_not
                               | operation_brackets;
 

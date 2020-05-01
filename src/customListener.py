@@ -216,6 +216,7 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#variable_use.
     def enterVariable_use(self, ctx: cParser.Variable_useContext):
         node = Variable(value=ctx.var.text)
+        # when the righthand side is dereferenced then we need to add the deref node together with the variable node
         self.add(node)
         pass
 
@@ -227,6 +228,13 @@ class customListener(ParseTreeListener):
             variable.array = True
             variable.array_number = int(array.index)
             self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
+        if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, cParser.LvalueContext):
+            node = self.trees.pop()
+            self.add(UReref())
+            self.add(node)
+            # Combine these two nodes
+            self.simplify(1)
+            return
         pass
 
     # Enter a parse tree produced by cParser#array_index.
@@ -371,7 +379,10 @@ class customListener(ParseTreeListener):
         lvalue = self.trees.pop()
         assign = self.trees.pop()
 
-        assign.declaration = lvalue.declaration
+        if isinstance(lvalue, UReref):
+            assign.declaration = False
+        else:
+            assign.declaration = lvalue.declaration
 
         self.add(assign)
         self.add(lvalue)
@@ -476,7 +487,7 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_unary_plus_minus_not.
     def enterOperation_unary_plus_minus_not(self, ctx: cParser.Operation_unary_plus_minus_notContext):
         self.help_operation(ctx, (ctx.plus, UPlus), (ctx.minus, UMinus), (ctx.not_, UNot),
-                            (ctx.rref, UReref), (ctx.dref, UDeref))
+                            (ctx.dref, UDeref)) # (ctx.rref, UReref),
         pass
 
     # Exit a parse tree produced by cParser#operation_unary_plus_minus_not.
@@ -531,4 +542,4 @@ class customListener(ParseTreeListener):
         pass
 
 
-del cParser
+# del cParser
