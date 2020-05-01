@@ -40,8 +40,8 @@ def assignment(ast):
     if not isinstance(ast, Variable) and not isinstance(ast, Assign):
         return
     # Check whether any other symbol is already in the symbol table
-    if ((isinstance(ast, Variable) and isinstance(ast.parent, Assign) and (ast.declaration or not ast.declaration)) or (
-            isinstance(ast, Variable))) and not isinstance(ast.parent.parent, Function):
+    if (not ast.is_declaration() and isinstance(ast, Variable) and not isinstance(ast.parent, Assign)) or \
+            (ast.is_declaration() and isinstance(ast, Variable) and isinstance(ast.parent, Assign)):
         # Fetch the symbol table of the ast node
         symbol_table = ast.get_symbol_table()
         # We need to get the position of the variable as a child of the symbol_table node which is somewhere a parent
@@ -67,8 +67,14 @@ def assignment(ast):
         # return not required here, but otherwise pycharm thinks the statement is useless
         return symbol_table[ast.value]  # Raises an error if not yet declared
 
+    # Check if the child is a declaration
+    is_declaration = False
+    if ast.children:
+        if ast[0].is_declaration():
+            is_declaration = True
+
     # Add symbol to symbol table
-    if ast.value == "=" and (ast.is_declaration() or ast[0].is_declaration()):
+    if isinstance(ast, Assign) and (ast.is_declaration() or is_declaration):
         # TODO improve type without constant and ptr
         location = ast.children[0].value
         type = ast.children[0]
@@ -117,6 +123,10 @@ def assignment(ast):
         position = ast.get_position()
         if position is None:
             return
+
+        # If we have an array declaration then we need to take the index position to the array size
+        if type.array:
+            type.array_size = type.array_number
 
         symbol_table.insert(location, type, position)
 
@@ -171,14 +181,14 @@ def convertVar(ast):
 def checkAssigns(ast):
     # Check for const assigns
     # If the child is of the type * then we need to take the child of UReref
-    if isinstance(ast, Assign) and isinstance(ast.children[0], UReref):
-        ast = ast.children[0]
+    if isinstance(ast, Assign) and isinstance(ast[0], UReref):
+        ast = ast[0]
     # On assignments that are declarations, but the leftmost child is a const variable
-    if isinstance(ast, Assign) and ast.children[0].const and not ast.declaration:
-        raise ConstError(ast.children[0].value)
+    if isinstance(ast, Assign) and ast[0].const and not ast.declaration:
+        raise ConstError(ast[0].value)
     if isinstance(ast, Assign):
-        type_lvalue = ast.children[0].get_type()
-        type_rvalue = ast.children[1].get_type()
+        type_lvalue = ast[0].get_type()
+        type_rvalue = ast[1].get_type()
         if type_lvalue == type_rvalue:
             pass
         # elif type_lvalue == "float" and type_rvalue == "int":
@@ -529,7 +539,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(check_only_dereference_lvalues)
     communismForLife.traverse(check_main)  # Checks if there is a main defined
     communismForLife.traverse(return_check)
-    communismForLife.traverse(check_arrays)
+    # communismForLife.traverse(check_arrays)
     AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
     communismForLife.traverse(check_function)  # Checks if all the functions are defined
     if not AST.main:
@@ -543,12 +553,16 @@ def make_ast(tree, optimize: bool = True):
 # Write the llvm version of the ast to the filename
 def to_LLVM(ast, filename):
     AST.llvm_output = ""
+    # This variable will contain all the variables that are globally defined
+    global_declaration_output = ""
 
     symbol_table = ast.symbol_table.elements
     ptr_types = list()
 
     # generate variable declarations from the symbol table
     for var in symbol_table:
+        element = symbol_table[var]
+        element.type.defined = True
         # define all the variables
         LLVM_var_name = "@" + var
         ptr = "*" if symbol_table[var].type.ptr else ""
@@ -559,9 +573,9 @@ def to_LLVM(ast, filename):
             LLVM_type = "global"
         LLVM_type += " {} undef".format(symbol_table[var].type.get_llvm_type())
         LLVM_align += " {}".format(symbol_table[var].type.get_align())
-        AST.llvm_output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
+        global_declaration_output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
     if len(symbol_table) > 0:
-        AST.llvm_output += "\n"
+        global_declaration_output += "\n"
     if not AST.contains_function:
         AST.llvm_output += "define i32 @main() {\n\n"
 
@@ -581,6 +595,11 @@ def to_LLVM(ast, filename):
     if AST.scan:
         scan_declaration = "declare i32 @__isoc99_scanf(i8*, ...)\n"
         AST.llvm_output += scan_declaration
+
+    # If we have global declarations then prepend them to the code
+    if len(global_declaration_output):
+        global_declaration_output += AST.llvm_output
+        AST.llvm_output = global_declaration_output
 
     # Write output to the outputfile
     outputFile = open(filename, "w")

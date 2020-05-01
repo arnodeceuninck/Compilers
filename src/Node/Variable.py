@@ -12,8 +12,8 @@ class Variable(AST):
         self.reref = False  # e.g. *a
 
         self.array = False
-        self.array_number = 0 # The index or the size in case of declaration
-        self.array_size = 0 # The size of the array
+        self.array_number = 0  # The index or the size in case of declaration
+        self.array_size = 0  # The size of the array
 
         self.declaration = False
 
@@ -69,8 +69,9 @@ class Variable(AST):
     # The llvm code for a variable will only be generated if the parent is a statement sequence,
     # because then we will have to allocate the variable
     def llvm_code(self):
-        if isinstance(self.parent, StatementSequence) and not self.parent.symbol_table.get_symbol_table(self.value)[
-            self.value].llvm_defined:
+        if isinstance(self.parent, StatementSequence) and \
+                not self.parent.symbol_table.get_symbol_table(self.value)[self.value].llvm_defined and \
+                not self.parent.symbol_table.is_global(self.value):
             # Allocate the variable
             create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
                 variable=self.variable(store=True),
@@ -98,7 +99,7 @@ class VInt(Variable):
         return "i32"
 
     def get_type(self):
-        return "int" + ("*" if self.ptr else "") # TODO: arrays should also include a '*', but this lets 3 tests fail
+        return "int" + ("*" if self.ptr else "")  # TODO: arrays should also include a '*', but this lets 3 tests fail
 
     def get_format_type(self):
         return "d"

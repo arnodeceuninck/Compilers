@@ -27,7 +27,6 @@ class AST:
     contains_function = False  # Check whether you have to manually add the int main()
     stdio = False  # Indicates if stdio is used
     functions = list()  # This list contains all the functions that it are declared on the pre-order traversal
-    global_llvm = ""  # Global llvm code
 
     # Resets the global class variables (must be used with tests)
     @staticmethod
@@ -46,7 +45,26 @@ class AST:
         AST.stdio = False
         # This list contains all the functions that it are declared on the pre-order traversal
         AST.functions = list()
-        AST.global_llvm = ""
+
+    def global_llvm(self):
+        llvm_output = AST.llvm_output
+        AST.llvm_output = ""
+        # Assure that we have the root statement sequence
+        if self.parent:
+            return ""
+
+        # Iterate over the children and only generate llvm_code for the children that are not function
+        for child in self.children:
+            if isinstance(child, Function):
+                continue
+            # Generate the llvm_code
+            child.llvm_code()
+
+        # The llvm code is stored in the llvm code variable of the ast, we need to remove it from
+        # there and store it into another return variable for this function
+        ret_val = AST.llvm_output
+        AST.llvm_output = llvm_output
+        return ret_val
 
     # This method tries to find the position of a node with respect to the first node with a symbol table in it
     # The parent nr is a way of saying which parent we need to use, first we seek the parent then we go digging
@@ -358,8 +376,14 @@ class StatementSequence(AST):
         return None
 
     def llvm_code(self):
+        # ATTENTION we do not need to generate llvm code for children that are defined in the global scope as
+        # variables
         AST.llvm_output += self.comments()
         for child in self.children:
+            # If there is no parent, we are the root statement sequence and the child is not a function
+            # we do can not generate llvm_code
+            if not self.parent and not isinstance(child, Function):
+                continue
             child.llvm_code()
         AST.llvm_output += '\n'
 
@@ -903,7 +927,6 @@ class Function(AST):
 
     # The llvm code needs to be generated a special way and not in the main function
     def llvm_code(self):
-        AST.llvm_output += self.comments()
         # Check if stdio is included if yes then use printf
         if AST.stdio:
             # Check if the function is either printf or scanf then try to use them
@@ -943,6 +966,10 @@ class Function(AST):
         elif self.function_type == "declaration":
             return
 
+        # If the function definition is that from main then generate the llvmcode
+        global_llvm_code = ""
+        if self.value == "main" and self.function_type == "definition":
+            global_llvm_code = self.parent.global_llvm()
         # Add the arguments for a function in a string
         # TODO: Check llvm arguments structure
         function_arguments = ""
@@ -962,9 +989,8 @@ class Function(AST):
 
         AST.llvm_output += " {\n"
 
-        # If we have global llvm variables then we need to insert the code to make them here
-        if AST.global_llvm:
-            AST.llvm_output += AST.global_llvm
+        # We add the global llvm code, if there is any though
+        AST.llvm_output += global_llvm_code
 
         # First get all arguments and store them in their variables to be readable
         if len(self[0].children):

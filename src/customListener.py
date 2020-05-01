@@ -592,7 +592,7 @@ class customListener(ParseTreeListener):
                 if child.symbol == ctx.var:
                     variable = Variable(child.getText())
             except AttributeError:
-                pass # Because an Operation_logic_orContext object has no attribute 'symbol'
+                pass  # Because an Operation_logic_orContext object has no attribute 'symbol'
         self.add(ArrayIndex(index))
         self.add(variable)
         pass

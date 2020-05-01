@@ -1,17 +1,23 @@
 #include <stdio.h>
 
+void f();
 
+void g();
 
-// Should print the numbers 10 20 30 40
+void f(){
+	printf("Hello ");
+	return;
+}
+
+void g(){
+	printf("World\n");
+	f();
+	printf("World\n");
+}
+
 int main(){
-	printf("%d;", x);
-	int x = 20;
-	printf("%d;", x);
-    x = 30;
-	if (1){
-		printf("%d;", x);
-		int x = 40;
-		printf("%d;", x);
-	}
+    // Should print "hello world" twice
+	f();
+	g();
 	return 1;
 }
