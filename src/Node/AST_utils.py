@@ -512,6 +512,7 @@ def make_ast(tree, optimize: bool = True):
     communismForLife.traverse(assignment)  # Symbol table checks
     # Convert Variables into their right type based on the symbol table
     communismForLife.traverse(convertVar)
+    dot(communismForLife, "output/debug.dot")
     # Gives all the function uses correct return types
     communismForLife.traverse(link_function)
     communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...

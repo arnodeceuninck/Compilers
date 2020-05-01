@@ -11,8 +11,8 @@ class ReservedType(AST):
 
 
 class Break(ReservedType):
-    def __init__(self, value=""):
-        ReservedType.__init__(self, "break")
+    def __init__(self, value="break"):
+        ReservedType.__init__(self, value)
 
     def __str__(self):
         return '{name}[label="Reserved Word: break", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)

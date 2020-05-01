@@ -4,16 +4,16 @@ from src.Node.AST import AST, StatementSequence, Assign
 class Variable(AST):
     def __init__(self, value=""):
         AST.__init__(self, value, "#af93ff")
-        self.ptr = False  # e.g. int* a (in declaration), &a (deref in rvalue)
+        self.ptr = 0  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
         self.defined = False
         self.llvm_defined = False  # If the variable is already defined in llvm code
 
-        self.reref = False  # e.g. *a
+        self.reref = 0  # e.g. *a
 
         self.array = False
         self.array_number = 0 # The index or the size in case of declaration
-        self.array_size = 0 # The size of the array
+        self.array_size = 0  # The size of the array
 
         self.declaration = False
 

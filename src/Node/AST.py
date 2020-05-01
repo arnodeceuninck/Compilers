@@ -49,6 +49,14 @@ class AST:
     def is_declaration(self):
         return self.declaration
 
+    def get_scope_count(self):
+        if isinstance(self, has_symbol_table):
+            return self.scope_count
+        if not self.parent:
+            return -1
+        else:
+            return self.parent.get_scope_count()
+
     def __init__(self, value: str = "", color: str = "#9f9f9f"):
 
         self._id = 0
@@ -420,6 +428,8 @@ class For(AST):
 class While(AST):
     def __init__(self):
         AST.__init__(self, "while")
+        # self.scope_count = scope_count
+        # self.symbol_table = SymbolTable(self.id())
 
     def comments(self, comment_out=True):
         comment = "while " + self[0].comments()  # only add comments for the condition, the comments for the statement
@@ -951,7 +961,7 @@ class Include(AST):
 
 # Variable to indicate that these classes need a bool for branching instead of original value
 BoolClasses = (If, For, While)
-has_symbol_table = (StatementSequence, For, Function)
+has_symbol_table = (StatementSequence, For, Function) #, If, For, While)
 
 # Use these imports to make these classes appear here
 from src.Node.Variable import *
