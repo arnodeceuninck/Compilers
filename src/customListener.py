@@ -228,7 +228,7 @@ class customListener(ParseTreeListener):
             variable.array = True
             variable.array_number = int(array.index)
             self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
-        if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, cParser.LvalueContext):
+        if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, (cParser.LvalueContext, cParser.Operation_bracketsContext)):
             node = self.trees.pop()
             self.add(UReref())
             self.add(node)

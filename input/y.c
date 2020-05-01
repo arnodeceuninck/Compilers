@@ -1,9 +1,8 @@
 #include <stdio.h>
 
-// This should print: 10, 10, 11, 11
+// Should print the number 10
 int main(){
-	int x = 0;
-	int* xp = &x;
-	*xp = 10;
-	return 1;
+    int x = 10;
+    int* xp = &x;
+    printf("%d", *xp);
 }
