@@ -1,4 +1,4 @@
-from src.Node.AST import AST, StatementSequence
+from src.Node.AST import AST, StatementSequence, Assign
 from src.Node.Unary import Unary
 from src.ErrorListener import RerefError
 
@@ -33,13 +33,13 @@ class UReref(Unary):
         child_type = self[0].get_type()
         if child_type[len(child_type) - 1] != "*":
             raise RerefError()
-        return child_type[:len(child_type) - 1]
+        return child_type[:-1]
 
     def get_llvm_type(self):
         child_type = self[0].get_llvm_type()
         if child_type[len(child_type) - 1] != "*":
             raise RerefError()
-        return child_type[:len(child_type) - 1]
+        return child_type[:-1]
 
     def llvm_code(self):
         self[0].llvm_code()
@@ -88,7 +88,7 @@ class Variable(AST):
         raise Exception("Abstract function")
         # return self.type + ("*" if self.ptr else "")
 
-    def getLLVMType(self, ignore_array=False):
+    def get_llvm_type(self, ignore_array=False):
         return ""
 
     def getFormatType(self):
@@ -107,7 +107,7 @@ class Variable(AST):
         AST.llvm_output += code
 
     def index_load(self, result, index):
-        code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
+        code = "\t{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
         code = code.format(result=result, array_type=self.get_llvm_type(),
                            variable=self.variable(store=True), index=index)
         AST.llvm_output += code

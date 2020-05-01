@@ -320,10 +320,17 @@ class AST:
                 if symbol_table.parent:
                     return "%" + self.value + "." + str(symbol_table.get_symbol_table_id(self.value))
                 return "@" + self.value
-            if indexed:  # Ale je aan een bepaalde index een waarde wil assignen
+            if indexed:  # Als je aan een bepaalde index een waarde wil assignen
                 var = "%.t" + str(self.get_unique_id())
                 self.index_load(var, index)
-                return var
+                # This loads the pointer type into a normal variable and returns the variable in which is stored
+                llvm_load_template = self.llvm_load_template()
+                result = "%.t" + str(self.get_unique_id())
+                llvm_load_template = llvm_load_template.format(result=result,
+                                                               type=self.get_llvm_type(True),
+                                                               var=var)
+                AST.llvm_output += llvm_load_template
+                return result
             else:
                 var = "%.t" + str(self.get_unique_id())
                 self.llvm_load(var)  # Loads the variable in storage into the variable var
@@ -649,8 +656,8 @@ class Assign(Binary):
             return
 
         if isinstance(self[0], Variable) and self[0].array:
-            code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
-            code += "store {type} {value}, {type}* {temp}, align 4\n"
+            code = "\t{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
+            code += "\tstore {type} {value}, {type}* {temp}, align 4\n"
             code = code.format(type=self.children[0].get_llvm_type(ignore_array=True),
                                array_type=self.children[0].get_llvm_type(),
                                temp=self.get_temp(),
@@ -874,6 +881,17 @@ class Function(AST):
                     variable = child.variable()
 
                 function_arguments += child.get_llvm_print_type() + " " + variable
+            # If we find a variable type then we need to check if it is an array
+            # because it needs to be another type that needs to be passed through
+            elif isinstance(child, Variable):
+                # If we have an array we need to store it in a variable and then load this in another variable
+                # because it will be a pointer
+                if child.array:
+                    variable = child.variable(indexed=True, index=child.array_number)
+
+                    function_arguments += child.get_llvm_type(child.array) + " " + variable
+                    continue
+                function_arguments += child.get_llvm_type(child.array) + " " + child.variable()
             else:
                 # We know that the llvm code that has been generated has stored the value in the child as a variable
                 function_arguments += child.get_llvm_type() + " " + child.variable()
@@ -930,8 +948,13 @@ class Function(AST):
             # Generate the llvm code of the child
             child.llvm_code()
 
-            # We know that the llvm code that has been generated has stored the value in the child as a variable
-            function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
+            # If we find a variable type then we need to check if it is an array
+            # because it needs to be another type that needs to be passed through
+            if isinstance(child, Variable):
+                function_arguments += child.get_llvm_type(child.array) + " " + child.variable()
+            else:
+                # We know that the llvm code that has been generated has stored the value in the child as a variable
+                function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
 
         # We created all the arguments that should go into the function call right now we need to put them in there
         # then we append it to the output of the llvm generation
@@ -962,7 +985,7 @@ class Function(AST):
                 child.llvm_code()
                 # We know that the llvm code that has been generated has stored the value in the child as a variable
                 if isinstance(child, Variable):
-                    function_arguments += child.get_llvm_type() + " " + child.variable()
+                    function_arguments += child.get_llvm_type(child.array) + " " + child.variable()
                 else:
                     function_arguments += child.get_llvm_type() + " " + child.variable(store=True)
 
