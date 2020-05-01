@@ -147,13 +147,13 @@ class VInt(Variable):
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
             return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
-        return "i32" + ("*" if self.ptr else "")
+        return "i32" + ("*"*self.ptr)
 
     def get_llvm_print_type(self) -> str:
         return "i32"
 
     def get_type(self):
-        return "int" + ("*" if self.ptr else "")  # TODO: arrays should also include a '*', but this lets 3 tests fail
+        return "int" + ("*"*self.ptr)  # TODO: arrays should also include a '*', but this lets 3 tests fail
 
     def get_format_type(self):
         return "d"
@@ -161,7 +161,7 @@ class VInt(Variable):
     def get_align(self, ignore_array=False):
         if self.array and not ignore_array:
             return 4 if self.array_number < 4 else 16
-        return 4 + 4 * self.ptr
+        return 8 if self.ptr else 4
 
     def convert_template(self, type):
         if type == "int":
@@ -183,10 +183,10 @@ class VChar(Variable):
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
             return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
-        return "i8" + ("*" if self.ptr else "")
+        return "i8" + ("*"*self.ptr)
 
     def get_type(self):
-        return "char" + ("*" if self.ptr else "")
+        return "char" + ("*"*self.ptr)
 
     def get_llvm_print_type(self) -> str:
         return "i8"
@@ -195,7 +195,7 @@ class VChar(Variable):
         return "c"
 
     def get_align(self):
-        return 1 + 7 * self.ptr
+        return 8 if self.ptr else 1
 
     def convert_template(self, type):
         if type == "int":
@@ -215,12 +215,12 @@ class VFloat(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        return "float" + ("*" if self.ptr else "")
+        return "float" + ("*"*self.ptr)
 
     def get_llvm_type(self, ignore_array=False) -> str:
         if not ignore_array and self.array:
             return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
-        return "float" + ("*" if self.ptr else "")
+        return "float" + ("*"*self.ptr)
 
     def get_llvm_print_type(self) -> str:
         return "double"
@@ -229,7 +229,7 @@ class VFloat(Variable):
         return "f"
 
     def get_align(self):
-        return 4 + 4 * self.ptr
+        return 8 if self.ptr else 4
 
     @staticmethod
     def convert_template(type):

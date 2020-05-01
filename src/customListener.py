@@ -234,11 +234,19 @@ class customListener(ParseTreeListener):
 
 
         if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, (cParser.LvalueContext, cParser.Operation_bracketsContext)):
+            ptr_count = 1
+            while ctx.getText()[ptr_count] == '*':
+                ptr_count += 1
+
             node = self.trees.pop()
-            self.add(UReref())
+            for i in range(ptr_count):
+                self.add(UReref())
+
             self.add(node)
-            # Combine these two nodes
-            self.simplify(1)
+
+            for i in range(ptr_count):
+                self.simplify(1)
+
             return
         pass
 
