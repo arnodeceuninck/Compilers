@@ -244,9 +244,9 @@ class customListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#array_index.
     def enterArray_index(self, ctx: cParser.Array_indexContext):
-        index = int(ctx.index.getText())
+        # index = int(ctx.index.getText())
         variable = self.trees.pop()
-        node = ArrayIndex(index)  # TODO: allow more than only int
+        node = ArrayIndex()  # TODO: allow more than only int
         self.add(node)
         self.add(variable)
         pass

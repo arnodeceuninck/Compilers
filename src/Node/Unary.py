@@ -111,7 +111,7 @@ class UNot(Unary):
 
 
 class ArrayIndex(Unary):
-    def __init__(self, index):
+    def __init__(self, index=None):
         self.index = index
         Unary.__init__(self, "[{i}]".format(i=index))
 
@@ -141,7 +141,7 @@ class ArrayIndex(Unary):
         return self.comment_out(comment, comment_out)
 
     def llvm_code(self):
-        print("Index yeet")
+        # print("Index yeet")
         AST.llvm_output += self.comments()
 
         self[1].llvm_code()
