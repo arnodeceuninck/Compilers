@@ -650,7 +650,7 @@ class Assign(Binary):
 
         if isinstance(self[0], Variable) and self[0].array:
             code = "{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
-            code += "store {type} {value}, {type}* {temp}, align 4"
+            code += "store {type} {value}, {type}* {temp}, align 4\n"
             code = code.format(type=self.children[0].get_llvm_type(ignore_array=True),
                                array_type=self.children[0].get_llvm_type(),
                                temp=self.get_temp(),

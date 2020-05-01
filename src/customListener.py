@@ -223,11 +223,16 @@ class customListener(ParseTreeListener):
     # Exit a parse tree produced by cParser#variable_use.
     def exitVariable_use(self, ctx: cParser.Variable_useContext):
         if ctx.array:
-            array = self.trees.pop()
-            variable = self.trees.pop()
-            variable.array = True
-            variable.array_number = int(array.index)
-            self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
+            if not isinstance(ctx.parentCtx, cParser.Operation_bracketsContext):
+                array = self.trees.pop()
+                variable = array[0]
+                variable.array = True
+                variable.array_number = int(array[1].value)  # Get the value of the CInt (TODO: other expressions)
+                variable.parent = None
+                self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
+
+
+
         if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, (cParser.LvalueContext, cParser.Operation_bracketsContext)):
             node = self.trees.pop()
             self.add(UReref())
@@ -240,13 +245,15 @@ class customListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#array_index.
     def enterArray_index(self, ctx: cParser.Array_indexContext):
         index = int(ctx.index.getText())
+        variable = self.trees.pop()
         node = ArrayIndex(index)  # TODO: allow more than only int
         self.add(node)
+        self.add(variable)
         pass
 
     # Exit a parse tree produced by cParser#array_index.
     def exitArray_index(self, ctx: cParser.Array_indexContext):
-        self.simplify(1)
+        self.simplify(2)
         pass
 
     # Enter a parse tree produced by cParser#pointer.

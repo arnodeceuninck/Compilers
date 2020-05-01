@@ -141,6 +141,7 @@ class ArrayIndex(Unary):
         return self.comment_out(comment, comment_out)
 
     def llvm_code(self):
+        print("Index yeet")
         AST.llvm_output += self.comments()
 
         self[1].llvm_code()
