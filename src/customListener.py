@@ -203,6 +203,7 @@ class customListener(ParseTreeListener):
         variable = self.trees.pop()
 
         variable.value = variable_use.value
+        variable.ptr = variable_use.ptr
 
         if variable_use.array:
             variable.array = variable_use.array
