@@ -4,6 +4,8 @@ def llvm_constant(ast):
         llvm_c_array(ast)
     elif isinstance(ast, CChar):
         llvm_c_char(ast)
+    elif isinstance(ast, CString):
+        llvm_c_string(ast)
     else:
         llvm_default_constant(ast)
 
@@ -42,11 +44,11 @@ def llvm_c_char(ast):
 def llvm_c_string(ast):
     # We need to prepend the variable to the AST output llvm code
     temp_llvm_code = llvm.output
-    llvm.output = stringVar.format(string_id=ast.variable(True)[2:],
+    llvm.output = stringVar.format(string_id=variable(ast, True)[2:],
                                        string_len=str(ast.get_llvm_string_len(ast.value) + 1),
                                        string_val=ast.value + "\\00")
     llvm.output += temp_llvm_code
 
 from src.LLVM.LLVM import llvm_code, llvm, variable
-from src.Node.Constant import CArray, CChar, BoolClasses, stringVar, Constant
+from src.Node.Constant import CArray, CChar, BoolClasses, stringVar, Constant, CString
 # from src.LLVM.LLVM import *
