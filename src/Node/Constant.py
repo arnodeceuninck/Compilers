@@ -16,9 +16,6 @@ class Constant(AST):
     def set_value(self, value):
         self.value = value
 
-    def get_llvm_type(self) -> str:
-        raise Exception("Abstract method")
-
     # TODO: wtf is the use of tis function?
     def get_format_type(self):
         raise Exception("Abstract method")
@@ -53,15 +50,6 @@ class CArray(Constant):
     def __init__(self, value: str = "Array"):
         Constant.__init__(self, value)
 
-    def get_llvm_type(self) -> str:
-        if len(self.children) == 0:
-            return None
-        type = self[0].get_llvm_type()
-        for child in self.children:
-            if type != child.get_llvm_type():
-                return None
-        return type
-
     def get_llvm_template(self):
         pass
 
@@ -75,9 +63,6 @@ class CInt(Constant):
 
     def set_value(self, value: float):
         self.value = str(int(round(value)))
-
-    def get_llvm_type(self) -> str:
-        return "i32"
 
     def get_format_type(self):
         return "d"
@@ -108,9 +93,6 @@ class CFloat(Constant):
 
     def set_value(self, value):
         self.value = str(float(value))
-
-    def get_llvm_type(self) -> str:
-        return "float"
 
     def get_llvm_print_type(self):
         return "double"
@@ -145,9 +127,6 @@ class CChar(Constant):
     def get_type(self):
         return "char"
 
-    def get_llvm_type(self) -> str:
-        return "i8"
-
     def get_format_type(self):
         return "c"
 
@@ -174,9 +153,6 @@ class CBool(Constant):
     def get_type(self):
         return "bool"
 
-    def get_llvm_type(self) -> str:
-        return "i1"
-
     def get_format_type(self):
         return "c"
 
@@ -202,9 +178,6 @@ class CString(Constant):
 
     def get_type(self):
         return "string"
-
-    def get_llvm_type(self) -> str:
-        return ""
 
     def get_format_type(self):
         return "s"

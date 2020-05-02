@@ -32,7 +32,29 @@ def llvm_code(ast):
         llvm_variable(ast)
     else:
         raise Exception("Unknown AST")
+    
+def get_llvm_type(ast, ignore_array=False):
+    if isinstance(ast, Operator):
+        return llvm_type_operate(ast)
+    elif isinstance(ast, Function):
+        return llvm_type_function(ast)
+    elif isinstance(ast, Constant):
+        return llvm_type_constant(ast)
+    elif isinstance(ast, Variable):
+        return llvm_type_variable(ast, ignore_array)
+    raise Exception("I didn't think the code would get this far")
 
+def llvm_type_function(ast):
+    if ast.return_type == "int":
+        return 'i32'
+    elif ast.return_type == "bool":
+        return 'i1'
+    elif ast.return_type == "float":
+        return 'float'
+    elif ast.return_type == "char":
+        return 'i8'
+    elif ast.return_type == "void":
+        return 'void'
 
 def llvm_operator(ast):
     if isinstance(ast, Binary):
@@ -86,12 +108,12 @@ def llvm_function(ast):
             llvm_code(child)
             # We know that the llvm code that has been generated has stored the value in the child as a variable
             if isinstance(child, Variable):
-                function_arguments += child.get_llvm_type(child.array) + " " + variable(child)
+                function_arguments += get_llvm_type(child, child.array) + " " + variable(child)
             else:
-                function_arguments += child.get_llvm_type() + " " + variable(child, store=True)
+                function_arguments += get_llvm_type(child) + " " + variable(child, store=True)
 
         initialization_line = ast.get_llvm_template()
-        initialization_line = initialization_line.format(return_type=ast.get_llvm_type(), name=ast.value,
+        initialization_line = initialization_line.format(return_type=get_llvm_type(ast), name=ast.value,
                                                          arg_list=function_arguments)
         function_call = initialization_line
         # Store this value in a llvm variable if the return value is not a void otherwise
@@ -115,12 +137,12 @@ def llvm_function(ast):
             # Add a separator to the arguments, because there was a previous argument
             function_arguments += ", "
         # Add the type of the variable
-        function_arguments += child.get_llvm_type()
+        function_arguments += get_llvm_type(child)
         # Set this child already used in llvm as a variable
         child.get_symbol_table().get_symbol_table(child.value)[child.value].llvm_defined = True
 
     initialization_line = ast.get_llvm_template()
-    initialization_line = initialization_line.format(return_type=ast.get_llvm_type(), name=ast.value,
+    initialization_line = initialization_line.format(return_type=get_llvm_type(ast), name=ast.value,
                                                      arg_list=function_arguments)
     llvm.output += initialization_line
 
@@ -137,7 +159,7 @@ def llvm_function(ast):
         code += "\tstore {type} %{arg_nr}, {type}* {variable}\n"
         code = code.format(
             variable=variable(ast[0][i], store=True),
-            type=ast[0][i].get_llvm_type(),
+            type=get_llvm_type(ast[0][i]),
             align=ast[0][i].get_align(),
             arg_nr=str(i))
 
@@ -180,7 +202,7 @@ def llvm_assign(ast):
         # First we need to load the variable into a temporary var in which we can store the new value
         # Then we store the recently created value into the pointer
         code = ast.get_llvm_template()
-        code = code.format(type=ast.children[0].children[0].get_llvm_type()[:-1],
+        code = code.format(type=get_llvm_type(ast.children[0].children[0])[:-1],
                            temp=variable(ast[1], store=False),
                            location=variable(ast[0].children[0]))  # This line will do a lot more than expected
         output += code
@@ -191,8 +213,8 @@ def llvm_assign(ast):
     if isinstance(ast[0], Variable) and ast[0].array:
         code = "\t{temp} = getelementptr inbounds {array_type}, {array_type}* {var_location}, i64 0, i64 {index}\n"
         code += "\tstore {type} {value}, {type}* {temp}, align 4\n"
-        code = code.format(type=ast.children[0].get_llvm_type(ignore_array=True),
-                           array_type=ast.children[0].get_llvm_type(),
+        code = code.format(type=get_llvm_type(ast.children[0], ignore_array=True),
+                           array_type=get_llvm_type(ast.children[0]),
                            temp=ast.get_temp(),
                            var_location=variable(ast[0], store=True),
                            index=ast[0].array_number,
@@ -226,13 +248,13 @@ def llvm_assign(ast):
             symbol_table[ast[0].value].llvm_defined:
         create_var = "\t{variable} = alloca {llvm_type}, align {align}\n".format(
             variable=variable(ast[0], store=True),
-            llvm_type=ast[0].get_llvm_type(),
+            llvm_type=get_llvm_type(ast[0]),
             align=ast[0].get_align())
         output += create_var
         # The variable has been defined in llvm, so no more generating hereafter
         symbol_table[ast[0].value].llvm_defined = True
     code = ast.get_llvm_template()
-    code = code.format(type=ast[0].get_llvm_type(), temp=variable(ast[1], store=False),
+    code = code.format(type=get_llvm_type(ast[0]), temp=variable(ast[1], store=False),
                        location=variable(ast[0], store=True))
 
     output += code
@@ -385,7 +407,7 @@ def to_LLVM(ast, filename):
             LLVM_type = "constant"
         else:
             LLVM_type = "global"
-        LLVM_type += " {} undef".format(symbol_table[var].type.get_llvm_type())
+        LLVM_type += " {} undef".format(get_llvm_type(symbol_table[var].type))
         LLVM_align += " {}".format(symbol_table[var].type.get_align())
         global_declaration_output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
     if len(symbol_table) > 0:
@@ -439,7 +461,7 @@ def get_llvm_print(ast):
     # PART 1
 
     custom_string = ast.to_llvm_string(custom_string)
-    string_count = ast.get_llvm_string_len(custom_string)
+    string_count = ast.get_real_string_len(custom_string)
     # Create an unique id based on the id of the current function node
     custom_string_id = str(ast.id())
     llvm_string_var = stringVar.format(string_id=custom_string_id, string_len=string_count,
@@ -468,7 +490,7 @@ def get_llvm_print(ast):
         if child.get_type() == "string":
             function_arguments += llvm_argument(child)
         # If the type of the child is a float then we need to convert it to a bool
-        elif child.get_llvm_type() == "float":
+        elif get_llvm_type(child) == "float":
             print_type = child.get_llvm_print_type()
             var = str()
             # Because you can't print floats only doubles, we need to first extend it to a double
@@ -489,12 +511,12 @@ def get_llvm_print(ast):
             if child.array:
                 var = variable(child, indexed=True, index=child.array_number)
 
-                function_arguments += child.get_llvm_type(child.array) + " " + var
+                function_arguments += get_llvm_type(child, child.array) + " " + var
                 continue
-            function_arguments += child.get_llvm_type(child.array) + " " + variable(child)
+            function_arguments += get_llvm_type(child, child.array) + " " + variable(child)
         else:
             # We know that the llvm code that has been generated has stored the value in the child as a variable
-            function_arguments += child.get_llvm_type() + " " + variable(child)
+            function_arguments += get_llvm_type(child) + " " + variable(child)
 
     # We created all the arguments that should go into the function call right now we need to put them in there
     # then we append it to the output of the llvm generation
@@ -522,7 +544,7 @@ def get_llvm_scan(ast):
     # Get the string value
     custom_string = ast[0][0].value
     custom_string = ast.to_llvm_string(custom_string)
-    string_count = ast.get_llvm_string_len(custom_string)
+    string_count = ast.get_real_string_len(custom_string)
     # Create an unique id based on the id of the current function node
     custom_string_id = str(ast.id())
     llvm_string_var = stringVar.format(string_id=custom_string_id, string_len=string_count,
@@ -551,10 +573,10 @@ def get_llvm_scan(ast):
         # If we find a variable type then we need to check if it is an array
         # because it needs to be another type that needs to be passed through
         if isinstance(child, Variable):
-            function_arguments += child.get_llvm_type(child.array) + " " + variable(child)
+            function_arguments += get_llvm_type(child, child.array) + " " + variable(child)
         else:
             # We know that the llvm code that has been generated has stored the value in the child as a variable
-            function_arguments += child.get_llvm_type() + " " + variable(child, store=True)
+            function_arguments += get_llvm_type(child) + " " + variable(child, store=True)
 
     # We created all the arguments that should go into the function call right now we need to put them in there
     # then we append it to the output of the llvm generation
@@ -609,7 +631,7 @@ def variable(ast, store: bool = False, indexed: bool = False, index=0):
             llvm_load_template = ast.llvm_load_template()
             result = "%.t" + str(ast.get_unique_id())
             llvm_load_template = llvm_load_template.format(result=result,
-                                                           type=ast.get_llvm_type(True),
+                                                           type=get_llvm_type(ast, True),
                                                            var=var)
             llvm.output += llvm_load_template
             return result
@@ -631,28 +653,28 @@ def goto(label: str):
 # Variable should be llvm_formated, e.g. %1
 def llvm_load(ast, var: str):
     code = ast.get_llvm_template()
-    code = code.format(result=var, type=ast.get_llvm_type(), var=variable(ast, store=True))
+    code = code.format(result=var, type=get_llvm_type(ast), var=variable(ast, store=True))
     llvm.output += code
 
 def index_load(ast, result, index):
     code = "\t{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
-    code = code.format(result=result, array_type=ast.get_llvm_type(),
-                       variable=variable(variable, store=True), index=index)
+    code = code.format(result=result, array_type=get_llvm_type(ast),
+                       variable=variable(ast.variable, store=True), index=index)
     llvm.output += code
 
 def llvm_argument(ast):
     if isinstance(ast, CString):
         argument = stringArg.format(string_id=variable(ast, True)[2:],
-                                    string_len=str(ast.get_llvm_string_len(ast.value) + 1))
+                                    string_len=str(ast.get_real_string_len(ast.value) + 1))
         return argument
 
 
 from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, Assign, scanCall, stringVar, stringCall, stringArg, VFloat, CString
 from src.LLVM.Comments import llvm_comments, Comments
 from src.LLVM.Compare import llvm_compare, Compare
-from src.LLVM.Constant import llvm_constant, Constant
-from src.LLVM.Operate import llvm_operate, Operate
+from src.LLVM.Constant import llvm_constant, Constant, llvm_type_constant
+from src.LLVM.Operate import llvm_operate, Operate, llvm_type_operate, llvm_type_default_operate
 from src.LLVM.ReservedType import llvm_reserved_type, ReservedType
-from src.LLVM.Unary import llvm_unary, Unary, UReref, UDeref
-from src.LLVM.Variable import llvm_variable, Variable
+from src.LLVM.Unary import llvm_unary, Unary, UReref, UDeref, llvm_type_unary
+from src.LLVM.Variable import llvm_variable, Variable, llvm_type_variable
 from src.ErrorListener import CallAmountMismatchError

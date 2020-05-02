@@ -43,7 +43,7 @@ class AST:
         # This list contains all the functions that it are declared on the pre-order traversal
         AST.functions = list()
 
-    def get_llvm_string_len(self, string) -> int:
+    def get_real_string_len(self, string) -> int:
         nr_backslashes = 0
         # We need to count the \ in the string in order to get the right amount of characters
         for character in string:
@@ -137,12 +137,6 @@ class AST:
         for child in self.children:
             child.traverse(func)
 
-    # Post-order traverse with a given function
-    def traverse_post(self, func):
-        for child in self.children:
-            child.traverse(func)
-        func(self)
-
     # Fold the constants where possible
     def constant_folding(self):
         ready_to_continue_folding = True  # Only ready to continue if all children are
@@ -216,10 +210,6 @@ class AST:
     def __str__(self):
         return '{name}[label="{value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
                                                                         color=self.color)
-
-    # Returns the type of the tree in LLVM
-    def get_llvm_type(self) -> str:
-        return "NONE"
 
     # returns the c_type
     def get_type(self) -> str:
@@ -310,10 +300,6 @@ class StatementSequence(AST):
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)
 
-    def get_llvm_type(self):
-        # A statement sequence has no type
-        return None
-
     def optimize(self):
         # Iterating over i to prevent working with copies
         i = 0
@@ -334,11 +320,6 @@ class If(AST):
     def comments(self, comment_out=True):
         comment = "if " + self.children[0].comments(comment_out=False)
         return self.comment_out(comment, comment_out)
-
-    def get_llvm_type(self):
-        # An if statement has no type
-        return None
-
 
 class For(AST):
     def __init__(self, scope_count):
@@ -380,13 +361,6 @@ class Operator(AST):
                 return None
         return type
 
-    def get_llvm_type(self):
-        type = self.children[0].get_llvm_type()
-        for child in self.children:
-            if child.get_llvm_type() != type:
-                return None
-        return type
-
     # Has no own specific functions, is specified further in binary/unary/...
 
 
@@ -403,10 +377,6 @@ class Binary(Operator):
         comment = self[0].comments(comment_out=False) + self.value + \
                   self[1].comments(comment_out=False)
         return self.comment_out(comment, comment_out)
-
-    def get_llvm_type(self):
-        if self.children[0].get_llvm_type() == self.children[1].get_llvm_type():
-            return self.children[0].get_llvm_type()
 
 
 class Assign(Binary):
@@ -448,18 +418,6 @@ class Function(AST):
 
     def get_type(self):
         return self.return_type
-
-    def get_llvm_type(self) -> str:
-        if self.return_type == "int":
-            return 'i32'
-        elif self.return_type == "bool":
-            return 'i1'
-        elif self.return_type == "float":
-            return 'float'
-        elif self.return_type == "char":
-            return 'i8'
-        elif self.return_type == "void":
-            return 'void'
 
     def comments(self, comment_out: bool = True) -> str:
         # Add the arguments for a function in a string

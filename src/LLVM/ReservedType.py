@@ -56,13 +56,13 @@ def llvm_return(ast):
     llvm.output += ast.comments()
 
     # The loop in which the user situates itast
-    code = "\tret " + ast[0].get_llvm_type() + " " + variable(ast[0])
+    code = "\tret " + get_llvm_type(ast[0]) + " " + variable(ast[0])
     llvm.output += code
 
 
 def llvm_void(ast):
     pass
 
-from src.LLVM.LLVM import llvm, llvm_code, variable, goto
+from src.LLVM.LLVM import llvm, llvm_code, variable, goto, get_llvm_type
 from src.Node.ReservedType import ReservedType, Break, Continue, Return, Void, While, For
 # from src.LLVM.LLVM import *

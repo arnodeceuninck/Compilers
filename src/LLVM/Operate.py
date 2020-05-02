@@ -1,6 +1,30 @@
-
 def llvm_operate(ast):
     llvm_default_operate(ast)
+
+
+def llvm_type_operate(ast):
+    if isinstance(ast, Binary):
+        return llvm_type_binary(ast)
+    elif isinstance(ast, Unary):
+        return llvm_type_unary(ast)
+    else:
+        return llvm_type_default_operate(ast)
+
+
+def llvm_type_binary(ast):
+    if get_llvm_type(ast.children[0]) == get_llvm_type(ast.children[1]):
+        return get_llvm_type(ast.children[0])
+    else:
+        return None
+
+
+def llvm_type_default_operate(ast):
+    type = get_llvm_type(ast.children[0])
+    for child in ast.children:
+        if get_llvm_type(child) != type:
+            return None
+    return type
+
 
 def llvm_default_operate(ast):
     llvm_code(ast[0])
@@ -8,7 +32,7 @@ def llvm_default_operate(ast):
 
     output = ast.comments()
 
-    llvm_type = ast.get_llvm_type()
+    llvm_type = get_llvm_type(ast)
 
     result = variable(ast)
     # If the parent is a bool class entity then we need to store the code into a temporary variable and then convert it
@@ -30,6 +54,9 @@ def llvm_default_operate(ast):
 
     llvm.output += output
 
-from src.LLVM.LLVM import llvm_code, llvm, variable
-from src.Node.Operate import Operate, BoolClasses, Constant
+
+from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
+from src.Node.Operate import Operate, BoolClasses, Constant, Binary
+from src.Node.Unary import Unary
+from src.LLVM.Unary import llvm_type_unary
 # from src.LLVM.LLVM import *

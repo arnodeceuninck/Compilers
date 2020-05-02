@@ -30,6 +30,7 @@ class LessT(Compare):
             return "\t{result} = icmp slt {type} {lvalue}, {rvalue}\n"
 
 
+
 class MoreT(Compare):
     def __init__(self, value=">"):
         Compare.__init__(self, value)

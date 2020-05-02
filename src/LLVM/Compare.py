@@ -12,7 +12,7 @@ def llvm_default_compare(ast):
 
     output = ast.comments()
 
-    llvm_type = ast.get_llvm_type()
+    llvm_type = get_llvm_type(ast)
 
     # We need to have the variable in order to have the correct translation when the parrent is the BoolClasses
     # because we do not want to extend the i1 we have to keep it that way
@@ -47,7 +47,7 @@ def llvm_logic_and(ast):
 
     output = ast.comments()
 
-    llvm_type = ast.get_llvm_type()
+    llvm_type = get_llvm_type(ast)
 
     temp1 = ast.get_temp()
     # We need to have the variable in order to have the correct translation when the parrent is the BoolClasses
@@ -77,6 +77,6 @@ def llvm_logic_and(ast):
 
     llvm.output += output
 
-from src.LLVM.LLVM import llvm_code, llvm, variable
+from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
 from src.Node.Compare import LogicAnd, Compare, BoolClasses, CBool
 # from src.LLVM.LLVM import *

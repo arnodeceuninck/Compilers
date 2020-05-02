@@ -84,12 +84,6 @@ class ArrayIndex(Unary):
         except:
             return None
 
-    def get_llvm_type(self):
-        try:
-            return self[0].get_llvm_type(ignore_array=True)
-        except:
-            return None
-
     def get_llvm_template(self):
         code = "{temp_index} = sext {index_type} {index} to i64\n"
         code += "{temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {temp_index}\n"
@@ -123,9 +117,6 @@ class UDeref(Unary):
     def get_type(self):
         return self[0].get_type() + "*"
 
-    def get_llvm_type(self):
-        return self[0].get_llvm_type() + "*"
-
     def is_declaration(self):
         return self[0].is_declaration()
 
@@ -136,12 +127,6 @@ class UReref(Unary):
 
     def get_type(self):
         child_type = self[0].get_type()
-        if child_type[len(child_type) - 1] != "*":
-            raise RerefError()
-        return child_type[:-1]
-
-    def get_llvm_type(self):
-        child_type = self[0].get_llvm_type()
         if child_type[len(child_type) - 1] != "*":
             raise RerefError()
         return child_type[:-1]

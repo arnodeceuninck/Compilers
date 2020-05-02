@@ -36,9 +36,6 @@ class Variable(AST):
         raise Exception("Abstract function")
         # return self.type + ("*" if self.ptr else "")
 
-    def get_llvm_type(self, ignore_array=False):
-        return ""
-
     def getFormatType(self):
         return ""
 
@@ -64,11 +61,6 @@ class Variable(AST):
 class VInt(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
-
-    def get_llvm_type(self, ignore_array=False) -> str:
-        if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
-        return "i32" + ("*"*self.ptr)
 
     def get_llvm_print_type(self) -> str:
         return "i32"
@@ -101,11 +93,6 @@ class VChar(Variable):
     def __init__(self, value=""):
         Variable.__init__(self, value)
 
-    def get_llvm_type(self, ignore_array=False) -> str:
-        if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
-        return "i8" + ("*"*self.ptr)
-
     def get_type(self):
         return "char" + ("*"*self.ptr)
 
@@ -136,11 +123,6 @@ class VFloat(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        return "float" + ("*"*self.ptr)
-
-    def get_llvm_type(self, ignore_array=False) -> str:
-        if not ignore_array and self.array:
-            return "[{size} x {type}]".format(size=self.max_array_size(), type=self.get_llvm_type(ignore_array=True))
         return "float" + ("*"*self.ptr)
 
     def get_llvm_print_type(self) -> str:
