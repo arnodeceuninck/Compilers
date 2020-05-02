@@ -33,27 +33,6 @@ class Constant(AST):
         else:
             return "\t{result} = add {type} {lvalue}, {rvalue}\n"
 
-    def llvm_code(self) -> int:
-        output = self.comments()
-        code = self.get_llvm_template()
-
-        # Get the result of the result in the case the parent being an if statement then we need to store
-        # it into a temporary variable in order to convert the result to i1 afterwards
-        result = self.variable()
-        if isinstance(self.parent, BoolClasses):
-            result = self.get_temp()
-
-        code = code.format(result=result, type=self.get_llvm_type(), lvalue=self.value,
-                           rvalue=self.get_neutral())
-        # Convert the constant into a i1 if the parent is an if statement
-        if isinstance(self.parent, BoolClasses):
-            type_to_bool = self.convert_template("bool")
-            type_to_bool = type_to_bool.format(result=self.variable(), value=result)
-            code += type_to_bool
-
-        output += code
-        AST.llvm_output += output
-
     def comments(self, comment_out=True):
         return self.comment_out(str(self.value), comment_out=comment_out)
 
@@ -84,9 +63,6 @@ class CArray(Constant):
         return type
 
     def get_llvm_template(self):
-        pass
-
-    def llvm_code(self):
         pass
 
 
@@ -191,15 +167,6 @@ class CChar(Constant):
         elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
             return "{result} = icmp ne i8 {value}, 0\n"
 
-    def llvm_code(self) -> int:
-        output = self.comments()
-        code = self.get_llvm_template()
-        code = code.format(result=self.variable(), type=self.get_llvm_type(), lvalue=str(ord(self.value)),
-                           rvalue=self.get_neutral())
-        output += code
-        AST.llvm_output += output
-
-
 class CBool(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
@@ -242,15 +209,4 @@ class CString(Constant):
     def get_format_type(self):
         return "s"
 
-    def llvm_argument(self):
-        argument = stringArg.format(string_id=self.variable(True)[2:],
-                                    string_len=str(self.get_llvm_string_len(self.value) + 1))
-        return argument
 
-    def llvm_code(self):
-        # We need to prepend the variable to the AST output llvm code
-        temp_llvm_code = AST.llvm_output
-        AST.llvm_output = stringVar.format(string_id=self.variable(True)[2:],
-                                           string_len=str(self.get_llvm_string_len(self.value) + 1),
-                                           string_val=self.value + "\\00")
-        AST.llvm_output += temp_llvm_code

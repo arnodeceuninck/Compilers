@@ -1,1 +1,1 @@
-print("*"*0)
+assert False

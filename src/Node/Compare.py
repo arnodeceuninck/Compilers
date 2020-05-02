@@ -1,5 +1,5 @@
 from src.Node.AST import AST, Binary, BoolClasses
-from src.Node.constant import CBool
+from src.Node.Constant import CBool
 from src.Node.Operate import Mult, BPlus
 
 
@@ -11,47 +11,11 @@ class Compare(Binary):
         return '{name}[label="Binary Operator Compare: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
                                                                                                  value=self.value,
                                                                                                  color=self.color)
-
     def get_type(self):
         if self[0].get_type() == self[1].get_type():
             return self[0].get_type()
         else:
             return "unknown"
-
-    def llvm_code(self):
-        self[0].llvm_code()
-        self[1].llvm_code()
-
-        output = self.comments()
-
-        llvm_type = self.get_llvm_type()
-
-        # We need to have the variable in order to have the correct translation when the parrent is the BoolClasses
-        # because we do not want to extend the i1 we have to keep it that way
-        if isinstance(self.parent, BoolClasses):
-            temp = self.variable(self.id())
-        else:
-            temp = self.get_temp()
-
-        comp_output = self.get_llvm_template()
-
-        comp_output = comp_output.format(result=temp, type=llvm_type,
-                                         lvalue=self[0].variable(),
-                                         rvalue=self[1].variable())
-
-        output += comp_output
-
-        # if the parent is an if statement then do not convert the variable
-        if isinstance(self.parent, BoolClasses):
-            AST.llvm_output += output
-            return
-        # Now convert the output (i1) we got to the type we need
-        bool_to_type = CBool.convert_template(self.get_type())
-        bool_to_type = bool_to_type.format(result=self.variable(self.id()), value=temp)
-
-        output += bool_to_type
-
-        AST.llvm_output += output
 
 
 class LessT(Compare):
@@ -145,47 +109,11 @@ class LogicAnd(Compare):
         # A and B <=> A*B != 0
         if self.get_type() == "float":
             template = "\t{result_temp} = fmul {type} {lvalue}, {rvalue}\n"
-            template += "\t{result} = fcmp one {type} {result_temp}, " + str(self.get_neutral()) + "\n"
+            template += "\t{result} = fcmp one {type} {result_temp}, 0.0\n"
         else:
             template = "\t{result_temp} = mul {type} {lvalue}, {rvalue}\n"
             template += "\t{result} = icmp ne {type} {result_temp}, " + str(self.get_neutral()) + "\n"
         return template
-
-    def llvm_code(self):
-        self[0].llvm_code()
-        self[1].llvm_code()
-
-        output = self.comments()
-
-        llvm_type = self.get_llvm_type()
-
-        temp1 = self.get_temp()
-        # We need to have the variable in order to have the correct translation when the parrent is the BoolClasses
-        # because we do not want to extend the i1 we have to keep it that way
-        if isinstance(self.parent, BoolClasses):
-            temp2 = self.variable(self.id())
-        else:
-            temp2 = self.get_temp()
-
-        comp_output = self.get_llvm_template()
-
-        comp_output = comp_output.format(result_temp=temp1, type=llvm_type,
-                                         lvalue=self[0].variable(),
-                                         rvalue=self[1].variable(), result=temp2)
-
-        output += comp_output
-
-        # if the parent is an if statement then do not convert the variable
-        if isinstance(self.parent, BoolClasses):
-            AST.llvm_output += output
-            return
-        # Now convert the output (i1) we got to the type we need
-        bool_to_type = CBool.convert_template(self.get_type())
-        bool_to_type = bool_to_type.format(result=self.variable(), value=temp2)
-
-        output += bool_to_type
-
-        AST.llvm_output += output
 
 
 class LogicOr(Compare):
@@ -196,7 +124,7 @@ class LogicOr(Compare):
     def get_llvm_template(self) -> str:
         if self.get_type() == "float":
             template = "\t{temp} = fadd {{type}} {{lvalue}}, {{rvalue}}\n"
-            template += "\t{{result}} = fcmp one {{type}} {temp}, {neutral}\n"
+            template += "\t{{result}} = fcmp one {{type}} {temp}, 0.0\n"
         else:
             template = "\t{temp} = add {{type}} {{lvalue}}, {{rvalue}}\n"
             template += "\t{{result}} = icmp ne {{type}} {temp}, {neutral}\n"

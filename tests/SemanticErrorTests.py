@@ -152,7 +152,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
     def test_undeclaredVariable3(self):
-        self.help_test(UndeclaredVariableError, "[ERROR] Variable z hasn't been declared yet")
+        self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
     def test_variableRedefinition1(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")

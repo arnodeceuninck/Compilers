@@ -1,11 +1,10 @@
 #include <stdio.h>
 
-// Should print the number 10 three times
+// Should print the numbers 5, 0.5 and the char c
 
 int main(){
-	int x = 10;
-	int* xp = &x;
-	int** xpp = &xp;
-	printf("%d;", **xpp);
-//	return 1;
+    int x = 5;
+    float y = 0.5;
+    char c = 'c';
+    printf("%d; %f; %c", x, y, c);
 }

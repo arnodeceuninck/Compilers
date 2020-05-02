@@ -1,7 +1,8 @@
 import sys
 
 from src.ErrorListener import CompilerError
-from src.Node.AST_utils import dot, compile, to_LLVM
+from src.Node.AST_utils import dot, compile
+from src.LLVM.LLVM import to_LLVM
 
 
 def main(argv):

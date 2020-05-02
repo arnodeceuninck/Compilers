@@ -4,12 +4,12 @@ from src.ErrorListener import RerefError, CompilerError, ConstError, Incompatibl
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
     FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError
-from src.Node.AST import *
+from src.Node.AST import Function, has_symbol_table, Include, dot
 from src.customListener import customListener
 from src.Node.Variable import *
 from src.Node.Unary import *
 from src.Node.Compare import *
-from src.Node.constant import *
+from src.Node.Constant import *
 from src.Node.Operate import *
 from src.Node.Comments import *
 from src.Node.ReservedType import *
@@ -550,60 +550,3 @@ def make_ast(tree, optimize: bool = True):
     if optimize:
         communismForLife.optimize()
     return communismForLife
-
-
-# Write the llvm version of the ast to the filename
-def to_LLVM(ast, filename):
-    AST.llvm_output = ""
-    # This variable will contain all the variables that are globally defined
-    global_declaration_output = ""
-
-    symbol_table = ast.symbol_table.elements
-    ptr_types = list()
-
-    # generate variable declarations from the symbol table
-    for var in symbol_table:
-        element = symbol_table[var]
-        element.type.defined = True
-        # define all the variables
-        LLVM_var_name = "@" + var
-        ptr = "*" if symbol_table[var].type.ptr else ""
-        LLVM_align = "align"
-        if symbol_table[var].type.const:
-            LLVM_type = "constant"
-        else:
-            LLVM_type = "global"
-        LLVM_type += " {} undef".format(symbol_table[var].type.get_llvm_type())
-        LLVM_align += " {}".format(symbol_table[var].type.get_align())
-        global_declaration_output += LLVM_var_name + " = {}, {}\n".format(LLVM_type, LLVM_align)
-    if len(symbol_table) > 0:
-        global_declaration_output += "\n"
-    if not AST.contains_function:
-        AST.llvm_output += "define i32 @main() {\n\n"
-
-    ast.llvm_code()
-
-    if not AST.contains_function:
-        AST.llvm_output += "\n"
-        AST.llvm_output += "ret i32 0\n"
-        AST.llvm_output += "}\n\n"
-
-    # If we need to print then create the print function declaration
-    if AST.print:
-        print_declaration = "declare i32 @printf(i8*, ...)\n"
-        AST.llvm_output += print_declaration
-
-    # If we need to scan then create the scan function declaration
-    if AST.scan:
-        scan_declaration = "declare i32 @__isoc99_scanf(i8*, ...)\n"
-        AST.llvm_output += scan_declaration
-
-    # If we have global declarations then prepend them to the code
-    if len(global_declaration_output):
-        global_declaration_output += AST.llvm_output
-        AST.llvm_output = global_declaration_output
-
-    # Write output to the outputfile
-    outputFile = open(filename, "w")
-    outputFile.write(AST.llvm_output)
-    outputFile.close()

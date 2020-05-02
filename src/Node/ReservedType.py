@@ -23,18 +23,6 @@ class Break(ReservedType):
     def comments(self, comment_out: bool = True) -> str:
         return "\t; break\n"
 
-    def llvm_code(self):
-        AST.llvm_output += self.comments()
-
-        # The loop in which the user situates itself
-        loop = self
-        # Get the loop in which the break situates itself, it can be situated in an if statement
-        while not isinstance(loop, (While, For)):
-            loop = loop.parent
-
-        # Handle the break
-        end_label = "end" + str(loop.id())
-        loop.goto(end_label)
 
 
 class Continue(ReservedType):
@@ -46,19 +34,6 @@ class Continue(ReservedType):
 
     def comments(self, comment_out: bool = True) -> str:
         return "\t; continue\n"
-
-    def llvm_code(self):
-        AST.llvm_output += self.comments()
-
-        # The loop in which the user situates itself
-        loop = self
-        # Get the loop in which the break situates itself, it can be situated in an if statement
-        while not isinstance(loop, (While, For)):
-            loop = loop.parent
-
-        # Handle the continue
-        loop_label = "loop" + str(loop.id())
-        loop.goto(loop_label)
 
 
 class Return(ReservedType):
@@ -78,22 +53,6 @@ class Return(ReservedType):
     def comments(self, comment_out: bool = True) -> str:
         return "\t; return\n"
 
-    def llvm_code(self):
-        # If we find that the return has no children then return a void type
-        if not self.children:
-            AST.llvm_output += self.comments()
-            AST.llvm_output += "\tret void\n"
-            return
-
-        # Generate code for the only child of return
-        self[0].llvm_code()
-
-        AST.llvm_output += self.comments()
-
-        # The loop in which the user situates itself
-        code = "\tret " + self[0].get_llvm_type() + " " + self[0].variable()
-        AST.llvm_output += code
-
 
 class Void(ReservedType):
     def __init__(self, value=""):
@@ -107,6 +66,3 @@ class Void(ReservedType):
 
     def comments(self, comment_out: bool = True) -> str:
         return "\t; void\n"
-
-    def llvm_code(self):
-        AST.llvm_output += self.comments()

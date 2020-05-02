@@ -5,6 +5,7 @@ from src.ErrorListener import *
 import inspect
 import unittest
 import subprocess
+from src.LLVM.LLVM import to_LLVM
 
 
 class CorrectCodeTests(unittest.TestCase):
@@ -153,8 +154,8 @@ class CorrectCodeTests(unittest.TestCase):
     def test_while(self):
         self.help_test()
 
-    # def test_y(self):
-    #     self.help_test()
+    def test_y(self):
+        self.help_test()
 
 
 if __name__ == '__main__':
