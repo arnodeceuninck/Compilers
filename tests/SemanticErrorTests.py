@@ -64,7 +64,8 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(FunctionDefinitionOutOfScope, "[ERROR] Function f defined out of scope")
 
     def test_dereferenceTypeMismatch1(self):
-        self.help_test(RerefError, "[ERROR] trying to rereference something that's not a pointer")
+        # Not allowed because of the grammar
+        self.help_test(SyntaxCompilerError, "[ERROR] Oh no!! You've used the wrong syntax at line 2, column 5: no viable alternative at input '*5'")
 
     def test_dereferenceTypeMismatch2(self):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
