@@ -40,7 +40,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '==' between 'int*' and 'int*'")
 
     def test_arraySizeTypeMismatch(self):
-        self.help_test(RerefError, "")
+        self.help_test(ArrayIndexError, "[ERROR] Array index must be int")
 
     def test_declarationDeclarationMismatch1(self):
         self.help_test(FunctionRedeclarationError, "[ERROR] Function f already declared")

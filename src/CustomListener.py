@@ -1,7 +1,7 @@
 # Generated from /home/arno/Documents/Compilers/input/c.g4 by ANTLR 4.8
 from antlr4 import *
 from gen.cParser import cParser
-from src.ErrorListener import CompilerError
+from src.ErrorListener import CompilerError, ArrayIndexError
 from src.Node.AST import AST, StatementSequence, If, For, Assign, VFloat, VInt, VChar, CBool, CFloat, CInt, CChar, \
     Comments, Variable, LogicAnd, LogicOr, LessOrEq, LessT, Equal, NotEqual, UDeref, UDMinus, UDPlus, Unary, UNot, \
     UMinus, UPlus, UReref, Binary, BMinus, BPlus, Print, MoreOrEq, MoreT, Mult, Div, Mod, While, Break, Continue, \
@@ -227,6 +227,8 @@ class CustomListener(ParseTreeListener):
                 array = self.trees.pop()
                 variable = array[0]
                 variable.array = True
+                if not isinstance(array[1], CInt): # Checks whether it only consists of digits
+                    raise ArrayIndexError()
                 variable.array_number = int(array[1].value)  # Get the value of the CInt (TODO: other expressions)
                 variable.parent = None
                 self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
