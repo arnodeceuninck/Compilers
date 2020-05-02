@@ -4,7 +4,7 @@ from src.ErrorListener import RerefError, CompilerError, ConstError, Incompatibl
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
     FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError
-from src.Node.AST import Function, has_symbol_table, Include, dot
+from src.Node.AST import Function, has_symbol_table, Include
 from src.CustomListener import CustomListener
 from src.Node.Variable import *
 from src.Node.Unary import *
@@ -13,6 +13,7 @@ from src.Node.Constant import *
 from src.Node.Operate import *
 from src.Node.Comments import *
 from src.Node.ReservedType import *
+from src.Dot.dot import dot
 
 
 def connect_symbol_table(ast):

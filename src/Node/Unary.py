@@ -11,9 +11,7 @@ class Unary(Operator):
         self.funct = None
 
     def __str__(self):
-        return '\t{name}[label="Unary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                          value=self.value,
-                                                                                          color=self.color)
+        return "Unary Operator: {value}".format(value=self.value)
 
     def get_type(self):
         return self[0].get_type()  # Only one type as argument

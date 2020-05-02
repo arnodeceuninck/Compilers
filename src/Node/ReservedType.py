@@ -3,19 +3,15 @@ from src.Node.AST import AST, For, While
 
 class ReservedType(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#adff76")
+        AST.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Reserved Word: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
-                                                                                       color=self.color)
+        return "Reserved Word: {value}".format(value=self.value)
 
 
 class Break(ReservedType):
     def __init__(self, value="break"):
         ReservedType.__init__(self, value)
-
-    def __str__(self):
-        return '{name}[label="Reserved Word: break", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
 
     def get_type(self):
         return None  # Has no type

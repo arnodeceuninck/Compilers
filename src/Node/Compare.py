@@ -8,9 +8,7 @@ class Compare(Binary):
         Binary.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Binary Operator Compare: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                                 value=self.value,
-                                                                                                 color=self.color)
+        return 'Binary Operator Compare: {value}'.format(value=self.value)
     def get_type(self):
         if self[0].get_type() == self[1].get_type():
             return self[0].get_type()

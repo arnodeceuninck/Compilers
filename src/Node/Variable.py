@@ -5,7 +5,7 @@ from src.ErrorListener import RerefError
 
 class Variable(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#af93ff")
+        AST.__init__(self, value)
         self.ptr = 0  # e.g. int* a (in declaration), &a (deref in rvalue)
         self.const = False
         self.defined = False
@@ -26,8 +26,7 @@ class Variable(AST):
                                                         value=self.value)
         if self.array:
             label += "[{nr}]".format(nr=self.array_number)
-        return '\t{name}[label=\"{label}\", fillcolor="{color}"] \n'.format(name=self.id(), label=label,
-                                                                            color=self.color)
+        return label
 
     def constant_folding(self):
         return False

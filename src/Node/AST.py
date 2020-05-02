@@ -53,7 +53,6 @@ class AST:
         # this is because each backslash sequence contains 3 characters which should in fact be 1
         return len(string) - 2 * nr_backslashes
 
-
     # This method tries to find the position of a node with respect to the first node with a symbol table in it
     # The parent nr is a way of saying which parent we need to use, first we seek the parent then we go digging
     def get_position(self, parent_nr=0):
@@ -96,7 +95,7 @@ class AST:
         else:
             return self.parent.get_scope_count()
 
-    def __init__(self, value: str = "", color: str = "#9f9f9f"):
+    def __init__(self, value: str = ""):
 
         self._id = 0
 
@@ -104,7 +103,6 @@ class AST:
         self.children: list = list()
 
         self.value: str = value  # The text that's displayed in the dot tree
-        self.color: str = color  # The color that's displayed in the dot tree
         self.funct = None  # The function that is applied for constant folding
         self.comment: str = ""  # Additional information as comment in the LLVM file
 
@@ -172,24 +170,6 @@ class AST:
 
         return True
 
-    # Represent the nodes for the dotfile
-    def dot_node(self):
-        # The output needs to be the id + The label itself
-        output = str(self)
-
-        for child in self.children:
-            output += child.dot_node()
-
-        return output
-
-    # represent the connections for the dotfile
-    def dot_connections(self):
-        output = ""
-        for child in self.children:
-            output += str(self.id()) + " -> " + str(child.id()) + "\n"
-            output += child.dot_connections()
-        return output
-
     # Replace the child tree_from with tree_to
     def replace_child(self, tree_from, tree_to):
         if tree_from.parent != self:
@@ -208,8 +188,7 @@ class AST:
 
     # returns the dot representation of the given node
     def __str__(self):
-        return '{name}[label="{value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
-                                                                        color=self.color)
+        return str(self.value)
 
     # returns the c_type
     def get_type(self) -> str:
@@ -250,7 +229,6 @@ class AST:
             self._id = self.get_unique_id()
         return self._id
 
-
     # Get a unique temp variable
     @staticmethod
     def get_temp():
@@ -262,29 +240,6 @@ class AST:
         return name + ":\n"
 
 
-# Convert given ast into a dotfile and write it to filename
-def dot(ast: AST, filename: str):
-    output = "Digraph G { \n"
-
-    # Add the symbol table tree
-    ast.symbol_table.to_dot()
-    output += SymbolTable.dot_output
-
-    output += "subgraph cluster_1 {\n"
-    output += "node [style=filled, shape=rectangle, penwidth=2];\n"
-
-    output += ast.dot_node()
-    output += ast.dot_connections()
-
-    output += "label = \"AST\";\n"
-    output += "}\n"
-    output += "}"
-
-    outputFile = open(filename, "w")
-    outputFile.write(output)
-    outputFile.close()
-
-
 # A sequence of statements
 class StatementSequence(AST):
     def __init__(self, scope_count):
@@ -294,8 +249,7 @@ class StatementSequence(AST):
 
     # returns the dot representation of a statement sequence
     def __str__(self):
-        return '{name}[label="{value} ({id})", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
-                                                                               id=self.id(), color=self.color)
+        return "{value} ({id})".format(value=self.value, id=self.id())
 
     def comments(self, comment_out=True):
         return self.comment_out("Code Block", comment_out)
@@ -321,6 +275,7 @@ class If(AST):
         comment = "if " + self.children[0].comments(comment_out=False)
         return self.comment_out(comment, comment_out)
 
+
 class For(AST):
     def __init__(self, scope_count):
         AST.__init__(self, "for")
@@ -345,14 +300,12 @@ class While(AST):
         return self.comment_out(comment, comment_out)
 
 
-
 class Operator(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#87f5ff")
+        AST.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
-                                                                                  color=self.color)
+        return "Operator: {value}".format(value=self.value)
 
     def get_type(self):
         type = self.children[0].get_type()
@@ -369,9 +322,7 @@ class Binary(Operator):
         Operator.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Binary Operator: {value}", fillcolor="{color}"] \n'.format(name=self.id(),
-                                                                                         value=self.value,
-                                                                                         color=self.color)
+        return "Binary Operator: {value}".format(value=self.value)
 
     def comments(self, comment_out=True):
         comment = self[0].comments(comment_out=False) + self.value + \
@@ -386,8 +337,8 @@ class Assign(Binary):
 
     def __str__(self):
         if self.declaration:
-            return '{name}[label="Assign Declaration", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
-        return '{name}[label="Assign", fillcolor="{color}"] \n'.format(name=self.id(), color=self.color)
+            return "Assign Declaration"
+        return "Assign"
 
     def get_llvm_template(self):
         return "\tstore {type} {temp}, {type}* {location}\n"
@@ -401,20 +352,17 @@ class Assign(Binary):
 class Function(AST):
     def __init__(self, value="", return_type="void", function_type="use"):
         AST.contains_function = True
-        AST.__init__(self, value, "#ff6486")
+        AST.__init__(self, value)
         self.return_type = return_type  # The type the return value must be
         self.function_type = function_type  # The use of the function, declaration/definition/using a function
         self.scope_count = 0  # Scope count does nothing
         self.symbol_table = SymbolTable(self.id())  # Function does have its own symbol table
 
     def __str__(self):
-        return '{name}[label="Function ({id}): {type}: {return_type} {func_name}", fillcolor="{color}"] \n'.format(
-            name=self.id(),
-            id=self.id(),
-            type=self.function_type,
-            return_type=self.return_type,
-            func_name=self.value,
-            color=self.color)
+        return "Function ({id}): {type}: {return_type} {func_name}".format(id=self.id(),
+                                                                           type=self.function_type,
+                                                                           return_type=self.return_type,
+                                                                           func_name=self.value)
 
     def get_type(self):
         return self.return_type
@@ -500,15 +448,12 @@ class Function(AST):
         return format_count
 
 
-
 class Arguments(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#ff6486")
+        AST.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label="Argument List", fillcolor="{color}"] \n'.format(
-            name=self.id(),
-            color=self.color)
+        return "Argument List"
 
     def get_type(self):
         return None
@@ -522,12 +467,10 @@ class Arguments(AST):
 
 class Include(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#000000")
+        AST.__init__(self, value)
 
     def __str__(self):
-        return '{name}[label= <<font color="white">include stdio.h</font>>, fillcolor="{color}"] \n'.format(
-            name=self.id(),
-            color=self.color)
+        return 'include stdio.h'
 
     def get_type(self):
         return None

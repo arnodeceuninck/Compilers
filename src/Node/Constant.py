@@ -3,12 +3,11 @@ from src.Node.AST import AST, BoolClasses, stringVar, stringArg
 
 class Constant(AST):
     def __init__(self, value=""):
-        AST.__init__(self, value, "#FFD885")
+        AST.__init__(self, value)
         self.funct = None
 
     def __str__(self):
-        return '{name}[label="Constant {value}", fillcolor="{color}"] \n'.format(name=self.id(), value=self.value,
-                                                                                 color=self.color)
+        return "Constant {value}".format(value=self.value)
 
     def constant_folding(self):
         return True
