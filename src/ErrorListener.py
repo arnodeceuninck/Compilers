@@ -64,15 +64,19 @@ class IncompatibleTypesError(CompilerError):
 
 
 class UnknownOperationError(CompilerError):
-    def __init__(self, operation, ltype, rtype):
+    def __init__(self, operation, ltype, rtype=None):
         super().__init__()
         self.operation = operation
         self.ltype = ltype
         self.rtype = rtype
 
     def __str__(self):
-        return "[ERROR] Undified operation \'{op}\' between \'{ltype}\' and \'{rtype}\'" \
-            .format(op=self.operation, ltype=self.ltype, rtype=self.rtype)
+        if self.rtype:
+            return "[ERROR] Undified operation \'{op}\' between \'{ltype}\' and \'{rtype}\'" \
+                .format(op=self.operation, ltype=self.ltype, rtype=self.rtype)
+        else:
+            return "[ERROR] Undified operation \'{op}\' on \'{ltype}\'" \
+                .format(op=self.operation, ltype=self.ltype)
 
 
 class RerefError(CompilerError):

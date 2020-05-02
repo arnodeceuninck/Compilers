@@ -65,7 +65,10 @@ class VInt(Variable):
         return "i32"
 
     def get_type(self):
-        return "int" + ("*"*self.ptr)  # TODO: arrays should also include a '*', but this lets 3 tests fail
+        type = "int" + ("*"*self.ptr)
+        if self.array and not isinstance(self.parent, Assign):
+            type += "*"
+        return type  # TODO: arrays should also include a '*', but this lets 3 tests fail
 
     def get_format_type(self):
         return "d"
@@ -93,7 +96,10 @@ class VChar(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        return "char" + ("*"*self.ptr)
+        type = "char" + ("*"*self.ptr)
+        if self.array:
+            type += "*"
+        return type
 
     def get_llvm_print_type(self) -> str:
         return "i8"
@@ -122,7 +128,10 @@ class VFloat(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        return "float" + ("*"*self.ptr)
+        type = "float" + ("*"*self.ptr)
+        if self.array:
+            type += "*"
+        return type
 
     def get_llvm_print_type(self) -> str:
         return "double"

@@ -1,5 +1,6 @@
 from test import *
 from src.ErrorListener import *
+from src.LLVM.LLVM import to_LLVM
 import inspect
 import unittest
 
@@ -36,7 +37,7 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(NoArrayError, "[ERROR] Trying to take the index of something that's not an array")
 
     def test_arrayCompareError(self):
-        self.help_test(RerefError, "")
+        self.help_test(UnknownOperationError, "[ERROR] Undified operation '==' between 'int*' and 'int*'")
 
     def test_arraySizeTypeMismatch(self):
         self.help_test(RerefError, "")

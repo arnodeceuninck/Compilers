@@ -78,7 +78,10 @@ class ArrayIndex(Unary):
 
     def get_type(self):
         try:
-            return self[0].get_type()
+            type = self[0].get_type()
+            if type[len(type)-1] != '*':
+                raise Exception("Taking the index of something that's not a pointer (and an array is a pointer)")
+            return type[:-1]
         except:
             return None
 

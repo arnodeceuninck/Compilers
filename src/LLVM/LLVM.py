@@ -2,6 +2,14 @@
 class llvm:
     output = ""
 
+# NOTE the parts referenced here are the parts described in the function get_llvm_print of the class Function
+# This string belongs to the first part
+stringVar = '@.str.{string_id} = private unnamed_addr constant [{string_len} x i8] c"{string_val}", align 1\n'
+# This string belongs to the second part
+stringArg = 'i8* getelementptr inbounds ([{string_len} x i8], [{string_len} x i8]* @.str.{string_id}, i32 0, i32 0)'
+stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
+
+scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
 
 def llvm_code(ast):
     llvm.output += ast.comments()
@@ -669,7 +677,7 @@ def llvm_argument(ast):
         return argument
 
 
-from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, Assign, scanCall, stringVar, stringCall, stringArg, VFloat, CString
+from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, Assign, VFloat, CString
 from src.LLVM.Comments import llvm_comments, Comments
 from src.LLVM.Compare import llvm_compare, Compare
 from src.LLVM.Constant import llvm_constant, Constant, llvm_type_constant

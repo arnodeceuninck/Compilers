@@ -79,4 +79,5 @@ def llvm_logic_and(ast):
 
 from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
 from src.Node.Compare import LogicAnd, Compare, BoolClasses, CBool
+from src.ErrorListener import UnknownOperationError
 # from src.LLVM.LLVM import *

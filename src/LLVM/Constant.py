@@ -94,6 +94,6 @@ def llvm_c_string(ast):
     llvm.output += temp_llvm_code
 
 
-from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
-from src.Node.Constant import CArray, CChar, BoolClasses, stringVar, Constant, CString, CInt, CBool, CFloat
+from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type, stringVar
+from src.Node.Constant import CArray, CChar, BoolClasses, Constant, CString, CInt, CBool, CFloat
 # from src.LLVM.LLVM import *

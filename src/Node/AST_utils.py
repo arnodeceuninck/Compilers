@@ -178,6 +178,17 @@ def convertVar(ast):
     else:
         print("[WARNING] Unsupported variable type")
 
+def check_supported_operations(ast):
+    if isinstance(ast, (Assign, ArrayIndex, UReref, UDeref)):
+        return  # Already checked in Check Assigns
+    if isinstance(ast, Unary):
+        supported_types = ["int", "float", "char"]
+        if ast[0].get_type() not in supported_types:
+            raise UnknownOperationError(ast.value, ast[0].get_type())
+    elif isinstance(ast, Binary):
+        supported_types = [("int", "int"), ("float", "float"), ("char", "char")]
+        if (ast[0].get_type(), ast[1].get_type()) not in supported_types:
+            raise UnknownOperationError(ast.value, ast[0].get_type(), ast[1].get_type())
 
 # A function to check whether you're always assigning to the right type and not to a const value
 def checkAssigns(ast):
@@ -542,7 +553,8 @@ def make_ast(tree, optimize: bool = True):
     javaForLife.traverse(check_only_dereference_lvalues)
     javaForLife.traverse(check_main)  # Checks if there is a main defined
     javaForLife.traverse(return_check)
-    # communismForLife.traverse(check_arrays)
+    javaForLife.traverse(check_arrays)
+    javaForLife.traverse(check_supported_operations)
     AST.stdio = has_been_included_stdio(javaForLife)  # Adds if the stdio is included
     javaForLife.traverse(check_function)  # Checks if all the functions are defined
     if not AST.main:

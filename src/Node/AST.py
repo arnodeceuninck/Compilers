@@ -4,15 +4,6 @@
 
 from src.symbolTable import SymbolTable
 
-# NOTE the parts referenced here are the parts described in the function get_llvm_print of the class Function
-# This string belongs to the first part
-stringVar = '@.str.{string_id} = private unnamed_addr constant [{string_len} x i8] c"{string_val}", align 1\n'
-# This string belongs to the second part
-stringArg = 'i8* getelementptr inbounds ([{string_len} x i8], [{string_len} x i8]* @.str.{string_id}, i32 0, i32 0)'
-stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
-
-scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
-
 
 class AST:
     _id = 0

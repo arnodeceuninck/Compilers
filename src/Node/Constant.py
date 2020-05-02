@@ -1,4 +1,4 @@
-from src.Node.AST import AST, BoolClasses, stringVar, stringArg
+from src.Node.AST import AST, BoolClasses
 
 
 class Constant(AST):

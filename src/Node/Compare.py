@@ -9,11 +9,6 @@ class Compare(Binary):
 
     def __str__(self):
         return 'Binary Operator Compare: {value}'.format(value=self.value)
-    def get_type(self):
-        if self[0].get_type() == self[1].get_type():
-            return self[0].get_type()
-        else:
-            return "unknown"
 
 
 class LessT(Compare):
