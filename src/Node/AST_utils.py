@@ -5,7 +5,7 @@ from src.ErrorListener import RerefError, CompilerError, ConstError, Incompatibl
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
     FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError
 from src.Node.AST import Function, has_symbol_table, Include, dot
-from src.customListener import customListener
+from src.CustomListener import CustomListener
 from src.Node.Variable import *
 from src.Node.Unary import *
 from src.Node.Compare import *
@@ -521,32 +521,32 @@ def compile(input_file: str, catch_error=True):
 
 # Convert an antlr tree into our own AST
 def make_ast(tree, optimize: bool = True):
-    communismRules = customListener()
+    customListener = CustomListener()
     walker = ParseTreeWalker()
-    walker.walk(communismRules, tree)
-    communismForLife = communismRules.trees[0]
+    walker.walk(customListener, tree)
+    javaForLife = customListener.trees[0]
     # Makes a tree of the symbol tables
-    communismForLife.traverse(connect_symbol_table)
+    javaForLife.traverse(connect_symbol_table)
     # The two methods of below should be combined in order to make it one pass and apply error checking
     # Create symbol table
-    communismForLife.traverse(assignment)  # Symbol table checks
+    javaForLife.traverse(assignment)  # Symbol table checks
     # Convert Variables into their right type based on the symbol table
-    communismForLife.traverse(convertVar)
-    dot(communismForLife, "output/debug.dot")
+    javaForLife.traverse(convertVar)
+    dot(javaForLife, "output/debug.dot")
     # Gives all the function uses correct return types
-    communismForLife.traverse(link_function)
-    communismForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
-    communismForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
-    communismForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
-    communismForLife.traverse(check_only_dereference_lvalues)
-    communismForLife.traverse(check_main)  # Checks if there is a main defined
-    communismForLife.traverse(return_check)
+    javaForLife.traverse(link_function)
+    javaForLife.traverse(checkAssigns)  # Check right type assigns, const assigns ...
+    javaForLife.traverse(checkReserved)  # Checks if the reserved variables are used in the right scope
+    javaForLife.traverse(adding_return)  # Adds a return to every function that has none on the end
+    javaForLife.traverse(check_only_dereference_lvalues)
+    javaForLife.traverse(check_main)  # Checks if there is a main defined
+    javaForLife.traverse(return_check)
     # communismForLife.traverse(check_arrays)
-    AST.stdio = has_been_included_stdio(communismForLife)  # Adds if the stdio is included
-    communismForLife.traverse(check_function)  # Checks if all the functions are defined
+    AST.stdio = has_been_included_stdio(javaForLife)  # Adds if the stdio is included
+    javaForLife.traverse(check_function)  # Checks if all the functions are defined
     if not AST.main:
         raise MainNotFoundError()
     # TODO: check if functions do end with a return when not void OPTIONAL!!!
     if optimize:
-        communismForLife.optimize()
-    return communismForLife
+        javaForLife.optimize()
+    return javaForLife

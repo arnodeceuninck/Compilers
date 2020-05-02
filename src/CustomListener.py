@@ -14,7 +14,7 @@ def has_children(ctx: ParserRuleContext):
 
 
 # This class defines a complete listener for a parse tree produced by cParser.
-class customListener(ParseTreeListener):
+class CustomListener(ParseTreeListener):
     def __init__(self):
         self.trees = []  # A stack containing all subtrees
         self.scope_count = 0  # The current scope we are finding ourselves in
