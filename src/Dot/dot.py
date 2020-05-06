@@ -5,9 +5,11 @@ from src.Dot.colors import color
 def dot(ast, filename: str):
     output = "Digraph G { \n"
 
-    # Add the symbol table tree
-    ast.symbol_table.to_dot() # TODO: Seperate from symbol table class
-    output += SymbolTable.dot_output
+    # Don't do this with llvm ast
+    if isinstance(ast, AST):
+        # Add the symbol table tree
+        ast.symbol_table.to_dot() # TODO: Seperate from symbol table class
+        output += SymbolTable.dot_output
 
     output += "subgraph cluster_1 {\n"
     output += "node [style=filled, shape=rectangle, penwidth=2];\n"
@@ -48,4 +50,4 @@ def dot_str(ast):
     return '{name}[label={value}, fillcolor="{color}"] \n'.format(name=ast.id(), value=value,
                                                                     color=color(ast))
 
-from src.Node.AST import Include
+from src.Node.AST import Include, AST

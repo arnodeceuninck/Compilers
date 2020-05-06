@@ -1,0 +1,5 @@
+Convert C to MIPS:
+clang -target mipsel-linux-gnu input/y.c -S -o output/mips_y.c
+http://reliant.colab.duke.edu/c2mips/
+
+Running MIPS code:
