@@ -430,7 +430,7 @@ def check_function(ast):
         # Iterate over the functions to check if they are defined
         for function in AST.functions:
             # Once we found a match we do not throw an error
-            if match_function(function, ast) and not matched_function:
+            if soft_match_function(function, ast) and not matched_function:
                 matched_function = True
         # If the function is not defined yet the throw an undefined error
         if not matched_function:
