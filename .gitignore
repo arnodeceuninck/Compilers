@@ -2,6 +2,7 @@
 **/output/*
 test/output/
 gen/
+gen_llvm/
 test.c
 test.ll
 test.s
