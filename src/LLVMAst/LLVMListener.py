@@ -88,10 +88,12 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#store.
     def enterStore(self, ctx: llvmParser.StoreContext):
+        self.add(LLVMStore(ctx.optype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#store.
     def exitStore(self, ctx: llvmParser.StoreContext):
+        self.simplify(2)
         pass
 
     # Enter a parse tree produced by llvmParser#assignment.
@@ -114,6 +116,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#alocation.
     def enterAlocation(self, ctx: llvmParser.AlocationContext):
+        self.add(LLVMAllocate(ctx.optype.getText(), ctx.align_index.text))
         pass
 
     # Exit a parse tree produced by llvmParser#alocation.

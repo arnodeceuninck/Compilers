@@ -71,3 +71,17 @@ class LLVMConst(LLVMAst):
     def __init__(self, value):
         super().__init__(value)
         self.constval = value
+
+class LLVMStore(LLVMAst):
+    def __init__(self, optype):
+        super().__init__("LLVM Store")
+        self.type = optype
+
+class LLVMAllocate(LLVMAst):
+    def __init__(self, optype, align):
+        super().__init__("LLVM Allocate")
+        self.type = optype
+        self.align = align
+
+    def __str__(self):
+        return "Allocate {type} {align}".format(type=self.type, align=self.align)
