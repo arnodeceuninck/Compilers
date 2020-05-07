@@ -33,6 +33,14 @@ class LLVMFunction(LLVMAst):
     def __str__(self):
         return "Function: {name}".format(name=self.name)
 
+class LLVMFunctionUse(LLVMAst):
+    def __init__(self, name, rettype):
+        super().__init__(name)
+        self.name = name
+        self.rettype = rettype
+
+    def __str__(self):
+        return "Function call: {name}".format(name=self.name)
 
 class LLVMOperationSequence(LLVMAst):
     def __init__(self):

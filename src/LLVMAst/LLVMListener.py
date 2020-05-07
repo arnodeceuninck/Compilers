@@ -52,7 +52,19 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#function.
     def exitFunction(self, ctx: llvmParser.FunctionContext):
-        self.simplify(1)  # Only the operation sequence (argument list is not yet supported)
+        self.simplify(1) # Only the operation sequence (argument list is not yet supported)
+        pass
+
+        # Enter a parse tree produced by llvmParser#own_function.
+
+    def enterOwn_function(self, ctx: llvmParser.Own_functionContext):
+        self.add(LLVMFunction(name=ctx.fname.text, rettype=ctx.rettype.getText()))
+        pass
+
+        # Exit a parse tree produced by llvmParser#own_function.
+
+    def exitOwn_function(self, ctx: llvmParser.Own_functionContext):
+        self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#scope.
@@ -125,31 +137,12 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#binary.
     def enterBinary(self, ctx:llvmParser.BinaryContext):
+        self.add(LLVMBinaryOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#binary.
     def exitBinary(self, ctx:llvmParser.BinaryContext):
         self.simplify(2)
-        pass
-
-    # Enter a parse tree produced by llvmParser#addition.
-    def enterAddition(self, ctx: llvmParser.AdditionContext):
-        self.add(LLVMBinaryOperation("add", optype=ctx.optype.getText()))
-        pass
-
-    # Enter a parse tree produced by llvmParser#addition.
-    def enterSubstraction(self, ctx: llvmParser.SubstractionContext):
-        self.add(LLVMBinaryOperation("sub", optype=ctx.optype.getText()))
-        pass
-
-    # Enter a parse tree produced by llvmParser#addition.
-    def enterFaddition(self, ctx: llvmParser.FadditionContext):
-        self.add(LLVMBinaryOperation("fadd", optype=ctx.optype.getText()))
-        pass
-
-    # Enter a parse tree produced by llvmParser#addition.
-    def enterFsubstraction(self, ctx: llvmParser.FsubstractionContext):
-        self.add(LLVMBinaryOperation("fsub", optype=ctx.optype.getText()))
         pass
 
     # Enter a parse tree produced by llvmParser#value.
