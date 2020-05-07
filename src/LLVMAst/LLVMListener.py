@@ -204,6 +204,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#declaration.
     def enterDeclaration(self, ctx: llvmParser.DeclarationContext):
+        self.add(LLVMDeclare(ctx.fname.text, ctx.rettype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#declaration.

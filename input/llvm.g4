@@ -35,7 +35,7 @@ print_function: 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([2 x i8
 
 print_str: 'private unnamed_addr constant [2 x i8] c"' var=VAR_NAME '\\00", align 1';
 
-declaration: 'declare i32 @printf(i8*, ...)';
+declaration: 'declare ' rettype=type_ '@' fname='printf' '(i8*, ...)';
 
 
 VAR_NAME: [a-zA-Z.][a-zA-Z_0-9.]*;

@@ -97,3 +97,12 @@ class LLVMPrintStr(LLVMAst):
 class LLVMPrint(LLVMAst):
     def __init__(self):
         super().__init__("LLVM Print")
+
+class LLVMDeclare(LLVMAst):
+    def __init__(self, fname, rettype):
+        super().__init__(fname)
+        self.name = fname
+        self.rettype = rettype
+
+    def __str__(self):
+        return "Declare {rettype} {name}".format(rettype=self.rettype, name=self.name)
