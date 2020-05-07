@@ -12,19 +12,25 @@ operation: return_ | assignment | store | function_call | function;
 
 store: 'store' optype=type_ variable ',' type_'*' variable;
 
+load: 'load' optype=type_ ',' type_'*' variable;
+
 assignment: variable '=' rvalue;
 
-rvalue: alocation | addition | function_call | print_str;
+rvalue: alocation | function_call | print_str | load | expression;
+
+expression: addition | substraction;
 
 alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
 
 addition: 'add' optype=type_ value  ',' value;
+substraction: 'sub' optype=type_ value  ',' value;
+
 
 value: variable | const_int;
 
 const_int: INT_ID;
 
-return_: 'ret' type_ variable;
+return_: 'ret' rettype=type_ variable;
 
 variable: ('%' | '@') var=VAR_NAME;
 

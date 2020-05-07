@@ -1,5 +1,6 @@
 from src.symbolTable import SymbolTable
 from src.Dot.colors import color
+from src.LLVMAst.LLVMAst import LLVMAst
 
 # Convert given ast into a dotfile and write it to filename
 def dot(ast, filename: str):
@@ -10,6 +11,10 @@ def dot(ast, filename: str):
         # Add the symbol table tree
         ast.symbol_table.to_dot() # TODO: Seperate from symbol table class
         output += SymbolTable.dot_output
+
+
+    # if isinstance(ast, LLVMAst):
+    #     output += "rankdir=LR\n"
 
     output += "subgraph cluster_1 {\n"
     output += "node [style=filled, shape=rectangle, penwidth=2];\n"

@@ -55,6 +55,10 @@ class LLVMAddition(LLVMBinaryOperation):
     def __init__(self, optype):
         super().__init__("add", optype)
 
+class LLVMSubstraction(LLVMBinaryOperation):
+    def __init__(self, optype):
+        super().__init__("sub", optype)
+
 
 class LLVMAssignment(LLVMAst):
     def __init__(self):
@@ -72,10 +76,12 @@ class LLVMConst(LLVMAst):
         super().__init__(value)
         self.constval = value
 
+
 class LLVMStore(LLVMAst):
     def __init__(self, optype):
         super().__init__("LLVM Store")
         self.type = optype
+
 
 class LLVMAllocate(LLVMAst):
     def __init__(self, optype, align):
@@ -86,6 +92,7 @@ class LLVMAllocate(LLVMAst):
     def __str__(self):
         return "Allocate {type} {align}".format(type=self.type, align=self.align)
 
+
 class LLVMPrintStr(LLVMAst):
     def __init__(self, var):
         super().__init__(var)
@@ -94,9 +101,11 @@ class LLVMPrintStr(LLVMAst):
     def __str__(self):
         return "Printstr {var}".format(var=self.printvar)
 
+
 class LLVMPrint(LLVMAst):
     def __init__(self):
         super().__init__("LLVM Print")
+
 
 class LLVMDeclare(LLVMAst):
     def __init__(self, fname, rettype):
@@ -106,3 +115,20 @@ class LLVMDeclare(LLVMAst):
 
     def __str__(self):
         return "Declare {rettype} {name}".format(rettype=self.rettype, name=self.name)
+
+
+class LLVMLoad(LLVMAst):
+    def __init__(self, type):
+        super().__init__("LLVM Load")
+        self.type = type
+
+    def __str__(self):
+        return "load {type}".format(type=self.type)
+
+class LLVMReturn(LLVMAst):
+    def __init__(self, type):
+        super().__init__("LLVM return")
+        self.type = type
+
+    def __str__(self):
+        return "return {type}".format(type=self.type)

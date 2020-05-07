@@ -2,6 +2,7 @@
 
 // Should print the numbers 10 20 30
 int main(){
-    int b = 6;
-    printf(b);
+    int a = 1;
+    int b = 2;
+    a-b;
 }

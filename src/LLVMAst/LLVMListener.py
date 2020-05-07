@@ -133,6 +133,16 @@ class LLVMListener(ParseTreeListener):
         self.simplify(2)
         pass
 
+    # Enter a parse tree produced by llvmParser#addition.
+    def enterSubstraction(self, ctx: llvmParser.SubstractionContext):
+        self.add(LLVMSubstraction(optype=ctx.optype.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#addition.
+    def exitSubstraction(self, ctx: llvmParser.SubstractionContext):
+        self.simplify(2)
+        pass
+
     # Enter a parse tree produced by llvmParser#value.
     def enterValue(self, ctx: llvmParser.ValueContext):
         pass
@@ -152,10 +162,12 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#return_.
     def enterReturn_(self, ctx: llvmParser.Return_Context):
+        self.add(LLVMReturn(ctx.rettype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#return_.
     def exitReturn_(self, ctx: llvmParser.Return_Context):
+        self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#variable.
@@ -210,3 +222,14 @@ class LLVMListener(ParseTreeListener):
     # Exit a parse tree produced by llvmParser#declaration.
     def exitDeclaration(self, ctx: llvmParser.DeclarationContext):
         pass
+
+    # Enter a parse tree produced by llvmParser#load.
+    def enterLoad(self, ctx:llvmParser.LoadContext):
+        self.add(LLVMLoad(ctx.optype.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#load.
+    def exitLoad(self, ctx:llvmParser.LoadContext):
+        self.simplify(1)
+        pass
+
