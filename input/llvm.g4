@@ -2,7 +2,11 @@ grammar llvm;
 
 start_rule: (operation)* (declaration)*;
 
-function: 'define' rettype=type_ '@' name=VAR_NAME '()' scope;
+function: 'define' rettype=type_ '@' name=VAR_NAME '(' argument_list ')' scope;
+
+argument_list: (argument)?(',' argument)*;
+
+argument: type_;
 
 scope: '{' operation_sequence '}';
 

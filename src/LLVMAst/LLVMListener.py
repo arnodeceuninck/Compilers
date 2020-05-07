@@ -52,7 +52,7 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#function.
     def exitFunction(self, ctx: llvmParser.FunctionContext):
-        self.simplify(1) # Only the operation sequence (argument list is not yet supported)
+        self.simplify(1)  # Only the operation sequence (argument list is not yet supported)
         pass
 
         # Enter a parse tree produced by llvmParser#own_function.
@@ -136,12 +136,12 @@ class LLVMListener(ParseTreeListener):
         pass
 
     # Enter a parse tree produced by llvmParser#binary.
-    def enterBinary(self, ctx:llvmParser.BinaryContext):
+    def enterBinary(self, ctx: llvmParser.BinaryContext):
         self.add(LLVMBinaryOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#binary.
-    def exitBinary(self, ctx:llvmParser.BinaryContext):
+    def exitBinary(self, ctx: llvmParser.BinaryContext):
         self.simplify(2)
         pass
 
@@ -163,12 +163,12 @@ class LLVMListener(ParseTreeListener):
         pass
 
     # Enter a parse tree produced by llvmParser#const_float.
-    def enterConst_float(self, ctx:llvmParser.Const_floatContext):
+    def enterConst_float(self, ctx: llvmParser.Const_floatContext):
         self.add(LLVMConstFloat(ctx.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#const_float.
-    def exitConst_float(self, ctx:llvmParser.Const_floatContext):
+    def exitConst_float(self, ctx: llvmParser.Const_floatContext):
         pass
 
     # Enter a parse tree produced by llvmParser#return_.
@@ -198,12 +198,13 @@ class LLVMListener(ParseTreeListener):
     def exitType_(self, ctx: llvmParser.Type_Context):
         pass
 
-    # Enter a parse tree produced by llvmParser#function_call.
-    def enterFunction_call(self, ctx: llvmParser.Function_callContext):
+    def enterOwn_function(self, ctx: llvmParser.Own_functionContext):
+        self.add(LLVMFunctionUse(ctx.fname.text, ctx.rettype.getText()))
         pass
 
-    # Exit a parse tree produced by llvmParser#function_call.
-    def exitFunction_call(self, ctx: llvmParser.Function_callContext):
+        # Exit a parse tree produced by llvmParser#own_function.
+
+    def exitOwn_function(self, ctx: llvmParser.Own_functionContext):
         pass
 
     # Enter a parse tree produced by llvmParser#print_function.
@@ -235,12 +236,11 @@ class LLVMListener(ParseTreeListener):
         pass
 
     # Enter a parse tree produced by llvmParser#load.
-    def enterLoad(self, ctx:llvmParser.LoadContext):
+    def enterLoad(self, ctx: llvmParser.LoadContext):
         self.add(LLVMLoad(ctx.optype.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#load.
-    def exitLoad(self, ctx:llvmParser.LoadContext):
+    def exitLoad(self, ctx: llvmParser.LoadContext):
         self.simplify(1)
         pass
-
