@@ -85,3 +85,15 @@ class LLVMAllocate(LLVMAst):
 
     def __str__(self):
         return "Allocate {type} {align}".format(type=self.type, align=self.align)
+
+class LLVMPrintStr(LLVMAst):
+    def __init__(self, var):
+        super().__init__(var)
+        self.printvar = var
+
+    def __str__(self):
+        return "Printstr {var}".format(var=self.printvar)
+
+class LLVMPrint(LLVMAst):
+    def __init__(self):
+        super().__init__("LLVM Print")

@@ -1,6 +1,6 @@
 grammar llvm;
 
-start_rule: (print_str)? function (declaration)?;
+start_rule: (operation)* (declaration)*;
 
 function: 'define' rettype=type_ '@' name=VAR_NAME '()' scope;
 
@@ -8,13 +8,13 @@ scope: '{' operation_sequence '}';
 
 operation_sequence: operation+;
 
-operation: return_ | assignment | store;
+operation: return_ | assignment | store | function_call | function;
 
 store: 'store' optype=type_ variable ',' type_'*' variable;
 
 assignment: variable '=' rvalue;
 
-rvalue: alocation | addition;
+rvalue: alocation | addition | function_call | print_str;
 
 alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
 
@@ -26,13 +26,14 @@ const_int: INT_ID;
 
 return_: 'ret' type_ variable;
 
-variable: '%' var=VAR_NAME;
+variable: ('%' | '@') var=VAR_NAME;
 
 type_: (int_='i32'|float_='float'|char_='i8'|bool_='i1');
 
-function_call: 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @.str.5, i32 0, i32 0))';
+function_call: print_function;
+print_function: 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([2 x i8], [2 x i8]* ' prtstr=variable ', i32 0, i32 0))';
 
-print_str: '@.str.5 = private unnamed_addr constant [2 x i8] c"b\\00", align 1';
+print_str: 'private unnamed_addr constant [2 x i8] c"' var=VAR_NAME '\\00", align 1';
 
 declaration: 'declare i32 @printf(i8*, ...)';
 
