@@ -51,15 +51,6 @@ class LLVMBinaryOperation(LLVMOperation):
         super().__init__(operation, optype)
 
 
-class LLVMAddition(LLVMBinaryOperation):
-    def __init__(self, optype):
-        super().__init__("add", optype)
-
-class LLVMSubstraction(LLVMBinaryOperation):
-    def __init__(self, optype):
-        super().__init__("sub", optype)
-
-
 class LLVMAssignment(LLVMAst):
     def __init__(self):
         super().__init__("=")
@@ -75,6 +66,21 @@ class LLVMConst(LLVMAst):
     def __init__(self, value):
         super().__init__(value)
         self.constval = value
+
+
+class LLVMConstInt(LLVMConst):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return "int {val}".format(val=self.constval)
+
+class LLVMConstFloat(LLVMConst):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return "float {val}".format(val=self.constval)
 
 
 class LLVMStore(LLVMAst):
@@ -124,6 +130,7 @@ class LLVMLoad(LLVMAst):
 
     def __str__(self):
         return "load {type}".format(type=self.type)
+
 
 class LLVMReturn(LLVMAst):
     def __init__(self, type):

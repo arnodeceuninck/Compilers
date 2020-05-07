@@ -2,7 +2,7 @@
 
 // Should print the numbers 10 20 30
 int main(){
-    int a = 1;
-    int b = 2;
+    float a = 1.0;
+    float b = 2.0;
     a-b;
 }

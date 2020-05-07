@@ -18,17 +18,16 @@ assignment: variable '=' rvalue;
 
 rvalue: alocation | function_call | print_str | load | expression;
 
-expression: addition | substraction;
+expression: binary;
+binary: op=OP_ID optype=type_ value  ',' value;;
 
 alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
 
-addition: 'add' optype=type_ value  ',' value;
-substraction: 'sub' optype=type_ value  ',' value;
-
-
-value: variable | const_int;
+value: variable | const_int | const_float;
 
 const_int: INT_ID;
+
+const_float: FLOAT_ID;
 
 return_: 'ret' rettype=type_ variable;
 
@@ -46,7 +45,8 @@ declaration: 'declare ' rettype=type_ '@' fname='printf' '(i8*, ...)';
 
 VAR_NAME: [a-zA-Z.][a-zA-Z_0-9.]*;
 INT_ID: [0-9]+;
-//FLOAT_ID: [0-9]+[.]?[0-9]*;
+FLOAT_ID: [0-9]+[.]?[0-9]*;
+OP_ID: ('add' | 'sub' | 'fadd' | 'fsub')
 //CHAR_ID: '\'' . '\'';
 //STR_ID: '"' .*? '"';
 WS: [ \t\r\n]+ -> skip;

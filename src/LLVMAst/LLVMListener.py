@@ -123,24 +123,33 @@ class LLVMListener(ParseTreeListener):
     def exitAlocation(self, ctx: llvmParser.AlocationContext):
         pass
 
-    # Enter a parse tree produced by llvmParser#addition.
-    def enterAddition(self, ctx: llvmParser.AdditionContext):
-        self.add(LLVMAddition(optype=ctx.optype.getText()))
+    # Enter a parse tree produced by llvmParser#binary.
+    def enterBinary(self, ctx:llvmParser.BinaryContext):
         pass
 
-    # Exit a parse tree produced by llvmParser#addition.
-    def exitAddition(self, ctx: llvmParser.AdditionContext):
+    # Exit a parse tree produced by llvmParser#binary.
+    def exitBinary(self, ctx:llvmParser.BinaryContext):
         self.simplify(2)
+        pass
+
+    # Enter a parse tree produced by llvmParser#addition.
+    def enterAddition(self, ctx: llvmParser.AdditionContext):
+        self.add(LLVMBinaryOperation("add", optype=ctx.optype.getText()))
         pass
 
     # Enter a parse tree produced by llvmParser#addition.
     def enterSubstraction(self, ctx: llvmParser.SubstractionContext):
-        self.add(LLVMSubstraction(optype=ctx.optype.getText()))
+        self.add(LLVMBinaryOperation("sub", optype=ctx.optype.getText()))
         pass
 
-    # Exit a parse tree produced by llvmParser#addition.
-    def exitSubstraction(self, ctx: llvmParser.SubstractionContext):
-        self.simplify(2)
+    # Enter a parse tree produced by llvmParser#addition.
+    def enterFaddition(self, ctx: llvmParser.FadditionContext):
+        self.add(LLVMBinaryOperation("fadd", optype=ctx.optype.getText()))
+        pass
+
+    # Enter a parse tree produced by llvmParser#addition.
+    def enterFsubstraction(self, ctx: llvmParser.FsubstractionContext):
+        self.add(LLVMBinaryOperation("fsub", optype=ctx.optype.getText()))
         pass
 
     # Enter a parse tree produced by llvmParser#value.
@@ -153,11 +162,20 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#const_int.
     def enterConst_int(self, ctx: llvmParser.Const_intContext):
-        self.add(LLVMConst(ctx.getText()))
+        self.add(LLVMConstInt(ctx.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#const_int.
     def exitConst_int(self, ctx: llvmParser.Const_intContext):
+        pass
+
+    # Enter a parse tree produced by llvmParser#const_float.
+    def enterConst_float(self, ctx:llvmParser.Const_floatContext):
+        self.add(LLVMConstFloat(ctx.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#const_float.
+    def exitConst_float(self, ctx:llvmParser.Const_floatContext):
         pass
 
     # Enter a parse tree produced by llvmParser#return_.
