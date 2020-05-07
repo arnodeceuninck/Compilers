@@ -8,6 +8,10 @@ argument_list: (argument)?(',' argument)*;
 
 argument: type_;
 
+use_arg_list: (use_argument)?(',' use_argument)*;
+
+use_argument: type_ variable;
+
 scope: '{' operation_sequence '}';
 
 operation_sequence: operation+;
@@ -35,23 +39,23 @@ const_float: FLOAT_ID;
 
 return_: 'ret' rettype=type_ variable;
 
-variable: ('%' | '@') var=VAR_NAME;
+variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot of errors if i don't add int id
 
 type_: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void');
 
 function_call: print_function | own_function;
-own_function: 'call' rettype=type_ '@' fname=VAR_NAME '()'; // TODO: arg list
+own_function: 'call' rettype=type_ '@' fname=VAR_NAME '(' use_arg_list ')';
 print_function: 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([2 x i8], [2 x i8]* ' prtstr=variable ', i32 0, i32 0))';
 
 print_str: 'private unnamed_addr constant [2 x i8] c"' var=VAR_NAME '\\00", align 1';
 
-declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(i8*, ...)'; // TODO: arglist and real name
+declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
 
 OP_ID: ('add' | 'sub' | 'fadd' | 'fsub');
-VAR_NAME: [a-zA-Z.][a-zA-Z_0-9.]*;
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
+VAR_NAME: [a-zA-Z_0-9.]+;
 //CHAR_ID: '\'' . '\'';
 //STR_ID: '"' .*? '"';
 WS: [ \t\r\n]+ -> skip;

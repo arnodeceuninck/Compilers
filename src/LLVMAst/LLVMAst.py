@@ -33,6 +33,7 @@ class LLVMFunction(LLVMAst):
     def __str__(self):
         return "Function: {name}".format(name=self.name)
 
+
 class LLVMFunctionUse(LLVMAst):
     def __init__(self, name, rettype):
         super().__init__(name)
@@ -41,6 +42,7 @@ class LLVMFunctionUse(LLVMAst):
 
     def __str__(self):
         return "Function call: {name}".format(name=self.name)
+
 
 class LLVMOperationSequence(LLVMAst):
     def __init__(self):
@@ -82,6 +84,7 @@ class LLVMConstInt(LLVMConst):
 
     def __str__(self):
         return "int {val}".format(val=self.constval)
+
 
 class LLVMConstFloat(LLVMConst):
     def __init__(self, value):
@@ -147,3 +150,28 @@ class LLVMReturn(LLVMAst):
 
     def __str__(self):
         return "return {type}".format(type=self.type)
+
+
+class LLVMArgumentList(LLVMAst):
+    def __init__(self):
+        super().__init__("Argument List")
+
+
+class LLVMArgument(LLVMAst):
+    def __init__(self, type):
+        super().__init__(type)
+        self.type = type
+
+
+class LLVMUseArgumentList(LLVMAst):
+    def __init__(self):
+        super().__init__("Use Argument List")
+
+
+class LLVMUseArgument(LLVMAst):
+    def __init__(self, type):
+        super().__init__(type)
+        self.type = type
+
+    def __str__(self):
+        return "Argument {type}".format(type=self.type)

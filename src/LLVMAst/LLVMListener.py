@@ -52,7 +52,7 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#function.
     def exitFunction(self, ctx: llvmParser.FunctionContext):
-        self.simplify(1)  # Only the operation sequence (argument list is not yet supported)
+        self.simplify(2)
         pass
 
         # Enter a parse tree produced by llvmParser#own_function.
@@ -205,6 +205,56 @@ class LLVMListener(ParseTreeListener):
         # Exit a parse tree produced by llvmParser#own_function.
 
     def exitOwn_function(self, ctx: llvmParser.Own_functionContext):
+        self.simplify(1) # argument list
+        pass
+
+    # Enter a parse tree produced by llvmParser#argument_list.
+    def enterArgument_list(self, ctx: llvmParser.Argument_listContext):
+        self.add(LLVMArgumentList())
+        pass
+
+    # Exit a parse tree produced by llvmParser#argument_list.
+    def exitArgument_list(self, ctx: llvmParser.Argument_listContext):
+        tree = self.trees[len(self.trees) - 1]
+        children = 0
+        while not isinstance(tree, LLVMArgumentList):
+            children += 1
+            tree = self.trees[len(self.trees) - 1 - children]
+        self.simplify(children)
+        pass
+
+    # Enter a parse tree produced by llvmParser#argument.
+    def enterArgument(self, ctx: llvmParser.ArgumentContext):
+        self.add(LLVMArgument(ctx.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#argument.
+    def exitArgument(self, ctx: llvmParser.ArgumentContext):
+        pass
+
+    # Enter a parse tree produced by llvmParser#use_arg_list.
+    def enterUse_arg_list(self, ctx: llvmParser.Use_arg_listContext):
+        self.add(LLVMUseArgumentList())
+        pass
+
+    # Exit a parse tree produced by llvmParser#use_arg_list.
+    def exitUse_arg_list(self, ctx: llvmParser.Use_arg_listContext):
+        tree = self.trees[len(self.trees) - 1]
+        children = 0
+        while not isinstance(tree, LLVMUseArgumentList):
+            children += 1
+            tree = self.trees[len(self.trees) - 1 - children]
+        self.simplify(children)
+        pass
+
+    # Enter a parse tree produced by llvmParser#use_argument.
+    def enterUse_argument(self, ctx: llvmParser.Use_argumentContext):
+        self.add(LLVMUseArgument(ctx.type_().getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#use_argument.
+    def exitUse_argument(self, ctx: llvmParser.Use_argumentContext):
+        self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#print_function.
