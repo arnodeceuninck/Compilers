@@ -1,8 +1,9 @@
 #include <stdio.h>
+// Should print the numbers 1 2 3
 
-// Should print the numbers 10 20 30
 int main(){
-    float a = 1.0;
-    float b = 2.0;
-    a-b;
+	int x = 3;
+	a[1] = 2;
+	printf("%d; %d; %d;", x, a[1], x);
+	return 1;
 }

@@ -19,7 +19,7 @@ assignment: variable '=' rvalue;
 rvalue: alocation | function_call | print_str | load | expression;
 
 expression: binary;
-binary: op=OP_ID optype=type_ value  ',' value;;
+binary: op=OP_ID optype=type_ value  ',' value;
 
 alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
 
