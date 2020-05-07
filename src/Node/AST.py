@@ -391,6 +391,7 @@ class Function(AST):
         ret_string = str()
         while i < len(string):
             # If we find that the string is a \ then we need to check what translation of it will be in llvm
+            # @Basil: Why? Gewoon een dict gebruiken was te weinig lijntjes zeker? xp
             if string[i] == "\\":
                 if string[i + 1] == "n":  # endl
                     ret_string += "\\0A"

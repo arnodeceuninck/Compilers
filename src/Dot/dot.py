@@ -48,6 +48,8 @@ def dot_connections(ast):
 
 def dot_str(ast):
     value = str(ast)
+    value = value.replace('\\', '\\\\')
+    value = value.replace('"', '\\"')
     if isinstance(ast, Include):
         value = '<<font color="white">{value}</font>>'.format(value=value)
     else:

@@ -111,17 +111,19 @@ class LLVMAllocate(LLVMAst):
 
 
 class LLVMPrintStr(LLVMAst):
-    def __init__(self, var):
+    def __init__(self, var, ccount):
         super().__init__(var)
         self.printvar = var
+        self.ccount = ccount
 
     def __str__(self):
         return "Printstr {var}".format(var=self.printvar)
 
 
 class LLVMPrint(LLVMAst):
-    def __init__(self):
+    def __init__(self, ccount):
         super().__init__("LLVM Print")
+        self.ccount = ccount
 
 
 class LLVMDeclare(LLVMAst):

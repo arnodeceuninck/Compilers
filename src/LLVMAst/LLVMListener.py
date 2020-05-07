@@ -259,7 +259,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#print_function.
     def enterPrint_function(self, ctx: llvmParser.Print_functionContext):
-        self.add(LLVMPrint())
+        self.add(LLVMPrint(ctx.c_count.text))
         pass
 
     # Exit a parse tree produced by llvmParser#print_function.
@@ -269,7 +269,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#print_str.
     def enterPrint_str(self, ctx: llvmParser.Print_strContext):
-        self.add(LLVMPrintStr(ctx.var.text))
+        self.add(LLVMPrintStr(ctx.var.text, ctx.c_count.text))
         pass
 
     # Exit a parse tree produced by llvmParser#print_str.
@@ -283,6 +283,7 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#declaration.
     def exitDeclaration(self, ctx: llvmParser.DeclarationContext):
+        self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#load.
