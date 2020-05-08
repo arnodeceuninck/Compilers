@@ -61,6 +61,21 @@ class LLVMBinaryOperation(LLVMOperation):
         super().__init__(operation, optype)
 
 
+class LLVMCompareOperation(LLVMBinaryOperation):
+    def __init__(self, operation, optype):
+        super().__init__(operation, optype)
+
+
+class LLVMFloatCompareOperation(LLVMBinaryOperation):
+    def __init__(self, operation, optype):
+        super().__init__(operation, optype)
+
+
+class LLVMIntCompareOperation(LLVMBinaryOperation):
+    def __init__(self, operation, optype):
+        super().__init__(operation, optype)
+
+
 class LLVMAssignment(LLVMAst):
     def __init__(self):
         super().__init__("=")

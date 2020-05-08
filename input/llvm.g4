@@ -35,9 +35,12 @@ assignment: variable '=' rvalue;
 
 rvalue: alocation | function_call | print_str | load | expression | extension;
 
-extension: op='fpext' type_from=type_ variable 'to' type_to=type_;
+extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui') type_from=type_ variable 'to' type_to=type_;
 
-expression: binary;
+expression: binary | compare;
+compare: float_compare | int_compare;
+float_compare: 'fcmp' op=CMP_ID optype=type_ value  ',' value;
+int_compare: 'icmp' op=CMP_ID optype=type_ value  ',' value;
 binary: op=OP_ID optype=type_ value  ',' value;
 
 alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
@@ -61,8 +64,12 @@ print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_I
 
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
+// TODO's
+// Get pointer at index: {temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {temp_index}\n
 
-OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'icmp sgt' | 'icmp slt' | 'icmp sle' | 'icmp sge' | 'icmp ne' | 'fcmp one');
+
+OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'fsub' | 'fdiv' | 'sdiv' | 'frem' | 'srem');
+CMP_ID: ('sgt' | 'slt' | 'sle' | 'sge' | 'ne' | 'one' | 'olt' | 'slt' | 'ogt' | 'ole' | 'sle' | 'oge' | 'sge' | 'oeq' | 'eq');
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 VAR_NAME: [a-zA-Z_0-9.]+;

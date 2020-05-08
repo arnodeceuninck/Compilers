@@ -326,3 +326,23 @@ class LLVMListener(ParseTreeListener):
     def exitExtension(self, ctx: llvmParser.ExtensionContext):
         self.simplify(1)
         pass
+
+    # Enter a parse tree produced by llvmParser#float_compare.
+    def enterFloat_compare(self, ctx: llvmParser.Float_compareContext):
+        self.add(LLVMFloatCompareOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#float_compare.
+    def exitFloat_compare(self, ctx: llvmParser.Float_compareContext):
+        self.simplify(2)
+        pass
+
+    # Enter a parse tree produced by llvmParser#int_compare.
+    def enterInt_compare(self, ctx: llvmParser.Int_compareContext):
+        self.add(LLVMIntCompareOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#int_compare.
+    def exitInt_compare(self, ctx: llvmParser.Int_compareContext):
+        self.simplify(2)
+        pass
