@@ -103,6 +103,15 @@ We zorgen er ook voor dat er bij de llvm generatie commentaren bij komen, dit zo
 waar we eventueel een fout in hebben gemaakt. Ook worden code blokken aangeduid, let wel op dat dit niet enorm betrouwbaar is.
 Het enigste waar we in commentaren generatie in verschillen is dat deze voor de llvm statements gebeurd.
 
+## MIPS generatie
+Om mips te genereren vertrekken we vanuit llvm. Zo kunnen we veel dubbel werk vermijden, zoals het bepalen van scopes,
+variabelen toekennen enz.
+### Variabelen
+We slaan al de variabelen op in de stack. We zoeken eerst al de gebruikte variablen in de llvm code en bepalen dan hoe groot
+de stack moet zijn. Omdat er geen enkele variabele overlap heeft ook niet met functies, kunnen we de stackpointer relatief klein houden.
+Zo moeten we geen rekening houden met de variabelen die reeds gebruikt zijn, met de doorgegeven argumenten is er een speciale operatie nodig, net als al de variabelen
+in de functie, die moeten ook opgeslagen worden. Dit gebeurd met de stackpointer
+
 ## Opmerkingen
 Indien er een bewerking wordt gedaan op 2 integer getallen, wordt de uitkomst afgerond en omgezet naar een int
 

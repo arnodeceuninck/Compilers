@@ -1,14 +1,31 @@
+from symbolTable import *
+
+
+# This will set the offset per type, and put it in the dict
+def set_offset(llvm_ast):
+    # The variable needs to be a llvm variable
+    if not isinstance(llvm_ast, LLVMVariable):
+        return
+
+    LLVMAst.offset_dct[llvm_ast.value] = llvm_ast.get_offset()
+
+
 class LLVMAst:
     _id = 0
+    offset_dct = {}
 
     def __init__(self, value):
         self.value = value
         self.children = []
         self.parent = None
         self.id_ = None
+        self.offset = 0  # This is the offset that a single variable needs
 
     def __str__(self):
         return self.value
+
+    def __getitem__(self, item):
+        return self.children[item]
 
     def id(self):
         if not self.id_:
@@ -16,11 +33,18 @@ class LLVMAst:
             self.id_ = LLVMAst._id
         return self.id_
 
+    # Perform a pre-order traversal
+    def traverse(self, function):
+        function(self)
+        for child in self.children:
+            child.traverse(function)
+
 
 # The root
 class LLVMCode(LLVMAst):
     def __init__(self):
         super().__init__("LLVM Code")
+        self.symbol_table = SymbolTable(self.id())
 
 
 class LLVMFunction(LLVMAst):
@@ -28,6 +52,7 @@ class LLVMFunction(LLVMAst):
         super().__init__(name)
         self.name = name
         self.rettype = rettype
+        self.symbol_table = SymbolTable(self.id())
 
     def __str__(self):
         return "Function: {name}".format(name=self.name)
@@ -42,10 +67,14 @@ class LLVMFunctionUse(LLVMAst):
     def __str__(self):
         return "Function call: {name}".format(name=self.name)
 
+    def to_mips(self):
+        return self.name + ":"
+
 
 class LLVMOperationSequence(LLVMAst):
     def __init__(self):
         super().__init__("Operation Sequence")
+        self.symbol_table = SymbolTable(self.id())
 
 
 class LLVMOperation(LLVMAst):

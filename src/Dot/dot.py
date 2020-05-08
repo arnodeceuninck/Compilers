@@ -2,16 +2,14 @@ from src.symbolTable import SymbolTable
 from src.Dot.colors import color
 from src.LLVMAst.LLVMAst import LLVMAst
 
+
 # Convert given ast into a dotfile and write it to filename
 def dot(ast, filename: str):
     output = "Digraph G { \n"
 
-    # Don't do this with llvm ast
-    if isinstance(ast, AST):
-        # Add the symbol table tree
-        ast.symbol_table.to_dot() # TODO: Seperate from symbol table class
-        output += SymbolTable.dot_output
-
+    # Add the symbol table tree
+    ast.symbol_table.to_dot(isinstance(ast, LLVMAst))  # TODO: Seperate from symbol table class
+    output += ast.symbol_table.dot_output
 
     # if isinstance(ast, LLVMAst):
     #     output += "rankdir=LR\n"
@@ -30,6 +28,7 @@ def dot(ast, filename: str):
     outputFile.write(output)
     outputFile.close()
 
+
 # Represent the nodes for the dotfile
 def dot_node(ast):
     # The output needs to be the id + The label itself
@@ -38,6 +37,7 @@ def dot_node(ast):
         output += dot_node(child)
     return output
 
+
 # represent the connections for the dotfile
 def dot_connections(ast):
     output = ""
@@ -45,6 +45,7 @@ def dot_connections(ast):
         output += str(ast.id()) + " -> " + str(child.id()) + "\n"
         output += dot_connections(child)
     return output
+
 
 def dot_str(ast):
     value = str(ast)
@@ -55,6 +56,7 @@ def dot_str(ast):
     else:
         value = "\"{value}\"".format(value=value)
     return '{name}[label={value}, fillcolor="{color}"] \n'.format(name=ast.id(), value=value,
-                                                                    color=color(ast))
+                                                                  color=color(ast))
+
 
 from src.Node.AST import Include, AST

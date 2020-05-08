@@ -1,45 +1,35 @@
 # TODO: limit all functions to an absolute maximum size of 20 lines (for readability)
-class llvm:
+class mips:
     output = ""
 
 
-# NOTE the parts referenced here are the parts described in the function get_llvm_print of the class Function
-# This string belongs to the first part
-stringVar = '@.str.{string_id} = private unnamed_addr constant [{string_len} x i8] c"{string_val}", align 1\n'
-# This string belongs to the second part
-stringArg = 'i8* getelementptr inbounds ([{string_len} x i8], [{string_len} x i8]* @.str.{string_id}, i32 0, i32 0)'
-stringCall = '\tcall i32 (i8*, ...) @printf({string_arg})\n'
+def mips_code(llvm_ast):
+    mips.output += llvm_ast.comments()
 
-scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
-
-
-def llvm_code(ast):
-    llvm.output += ast.comments()
-
-    if isinstance(ast, StatementSequence):
-        llvm_statement_sequence(ast)
-    elif isinstance(ast, If):
-        llvm_if(ast)
-    elif isinstance(ast, For):
-        llvm_for(ast)
-    elif isinstance(ast, While):
-        llvm_while(ast)
-    elif isinstance(ast, Operator):
-        llvm_operator(ast)
-    elif isinstance(ast, Function):
-        llvm_function(ast)
-    elif isinstance(ast, Arguments):
-        llvm_arguments(ast)
-    elif isinstance(ast, Include):
-        llvm_include(ast)
-    elif isinstance(ast, Comments):
-        llvm_comments(ast)
-    elif isinstance(ast, Constant):
-        llvm_constant(ast)
-    elif isinstance(ast, ReservedType):
-        llvm_reserved_type(ast)
-    elif isinstance(ast, Variable):
-        llvm_variable(ast)
+    if isinstance(llvm_ast, LLVMOperationSequence):
+        mips_operation_sequence(llvm_ast)
+    elif isinstance(llvm_ast, If):
+        llvm_if(llvm_ast)
+    elif isinstance(llvm_ast, For):
+        llvm_for(llvm_ast)
+    elif isinstance(llvm_ast, While):
+        llvm_while(llvm_ast)
+    elif isinstance(llvm_ast, Operator):
+        llvm_operator(llvm_ast)
+    elif isinstance(llvm_ast, Function):
+        llvm_function(llvm_ast)
+    elif isinstance(llvm_ast, Arguments):
+        llvm_arguments(llvm_ast)
+    elif isinstance(llvm_ast, Include):
+        llvm_include(llvm_ast)
+    elif isinstance(llvm_ast, Comments):
+        llvm_comments(llvm_ast)
+    elif isinstance(llvm_ast, Constant):
+        llvm_constant(llvm_ast)
+    elif isinstance(llvm_ast, ReservedType):
+        llvm_reserved_type(llvm_ast)
+    elif isinstance(llvm_ast, Variable):
+        llvm_variable(llvm_ast)
     else:
         raise Exception("Unknown AST")
 
@@ -275,14 +265,14 @@ def llvm_assign(ast):
     llvm.output += output
 
 
-def llvm_statement_sequence(ast):
+def mips_operation_sequence(ast):
     # ATTENTION we do not need to generate llvm code for children that are defined in the global scope as
     # variables # TODO
     llvm.output += ast.comments()
     for child in ast.children:
         # If there is no parent, we are the root statement sequence and the child is not a function
         # we do can not generate llvm_code
-        if not ast.parent and not isinstance(child, Function):
+        if not ast.parent and not isinstance(child, LLVMFunction) or isinstance(child, ):
             continue
         llvm_code(child)
     llvm.output += '\n'
@@ -689,13 +679,4 @@ def llvm_argument(ast):
         return argument
 
 
-from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, Assign, \
-    VFloat, CString
-from src.LLVM.Comments import llvm_comments, Comments
-from src.LLVM.Compare import llvm_compare, Compare
-from src.LLVM.Constant import llvm_constant, Constant, llvm_type_constant
-from src.LLVM.Operate import llvm_operate, Operate, llvm_type_operate, llvm_type_default_operate
-from src.LLVM.ReservedType import llvm_reserved_type, ReservedType
-from src.LLVM.Unary import llvm_unary, Unary, UReref, UDeref, llvm_type_unary
-from src.LLVM.Variable import llvm_variable, Variable, llvm_type_variable
-from src.ErrorListener import CallAmountMismatchError
+from src.LLVMAst import *

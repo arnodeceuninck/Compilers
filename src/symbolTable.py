@@ -59,7 +59,7 @@ class SymbolTable:
             return False
         True
 
-    def insert(self, location, type, position):
+    def insert(self, location, type, position=-1):
         if location not in self.elements:
             self.elements[location] = SymbolTableElement(type, position)
         else:
@@ -101,12 +101,44 @@ class SymbolTable:
                  "\t\t\t>];\n"
         return table
 
-    def __dot_node(self):
+    def to_llvm_dot(self):
+        # If there is no symbol table to construct then return an empty table
+        if not len(self.elements):
+            # A table has a unique id
+            table = "\t\ttbl{id} [\n".format(id=self.id())
+            table += "\t\t\tshape=plaintext\n" \
+                     "\t\t\tlabel=<\n" \
+                     "\t\t\t\t<table border='0' cellborder='1' cellspacing='0'>\n"
+            # Create the header of the table so it can match the ast node ids based on eyesight of the user
+            table += "\t\t\t\t\t<tr><td colspan=\"2\"><b>{tableId}</b></td></tr>\n".format(tableId=self.id())
+            table += "\t\t\t\t\t<tr><td>location</td><td>type</td></tr>\n" \
+                     "\t\t\t\t</table>\n" \
+                     "\t\t\t>];\n"
+            return table
+        # start the table node
+        # A table has a unique id
+        table = "\t\ttbl{id} [\n".format(id=self.id())
+        table += "\t\t\tshape=plaintext\n" \
+                 "\t\t\tlabel=<\n" \
+                 "\t\t\t\t<table border='0' cellborder='1' cellspacing='0'>\n"
+        # Create the header of the table so it can match the ast node ids based on eyesight of the user
+        table += "\t\t\t\t\t<tr><td colspan=\"2\"><b>{tableId}</b></td></tr>\n".format(tableId=self.id())
+        table += "\t\t\t\t\t<tr><td>location</td><td>type</td></tr>\n"
+        # add all the row elements
+        for key in self.elements:
+            var_type = self.elements[key].type
+            table += "\t\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\n".format(key, var_type)
+        # finish the table node
+        table += "\t\t\t\t</table>\n" \
+                 "\t\t\t>];\n"
+        return table
+
+    def __dot_node(self, is_llvm):
         # create the symbol table
-        SymbolTable.dot_output += str(self)
+        SymbolTable.dot_output += str(self) if not is_llvm else self.to_llvm_dot()
         # The output needs to be the id + The label itself
         for child in self.children:
-            child.__dot_node()
+            child.__dot_node(is_llvm)
 
     def __dot_connections(self):
         # Make the connections between the parent and the child(ren)
@@ -114,12 +146,12 @@ class SymbolTable:
             SymbolTable.dot_output += "\t\ttbl" + str(self.id()) + " -> " + "tbl" + str(child.id()) + "\n"
             child.__dot_connections()
 
-    def to_dot(self):
+    def to_dot(self, is_llvm=False):
         # Being the cluster subgraph
         SymbolTable.dot_output = "\tsubgraph cluster_0 {\n"
 
         # Make the dot nodes
-        self.__dot_node()
+        self.__dot_node(is_llvm)
         # Make the dot connections between the symbol tables
         self.__dot_connections()
 
