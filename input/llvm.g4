@@ -18,9 +18,14 @@ scope: '{' operation_sequence '}';
 
 operation_sequence: operation+;
 
-operation: return_ | assignment | store | function_call | function | label;
+operation: return_ | assignment | store | function_call | function | label | branch;
 
 label: name=VAR_NAME ':';
+
+branch: conditional_branch | normal_branch;
+
+conditional_branch: 'br' optype=type_ variable ', label' iftrue=variable ', label' iffalse=variable;
+normal_branch: 'br' 'label' variable;
 
 store: 'store' optype=type_ variable ',' type_'*' variable;
 

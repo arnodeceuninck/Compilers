@@ -178,6 +178,7 @@ class LLVMUseArgument(LLVMAst):
     def __str__(self):
         return "Argument {type}".format(type=self.type)
 
+
 class LLVMStringArgument(LLVMAst):
     def __init__(self, ccount):
         super().__init__("String")
@@ -185,6 +186,7 @@ class LLVMStringArgument(LLVMAst):
 
     def __str__(self):
         return "String Argument: {c} chars".format(c=self.ccount)
+
 
 class LLVMLabel(LLVMAst):
     def __init__(self, name):
@@ -203,3 +205,19 @@ class LLVMExtension(LLVMOperation):
 
     def __str__(self):
         return "fpext {from_} to {to_}".format(from_=self.from_type, to_=self.to_type)
+
+
+class LLVMBranch(LLVMAst):
+    def __init__(self, branch_type):
+        super().__init__(branch_type)
+
+
+class LLVMNormalBranch(LLVMBranch):
+    def __init__(self):
+        super().__init__("Branch")
+
+
+class LLVMConditionalBranch(LLVMBranch):
+    def __init__(self, optype):
+        super().__init__("Conditional Branch")
+        self.optype = optype

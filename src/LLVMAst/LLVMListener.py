@@ -277,6 +277,26 @@ class LLVMListener(ParseTreeListener):
     def exitLabel(self, ctx: llvmParser.LabelContext):
         pass
 
+    # Enter a parse tree produced by llvmParser#conditional_branch.
+    def enterConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
+        self.add(LLVMConditionalBranch(optype=ctx.optype.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#conditional_branch.
+    def exitConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
+        self.simplify(3)
+        pass
+
+    # Enter a parse tree produced by llvmParser#normal_branch.
+    def enterNormal_branch(self, ctx: llvmParser.Normal_branchContext):
+        self.add(LLVMNormalBranch())
+        pass
+
+    # Exit a parse tree produced by llvmParser#normal_branch.
+    def exitNormal_branch(self, ctx: llvmParser.Normal_branchContext):
+        self.simplify(1)
+        pass
+
     # Enter a parse tree produced by llvmParser#declaration.
     def enterDeclaration(self, ctx: llvmParser.DeclarationContext):
         self.add(LLVMDeclare(ctx.fname.text, ctx.rettype.getText()))
