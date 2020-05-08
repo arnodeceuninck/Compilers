@@ -1,9 +1,8 @@
 class LLVMAst:
     _id = 0
 
-    def __init__(self, value, color="#069420"):
+    def __init__(self, value):
         self.value = value
-        self.color = color
         self.children = []
         self.parent = None
         self.id_ = None
