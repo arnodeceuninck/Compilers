@@ -177,3 +177,21 @@ class LLVMUseArgument(LLVMAst):
 
     def __str__(self):
         return "Argument {type}".format(type=self.type)
+
+class LLVMStringArgument(LLVMAst):
+    def __init__(self, ccount):
+        super().__init__("String")
+        self.ccount = ccount
+
+    def __str__(self):
+        return "String Argument: {c} chars".format(c=self.ccount)
+
+
+class LLVMExtension(LLVMOperation):
+    def __init__(self, op, from_type, to_type):
+        super().__init__(op, to_type)
+        self.from_type = from_type
+        self.to_type = to_type
+
+    def __str__(self):
+        return "fpext {from_} to {to_}".format(from_=self.from_type, to_=self.to_type)

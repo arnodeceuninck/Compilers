@@ -10,7 +10,9 @@ argument: type_;
 
 use_arg_list: (use_argument)?(',' use_argument)*;
 
-use_argument: type_ variable;
+use_argument: normal_argument | string_argument;
+string_argument: 'i8* getelementptr inbounds ([' c_count=INT_ID 'x i8], [' INT_ID 'x i8]* ' prtstr=variable ', i32 0, i32 0)';
+normal_argument: type_ variable;
 
 scope: '{' operation_sequence '}';
 
@@ -24,7 +26,9 @@ load: 'load' optype=type_ ',' type_'*' variable;
 
 assignment: variable '=' rvalue;
 
-rvalue: alocation | function_call | print_str | load | expression;
+rvalue: alocation | function_call | print_str | load | expression | extension;
+
+extension: op='fpext' type_from=type_ variable 'to' type_to=type_;
 
 expression: binary;
 binary: op=OP_ID optype=type_ value  ',' value;
@@ -41,11 +45,10 @@ return_: 'ret' rettype=type_ variable;
 
 variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot of errors if i don't add int id
 
-type_: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | '...') (ptr='*')?; // ... for printf
+type_: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | '...') (ptr='*')?; // ... for printf
 
-function_call: print_function | own_function;
-own_function: 'call' rettype=type_ '@' fname=VAR_NAME '(' use_arg_list ')';
-print_function: 'call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([' c_count=INT_ID 'x i8], [' INT_ID 'x i8]* ' prtstr=variable ', i32 0, i32 0))';
+function_call: 'call' rettype=type_ ('(' argument_list ')')? '@' fname=VAR_NAME '(' use_arg_list ')';
+//print_function: 'call i32 (i8*, ...) @printf(' (',' use_arg_list)? ')';
 
 print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_ID ', align 1';
 

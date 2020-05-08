@@ -1,5 +1,5 @@
 #include <stdio.h>
 
 int main(){
-    printf("Hello World!");
+    printf("%d%f%c", 10, 0.5, '%');
 }

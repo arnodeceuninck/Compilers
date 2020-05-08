@@ -57,13 +57,13 @@ class LLVMListener(ParseTreeListener):
 
         # Enter a parse tree produced by llvmParser#own_function.
 
-    def enterOwn_function(self, ctx: llvmParser.Own_functionContext):
+    # Enter a parse tree produced by llvmParser#function_call.
+    def enterFunction_call(self, ctx: llvmParser.Function_callContext):
         self.add(LLVMFunction(name=ctx.fname.text, rettype=ctx.rettype.getText()))
         pass
 
-        # Exit a parse tree produced by llvmParser#own_function.
-
-    def exitOwn_function(self, ctx: llvmParser.Own_functionContext):
+    # Exit a parse tree produced by llvmParser#function_call.
+    def exitFunction_call(self, ctx: llvmParser.Function_callContext):
         self.simplify(1)
         pass
 
@@ -198,15 +198,7 @@ class LLVMListener(ParseTreeListener):
     def exitType_(self, ctx: llvmParser.Type_Context):
         pass
 
-    def enterOwn_function(self, ctx: llvmParser.Own_functionContext):
-        self.add(LLVMFunctionUse(ctx.fname.text, ctx.rettype.getText()))
-        pass
 
-        # Exit a parse tree produced by llvmParser#own_function.
-
-    def exitOwn_function(self, ctx: llvmParser.Own_functionContext):
-        self.simplify(1) # argument list
-        pass
 
     # Enter a parse tree produced by llvmParser#argument_list.
     def enterArgument_list(self, ctx: llvmParser.Argument_listContext):
@@ -247,23 +239,13 @@ class LLVMListener(ParseTreeListener):
         self.simplify(children)
         pass
 
-    # Enter a parse tree produced by llvmParser#use_argument.
-    def enterUse_argument(self, ctx: llvmParser.Use_argumentContext):
+    # Enter a parse tree produced by llvmParser#normal_argument.
+    def enterNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
         self.add(LLVMUseArgument(ctx.type_().getText()))
         pass
 
-    # Exit a parse tree produced by llvmParser#use_argument.
-    def exitUse_argument(self, ctx: llvmParser.Use_argumentContext):
-        self.simplify(1)
-        pass
-
-    # Enter a parse tree produced by llvmParser#print_function.
-    def enterPrint_function(self, ctx: llvmParser.Print_functionContext):
-        self.add(LLVMPrint(ctx.c_count.text))
-        pass
-
-    # Exit a parse tree produced by llvmParser#print_function.
-    def exitPrint_function(self, ctx: llvmParser.Print_functionContext):
+    # Exit a parse tree produced by llvmParser#normal_argument.
+    def exitNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
         self.simplify(1)
         pass
 
@@ -274,6 +256,16 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#print_str.
     def exitPrint_str(self, ctx: llvmParser.Print_strContext):
+        pass
+
+    # Enter a parse tree produced by llvmParser#string_argument.
+    def enterString_argument(self, ctx: llvmParser.String_argumentContext):
+        self.add(LLVMStringArgument(ctx.c_count.text))
+        pass
+
+    # Exit a parse tree produced by llvmParser#string_argument.
+    def exitString_argument(self, ctx: llvmParser.String_argumentContext):
+        self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#declaration.
@@ -293,5 +285,15 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#load.
     def exitLoad(self, ctx: llvmParser.LoadContext):
+        self.simplify(1)
+        pass
+
+    # Enter a parse tree produced by llvmParser#extension.
+    def enterExtension(self, ctx: llvmParser.ExtensionContext):
+        self.add(LLVMExtension(ctx.op.text, ctx.type_from.getText(), ctx.type_to.getText()))
+        pass
+
+    # Exit a parse tree produced by llvmParser#extension.
+    def exitExtension(self, ctx: llvmParser.ExtensionContext):
         self.simplify(1)
         pass
