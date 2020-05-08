@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 int main(){
-    int i = 0;
-    if(i > 3){
-        i = 5;
+    float i = 0.0;
+    for(i=1.0; i > 3.0; i = i+1.0){
+        i = 5.0;
     }
 }
