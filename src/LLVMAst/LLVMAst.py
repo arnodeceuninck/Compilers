@@ -264,3 +264,22 @@ class LLVMConditionalBranch(LLVMBranch):
     def __init__(self, optype):
         super().__init__("Conditional Branch")
         self.optype = optype
+
+
+# TODO: use these classes as type in the other classes
+class LLVMType:
+    def __init__(self, type):
+        self.type = type
+
+    def __str__(self):
+        return self.type
+
+
+class LLVMArrayType(LLVMType):
+    def __init__(self, size, type):
+        super().__init__(type)
+        self.size = size
+        self.type = type
+
+    def __str__(self):
+        return "[{} x {}]".format(self.size, self.type)
