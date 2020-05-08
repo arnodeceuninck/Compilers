@@ -3,6 +3,14 @@ from src.LLVMAst.LLVMAst import LLVMOperationSequence, LLVMCode, LLVMArgumentLis
     LLVMStore
 from src.Node.AST_utils import *
 from src.symbolTable import *
+from src.Dot.dot import dot
+import sys
+from gen_llvm import llvmLexer, llvmParser
+from src.LLVMAst.LLVMAst_utils import *
+# import gen_llvm.llvmLexer
+from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
+
+from src.LLVMAst.LLVMListener import LLVMListener
 
 has_symbol_table = (LLVMCode, LLVMOperationSequence, LLVMFunction)
 
@@ -121,20 +129,23 @@ def assignment(ast):
             pass
 
 
-# Converts all variables into the right type.
-# e.g. int x = y, y will be a variable from the listener, but must be the right type
-def convertVar(ast):
-    # Returns when the ast is not a variable type
-    if not isinstance(ast, Variable):
-        return
-
-
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # Makes a tree of the symbol tables
     ast.traverse(connect_symbol_table)
-    # The two methods of below should be combined in order to make it one pass and apply error checking
-    # Create symbol table
+    # seeks the types for all the variables in the tree
     ast.traverse(assignment)  # Symbol table checks
-    # Convert Variables into their right type based on the symbol table
-    ast.traverse(convertVar)
+
+
+def compile_llvm(input_file):
+    input_stream = FileStream(input_file)
+    lexer = llvmLexer.llvmLexer(input_stream)
+    stream = CommonTokenStream(lexer)
+    parser = llvmParser.llvmParser(stream)
+    tree = parser.start_rule()
+    customListener = LLVMListener()
+    walker = ParseTreeWalker()
+    walker.walk(customListener, tree)
+    javaForLife = customListener.trees[0]
+    make_llvm_ast(javaForLife)
+    return javaForLife

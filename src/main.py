@@ -2,6 +2,7 @@ import sys
 
 from src.ErrorListener import CompilerError
 from src.Node.AST_utils import dot, compile
+from src.LLVMAst.LLVMAst_utils import compile_llvm
 from src.LLVM.LLVM import to_LLVM
 
 
@@ -15,6 +16,10 @@ def main(argv):
         # Creates comments for every assignment, for loop and if statement
         # insert_comments(communismForLife)
         to_LLVM(javaForLife, "output/compiled.ll")
+
+        # We now convert this llvm to mips by using the previously generated llvm code
+        llvmForLife = compile_llvm("output/compiled.ll")
+        dot(llvmForLife, "output/llvm_tree.dot")
         print("Done")
     else:
         print("Had to stop because of an error")
