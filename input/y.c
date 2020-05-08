@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 int main(){
-    float i = 0.0;
-    for(i=1.0; i > 3.0; i = i+1.0){
-        i = 5.0;
-    }
+    int i[2];
+    i[0] = 3;
+    int a = i[0];
 }

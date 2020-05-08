@@ -33,7 +33,7 @@ load: 'load' optype=type_ ',' type_'*' variable;
 
 assignment: variable '=' rvalue;
 
-rvalue: alocation | function_call | print_str | load | expression | extension;
+rvalue: alocation | function_call | print_str | load | expression | extension | ptr_index;
 
 extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui') type_from=type_ variable 'to' type_to=type_;
 
@@ -64,8 +64,8 @@ print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_I
 
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
-// TODO's
-// Get pointer at index: {temp} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {temp_index}\n
+ptr_index: 'getelementptr inbounds' array_type ',' array_type'*' variable ', i64 0, i64' index=INT_ID;
+array_type: '[' max_count=INT_ID 'x' element_type=type_ ']';
 
 
 OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'fsub' | 'fdiv' | 'sdiv' | 'frem' | 'srem');
