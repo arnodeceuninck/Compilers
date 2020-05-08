@@ -268,6 +268,15 @@ class LLVMListener(ParseTreeListener):
         self.simplify(1)
         pass
 
+    # Enter a parse tree produced by llvmParser#label.
+    def enterLabel(self, ctx: llvmParser.LabelContext):
+        self.add(LLVMLabel(ctx.name.text))
+        pass
+
+    # Exit a parse tree produced by llvmParser#label.
+    def exitLabel(self, ctx: llvmParser.LabelContext):
+        pass
+
     # Enter a parse tree produced by llvmParser#declaration.
     def enterDeclaration(self, ctx: llvmParser.DeclarationContext):
         self.add(LLVMDeclare(ctx.fname.text, ctx.rettype.getText()))

@@ -186,6 +186,14 @@ class LLVMStringArgument(LLVMAst):
     def __str__(self):
         return "String Argument: {c} chars".format(c=self.ccount)
 
+class LLVMLabel(LLVMAst):
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def __str__(self):
+        return "Label: {name}".format(name=self.name)
+
 
 class LLVMExtension(LLVMOperation):
     def __init__(self, op, from_type, to_type):

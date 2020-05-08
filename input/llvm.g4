@@ -18,7 +18,9 @@ scope: '{' operation_sequence '}';
 
 operation_sequence: operation+;
 
-operation: return_ | assignment | store | function_call | function;
+operation: return_ | assignment | store | function_call | function | label;
+
+label: name=VAR_NAME ':';
 
 store: 'store' optype=type_ variable ',' type_'*' variable;
 
@@ -55,7 +57,7 @@ print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_I
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
 
-OP_ID: ('add' | 'sub' | 'fadd' | 'fsub');
+OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'icmp sgt');
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 VAR_NAME: [a-zA-Z_0-9.]+;
