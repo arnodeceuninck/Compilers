@@ -171,9 +171,11 @@ def compile_llvm(input_file):
     walker.walk(customListener, tree)
     javaForLife = customListener.trees[0]
 
-    # Make the llvm ast complete
-    make_llvm_ast(javaForLife)
-    # Generate the mips code
-    mips_code(javaForLife)
-    print(mips.output)
+
+    # TODO: uncomment these (commented for Variable .v9 hasn't been declared yet and assignment has no symbol table)
+    # # Make the llvm ast complete
+    # make_llvm_ast(javaForLife)
+    # # Generate the mips code
+    # mips_code(javaForLife)
+    # print(mips.output)
     return javaForLife

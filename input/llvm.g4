@@ -27,9 +27,9 @@ branch: conditional_branch | normal_branch;
 conditional_branch: 'br' optype=type_ variable ', label' iftrue=variable ', label' iffalse=variable;
 normal_branch: 'br' 'label' variable;
 
-store: 'store' optype=type_ variable ',' type_'*' variable;
+store: 'store' optype=type_ variable ',' type_'*' variable (', align' align=INT_ID)?; // same todo as with load
 
-load: 'load' optype=type_ ',' type_'*' variable;
+load: 'load' optype=type_ ',' type_'*' variable (', align' align=INT_ID)?; // TODO: is align required in tree? probably it is for arrays
 
 assignment: variable '=' rvalue;
 
@@ -43,7 +43,7 @@ float_compare: 'fcmp' op=CMP_ID optype=type_ value  ',' value;
 int_compare: 'icmp' op=CMP_ID optype=type_ value  ',' value;
 binary: op=OP_ID optype=type_ value  ',' value;
 
-alocation: ('alloca' | global_='global') optype=type_ ('undef')? ',' 'align' align_index=INT_ID;
+alocation: ('alloca' | global_='global') optype=type_ ('undef')? ', align' align_index=INT_ID;
 
 value: variable | const_int | const_float;
 
@@ -56,7 +56,7 @@ return_: 'ret' rettype=type_ (var=variable)?; // variable is optional in case of
 variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot of errors if i don't add int id
 
 type_: normal_type | array=array_type;
-normal_type: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | '...') (ptr='*')?; // ... for printf
+normal_type: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | double='i64' | '...') (ptr='*')?; // ... for printf
 array_type: '[' max_count=INT_ID 'x' element_type=normal_type ']';
 
 function_call: 'call' rettype=type_ ('(' argument_list ')')? '@' fname=VAR_NAME '(' use_arg_list ')';
@@ -66,7 +66,7 @@ print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_I
 
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
-ptr_index: 'getelementptr inbounds' a_type=array_type ',' array_type'*' variable ', i64 0, i64' index=INT_ID;
+ptr_index: 'getelementptr inbounds' a_type=array_type ',' array_type'*' variable ', i64 0, i64' index=value;
 
 OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'fsub' | 'fdiv' | 'sdiv' | 'frem' | 'srem');
 CMP_ID: ('sgt' | 'slt' | 'sle' | 'sge' | 'ne' | 'one' | 'olt' | 'slt' | 'ogt' | 'ole' | 'sle' | 'oge' | 'sge' | 'oeq' | 'eq');

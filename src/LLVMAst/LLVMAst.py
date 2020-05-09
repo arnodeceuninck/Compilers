@@ -283,7 +283,7 @@ class LLVMExtension(LLVMOperation):
         self.to_type = LLVMType(to_type)
 
     def __str__(self):
-        return "fpext {from_} to {to_}".format(from_=self.from_type, to_=self.to_type)
+        return "{op} {from_} to {to_}".format(op=self.operation, from_=self.from_type, to_=self.to_type)
 
 
 class LLVMBranch(LLVMAst):
@@ -302,13 +302,13 @@ class LLVMConditionalBranch(LLVMBranch):
         self.optype = LLVMType(optype)
 
 class LLVMArrayIndex(LLVMAst):
-    def __init__(self, type, index):
+    def __init__(self, type):
         super().__init__("Pointer index")
         self.type = type
-        self.index = index
+        # self.index = index # in child
 
     def __str__(self):
-        return "Index {}".format(self.index)
+        return "Index {}".format(self.type)
 
 
 # TODO: use these classes as type in the other classes

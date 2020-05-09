@@ -369,11 +369,11 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#ptr_index.
     def enterPtr_index(self, ctx: llvmParser.Ptr_indexContext):
         type = LLVMArrayType(ctx.a_type.max_count.text, ctx.a_type.element_type.getText())
-        index = ctx.index.text
-        self.add(LLVMArrayIndex(type, index))
+        # index = ctx.index.text # Child will contain index
+        self.add(LLVMArrayIndex(type))
         pass
 
     # Exit a parse tree produced by llvmParser#ptr_index.
     def exitPtr_index(self, ctx: llvmParser.Ptr_indexContext):
-        self.simplify(1)
+        self.simplify(2) # Index and variable
         pass
