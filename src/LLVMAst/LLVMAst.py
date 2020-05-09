@@ -144,13 +144,14 @@ class LLVMStore(LLVMAst):
 
 
 class LLVMAllocate(LLVMAst):
-    def __init__(self, optype, align):
+    def __init__(self, optype, align, global_=False):
         super().__init__("LLVM Allocate")
         self.type = optype
         self.align = align
+        self.global_ = bool(global_)
 
     def __str__(self):
-        return "Allocate {type} {align}".format(type=self.type, align=self.align)
+        return "{allo_type} {type} {align}".format(allo_type="Global" if self.global_ else "Alocate", type=self.type, align=self.align)
 
 
 class LLVMPrintStr(LLVMAst):

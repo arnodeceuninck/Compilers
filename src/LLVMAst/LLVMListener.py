@@ -128,7 +128,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#alocation.
     def enterAlocation(self, ctx: llvmParser.AlocationContext):
-        self.add(LLVMAllocate(ctx.optype.getText(), ctx.align_index.text))
+        self.add(LLVMAllocate(ctx.optype.getText(), ctx.align_index.text, ctx.global_))
         pass
 
     # Exit a parse tree produced by llvmParser#alocation.

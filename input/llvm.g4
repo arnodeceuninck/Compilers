@@ -43,7 +43,7 @@ float_compare: 'fcmp' op=CMP_ID optype=type_ value  ',' value;
 int_compare: 'icmp' op=CMP_ID optype=type_ value  ',' value;
 binary: op=OP_ID optype=type_ value  ',' value;
 
-alocation: 'alloca' optype=type_ ',' 'align' align_index=INT_ID;
+alocation: ('alloca' | global_='global') optype=type_ ('undef')? ',' 'align' align_index=INT_ID;
 
 value: variable | const_int | const_float;
 
