@@ -51,7 +51,7 @@ class LLVMFunction(LLVMAst):
     def __init__(self, name, rettype):
         super().__init__(name)
         self.name = name
-        self.rettype = rettype
+        self.rettype = LLVMType(rettype)
         self.symbol_table = SymbolTable(self.id())
 
     def __str__(self):
@@ -62,7 +62,7 @@ class LLVMFunctionUse(LLVMAst):
     def __init__(self, name, rettype):
         super().__init__(name)
         self.name = name
-        self.rettype = rettype
+        self.rettype = LLVMType(rettype)
 
     def __str__(self):
         return "Function call: {name}".format(name=self.name)
@@ -81,7 +81,7 @@ class LLVMOperation(LLVMAst):
     def __init__(self, operation, optype):
         super().__init__(operation)
         self.operation = operation
-        self.optype = optype
+        self.optype = LLVMType(optype)
 
 
 class LLVMBinaryOperation(LLVMOperation):
@@ -140,13 +140,13 @@ class LLVMConstFloat(LLVMConst):
 class LLVMStore(LLVMAst):
     def __init__(self, optype):
         super().__init__("LLVM Store")
-        self.type = optype
+        self.type = LLVMType(optype)
 
 
 class LLVMAllocate(LLVMAst):
     def __init__(self, optype, align, global_=False):
         super().__init__("LLVM Allocate")
-        self.type = optype
+        self.type = optype # Should already be a llvm type
         self.align = align
         self.global_ = bool(global_)
 
@@ -174,7 +174,7 @@ class LLVMDeclare(LLVMAst):
     def __init__(self, fname, rettype):
         super().__init__(fname)
         self.name = fname
-        self.rettype = rettype
+        self.rettype = LLVMType(rettype)
 
     def __str__(self):
         return "Declare {rettype} {name}".format(rettype=self.rettype, name=self.name)
@@ -183,7 +183,7 @@ class LLVMDeclare(LLVMAst):
 class LLVMLoad(LLVMAst):
     def __init__(self, type):
         super().__init__("LLVM Load")
-        self.type = type
+        self.type = LLVMType(type)
 
     def __str__(self):
         return "load {type}".format(type=self.type)
@@ -192,7 +192,7 @@ class LLVMLoad(LLVMAst):
 class LLVMReturn(LLVMAst):
     def __init__(self, type):
         super().__init__("LLVM return")
-        self.type = type
+        self.type = LLVMType(type)
 
     def __str__(self):
         return "return {type}".format(type=self.type)
@@ -206,7 +206,7 @@ class LLVMArgumentList(LLVMAst):
 class LLVMArgument(LLVMAst):
     def __init__(self, type):
         super().__init__(type)
-        self.type = type
+        self.type = LLVMType(type)
 
 
 class LLVMUseArgumentList(LLVMAst):
@@ -217,7 +217,7 @@ class LLVMUseArgumentList(LLVMAst):
 class LLVMUseArgument(LLVMAst):
     def __init__(self, type):
         super().__init__(type)
-        self.type = type
+        self.type = LLVMType(type)
 
     def __str__(self):
         return "Argument {type}".format(type=self.type)
@@ -244,8 +244,8 @@ class LLVMLabel(LLVMAst):
 class LLVMExtension(LLVMOperation):
     def __init__(self, op, from_type, to_type):
         super().__init__(op, to_type)
-        self.from_type = from_type
-        self.to_type = to_type
+        self.from_type = LLVMType(from_type)
+        self.to_type = LLVMType(to_type)
 
     def __str__(self):
         return "fpext {from_} to {to_}".format(from_=self.from_type, to_=self.to_type)
@@ -264,7 +264,16 @@ class LLVMNormalBranch(LLVMBranch):
 class LLVMConditionalBranch(LLVMBranch):
     def __init__(self, optype):
         super().__init__("Conditional Branch")
-        self.optype = optype
+        self.optype = LLVMType(optype)
+
+class LLVMArrayIndex(LLVMAst):
+    def __init__(self, type, index):
+        super().__init__("Pointer index")
+        self.type = type
+        self.index = index
+
+    def __str__(self):
+        return "Index {}".format(self.index)
 
 
 # TODO: use these classes as type in the other classes
@@ -280,7 +289,7 @@ class LLVMArrayType(LLVMType):
     def __init__(self, size, type):
         super().__init__(type)
         self.size = size
-        self.type = type
+        self.type = LLVMType(type)
 
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)

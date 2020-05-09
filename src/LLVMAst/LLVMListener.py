@@ -128,7 +128,11 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#alocation.
     def enterAlocation(self, ctx: llvmParser.AlocationContext):
-        self.add(LLVMAllocate(ctx.optype.getText(), ctx.align_index.text, ctx.global_))
+        if ctx.optype.array:
+            type = LLVMArrayType(ctx.optype.array.max_count.text, ctx.optype.array.element_type.getText())
+        else:
+            type = LLVMType(ctx.optype.getText())
+        self.add(LLVMAllocate(type, ctx.align_index.text, ctx.global_))
         pass
 
     # Exit a parse tree produced by llvmParser#alocation.
@@ -199,7 +203,21 @@ class LLVMListener(ParseTreeListener):
     def exitType_(self, ctx: llvmParser.Type_Context):
         pass
 
+    # Enter a parse tree produced by llvmParser#normal_type.
+    def enterNormal_type(self, ctx: llvmParser.Normal_typeContext):
+        pass
 
+    # Exit a parse tree produced by llvmParser#normal_type.
+    def exitNormal_type(self, ctx: llvmParser.Normal_typeContext):
+        pass
+
+    # Enter a parse tree produced by llvmParser#array_type.
+    def enterArray_type(self, ctx: llvmParser.Array_typeContext):
+        pass
+
+    # Exit a parse tree produced by llvmParser#array_type.
+    def exitArray_type(self, ctx: llvmParser.Array_typeContext):
+        pass
 
     # Enter a parse tree produced by llvmParser#argument_list.
     def enterArgument_list(self, ctx: llvmParser.Argument_listContext):
@@ -346,4 +364,16 @@ class LLVMListener(ParseTreeListener):
     # Exit a parse tree produced by llvmParser#int_compare.
     def exitInt_compare(self, ctx: llvmParser.Int_compareContext):
         self.simplify(2)
+        pass
+
+    # Enter a parse tree produced by llvmParser#ptr_index.
+    def enterPtr_index(self, ctx: llvmParser.Ptr_indexContext):
+        type = LLVMArrayType(ctx.a_type.max_count.text, ctx.a_type.element_type.getText())
+        index = ctx.index.text
+        self.add(LLVMArrayIndex(type, index))
+        pass
+
+    # Exit a parse tree produced by llvmParser#ptr_index.
+    def exitPtr_index(self, ctx: llvmParser.Ptr_indexContext):
+        self.simplify(1)
         pass
