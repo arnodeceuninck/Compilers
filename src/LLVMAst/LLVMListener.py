@@ -13,6 +13,7 @@ def has_children(ctx: ParserRuleContext):
 class LLVMListener(ParseTreeListener):
     def __init__(self):
         self.trees = []  # A stack containing all subtrees
+        self.type_ctr = 0 # Increases when expecting a type, must be uses when a type is twice, e.g. in store, we only want to add one type to the tree
 
     # Add an AST with given node to the stack
     def add(self, ast):
@@ -47,11 +48,20 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#function.
     def enterFunction(self, ctx: llvmParser.FunctionContext):
-        self.add(LLVMFunction(name=ctx.name.text, rettype=ctx.rettype.getText()))
+        self.add(LLVMFunction(name=ctx.name.text))
+        self.type_ctr += 1 # Expecting return type
         pass
 
     # Exit a parse tree produced by llvmParser#function.
     def exitFunction(self, ctx: llvmParser.FunctionContext):
+        opseq = self.trees.pop()
+        args = self.trees.pop()
+        type = self.trees.pop()
+        function = self.trees.pop()
+        function.rettype = type
+        self.add(function)
+        self.add(args)
+        self.add(opseq)
         self.simplify(2)
         pass
 
@@ -59,11 +69,18 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#function_call.
     def enterFunction_call(self, ctx: llvmParser.Function_callContext):
-        self.add(LLVMFunction(name=ctx.fname.text, rettype=ctx.rettype.getText()))
+        self.add(LLVMFunctionUse(name=ctx.fname.text))
+        self.type_ctr += 1 # Expecting return type
         pass
 
     # Exit a parse tree produced by llvmParser#function_call.
     def exitFunction_call(self, ctx: llvmParser.Function_callContext):
+        args = self.trees.pop()
+        type = self.trees.pop()
+        funccall = self.trees.pop()
+        funccall.rettype = type
+        self.add(funccall)
+        self.add(args)
         self.simplify(1)
         pass
 
@@ -100,11 +117,20 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#store.
     def enterStore(self, ctx: llvmParser.StoreContext):
-        self.add(LLVMStore(ctx.optype.getText()))
+        self.add(LLVMStore())
+        self.type_ctr += 1 # Expecting store type
         pass
 
     # Exit a parse tree produced by llvmParser#store.
     def exitStore(self, ctx: llvmParser.StoreContext):
+        v1 = self.trees.pop()
+        v2 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        self.add(v2)
+        self.add(v1)
         self.simplify(2)
         pass
 
@@ -128,24 +154,34 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#alocation.
     def enterAlocation(self, ctx: llvmParser.AlocationContext):
-        if ctx.optype.array:
-            type = LLVMArrayType(ctx.optype.array.max_count.text, ctx.optype.array.element_type.getText())
-        else:
-            type = LLVMType(ctx.optype.getText())
-        self.add(LLVMAllocate(type, ctx.align_index.text, ctx.global_))
+        self.add(LLVMAllocate(ctx.align_index.text, ctx.global_))
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#alocation.
     def exitAlocation(self, ctx: llvmParser.AlocationContext):
+        type = self.trees.pop()
+        allocation = self.trees.pop()
+        allocation.type = type
+        self.add(allocation)
         pass
 
     # Enter a parse tree produced by llvmParser#binary.
     def enterBinary(self, ctx: llvmParser.BinaryContext):
-        self.add(LLVMBinaryOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
+        self.add(LLVMBinaryOperation(operation=ctx.op.text))
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#binary.
     def exitBinary(self, ctx: llvmParser.BinaryContext):
+        v1 = self.trees.pop()
+        v2 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.optype = type
+        self.add(op)
+        self.add(v2)
+        self.add(v1)
         self.simplify(2)
         pass
 
@@ -177,12 +213,21 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#return_.
     def enterReturn_(self, ctx: llvmParser.Return_Context):
-        self.add(LLVMReturn(ctx.rettype.getText()))
+        self.add(LLVMReturn())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#return_.
     def exitReturn_(self, ctx: llvmParser.Return_Context):
+        v1 = None
         if ctx.var:
+            v1 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        if ctx.var:
+            self.add(v1)
             self.simplify(1)
         pass
 
@@ -205,6 +250,9 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#normal_type.
     def enterNormal_type(self, ctx: llvmParser.Normal_typeContext):
+        if self.type_ctr:
+            self.add(LLVMType(ctx.getText()))
+            self.type_ctr -= 1
         pass
 
     # Exit a parse tree produced by llvmParser#normal_type.
@@ -213,10 +261,19 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#array_type.
     def enterArray_type(self, ctx: llvmParser.Array_typeContext):
+        if self.type_ctr:
+            self.add(LLVMArrayType(ctx.max_count.text))
+            self.type_ctr += 1
         pass
 
     # Exit a parse tree produced by llvmParser#array_type.
     def exitArray_type(self, ctx: llvmParser.Array_typeContext):
+        if self.type_ctr:
+            type = self.trees.pop()
+            array = self.trees.pop()
+            array.type = type
+            self.add(array)
+            self.type_ctr -= 1
         pass
 
     # Enter a parse tree produced by llvmParser#argument_list.
@@ -236,11 +293,16 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#argument.
     def enterArgument(self, ctx: llvmParser.ArgumentContext):
-        self.add(LLVMArgument(ctx.getText()))
+        self.add(LLVMArgument())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#argument.
     def exitArgument(self, ctx: llvmParser.ArgumentContext):
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
         pass
 
     # Enter a parse tree produced by llvmParser#use_arg_list.
@@ -260,11 +322,18 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#normal_argument.
     def enterNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
-        self.add(LLVMUseArgument(ctx.type_().getText()))
+        self.add(LLVMUseArgument())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#normal_argument.
     def exitNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
+        v1 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        self.add(v1)
         self.simplify(1)
         pass
 
@@ -298,11 +367,22 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#conditional_branch.
     def enterConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
-        self.add(LLVMConditionalBranch(optype=ctx.optype.getText()))
+        self.add(LLVMConditionalBranch())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#conditional_branch.
     def exitConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
+        v1 = self.trees.pop()
+        v2 = self.trees.pop()
+        v3 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.optype = type
+        self.add(op)
+        self.add(v3)
+        self.add(v2)
+        self.add(v1)
         self.simplify(3)
         pass
 
@@ -318,62 +398,109 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#declaration.
     def enterDeclaration(self, ctx: llvmParser.DeclarationContext):
-        self.add(LLVMDeclare(ctx.fname.text, ctx.rettype.getText()))
+        self.add(LLVMDeclare(ctx.fname.text))
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#declaration.
     def exitDeclaration(self, ctx: llvmParser.DeclarationContext):
+        v1 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        self.add(v1)
         self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#load.
     def enterLoad(self, ctx: llvmParser.LoadContext):
-        self.add(LLVMLoad(ctx.optype.getText()))
+        self.add(LLVMLoad())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#load.
     def exitLoad(self, ctx: llvmParser.LoadContext):
+        v1 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        self.add(v1)
         self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#extension.
     def enterExtension(self, ctx: llvmParser.ExtensionContext):
-        self.add(LLVMExtension(ctx.op.text, ctx.type_from.getText(), ctx.type_to.getText()))
+        self.add(LLVMExtension(ctx.op.text))
+        self.type_ctr += 2 # Expecting type from and to
         pass
 
     # Exit a parse tree produced by llvmParser#extension.
     def exitExtension(self, ctx: llvmParser.ExtensionContext):
+        type_to = self.trees.pop()
+        v2 = self.trees.pop()
+        type_from = self.trees.pop()
+        op = self.trees.pop()
+        op.type_from = type_from
+        op.type_to = type_to
+        self.add(op)
+        self.add(v2)
         self.simplify(1)
+        pass
+
+    # Enter a parse tree produced by llvmParser#compare.
+    def enterCompare(self, ctx: llvmParser.CompareContext):
+        self.type_ctr += 1 # Expecting type
+        pass
+
+    # Exit a parse tree produced by llvmParser#compare.
+    def exitCompare(self, ctx: llvmParser.CompareContext):
+        v1 = self.trees.pop()
+        v2 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.optype = type
+        self.add(op)
+        self.add(v2)
+        self.add(v1)
+        self.simplify(2)
         pass
 
     # Enter a parse tree produced by llvmParser#float_compare.
     def enterFloat_compare(self, ctx: llvmParser.Float_compareContext):
-        self.add(LLVMFloatCompareOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
+        self.add(LLVMFloatCompareOperation(operation=ctx.op.text))
         pass
 
     # Exit a parse tree produced by llvmParser#float_compare.
     def exitFloat_compare(self, ctx: llvmParser.Float_compareContext):
-        self.simplify(2)
         pass
 
     # Enter a parse tree produced by llvmParser#int_compare.
     def enterInt_compare(self, ctx: llvmParser.Int_compareContext):
-        self.add(LLVMIntCompareOperation(operation=ctx.op.text, optype=ctx.optype.getText()))
+        self.add(LLVMIntCompareOperation(operation=ctx.op.text))
         pass
 
     # Exit a parse tree produced by llvmParser#int_compare.
     def exitInt_compare(self, ctx: llvmParser.Int_compareContext):
-        self.simplify(2)
         pass
 
     # Enter a parse tree produced by llvmParser#ptr_index.
     def enterPtr_index(self, ctx: llvmParser.Ptr_indexContext):
-        type = LLVMArrayType(ctx.a_type.max_count.text, ctx.a_type.element_type.getText())
         # index = ctx.index.text # Child will contain index
-        self.add(LLVMArrayIndex(type))
+        self.add(LLVMArrayIndex())
+        self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#ptr_index.
     def exitPtr_index(self, ctx: llvmParser.Ptr_indexContext):
-        self.simplify(2) # Index and variable
+        v1 = self.trees.pop()
+        v2 = self.trees.pop()
+        type = self.trees.pop()
+        op = self.trees.pop()
+        op.type = type
+        self.add(op)
+        self.add(v2)
+        self.add(v1)
+        self.simplify(2)  # Index and variable
         pass
