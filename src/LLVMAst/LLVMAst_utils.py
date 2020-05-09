@@ -11,6 +11,7 @@ from src.LLVMAst.LLVMAst_utils import *
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 
 from src.LLVMAst.LLVMListener import LLVMListener
+from src.MIPS.MIPS import mips_code, mips
 
 has_symbol_table = (LLVMCode, LLVMOperationSequence, LLVMFunction)
 
@@ -136,6 +137,9 @@ def make_llvm_ast(ast):
     # seeks the types for all the variables in the tree
     ast.traverse(assignment)  # Symbol table checks
 
+    # merge all the symbol tables into 1 big dict this we can use for assigning variables
+    ast.symbol_table.merge()
+
 
 def compile_llvm(input_file):
     input_stream = FileStream(input_file)
@@ -147,5 +151,11 @@ def compile_llvm(input_file):
     walker = ParseTreeWalker()
     walker.walk(customListener, tree)
     javaForLife = customListener.trees[0]
+
+    # Make the llvm ast complete
     make_llvm_ast(javaForLife)
+    # Generate the mips code
+    mips_code(javaForLife)
+
+    print(mips.output)
     return javaForLife

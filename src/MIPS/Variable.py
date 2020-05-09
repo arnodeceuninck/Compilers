@@ -14,19 +14,19 @@ def mips_type_variable(ast, ignore_array=False):
 
 
 def mips_type_v_char(ast, ignore_array=False):
-    pass
+    return ""
 
 
 def mips_type_v_float(ast, ignore_array=False):
-    pass
+    return ""
 
 
 def mips_type_v_int(ast, ignore_array=False):
-    pass
+    return ""
 
 
 def mips_default_variable(ast):
-    pass
+    return ""
 
 
 from src.MIPS.MIPS import mips, mips_code, variable, get_mips_type

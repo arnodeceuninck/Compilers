@@ -10,6 +10,7 @@ class SymbolTableElement:
 
 class SymbolTable:
     dot_output = ""
+    total_table = dict()
 
     def __init__(self, id):
         self.elements = dict()
@@ -36,6 +37,21 @@ class SymbolTable:
     # Overloads the [] operator
     def __getitem__(self, location) -> SymbolTableElement:
         return self.__get_symbol_table(location).elements[location]
+
+    # Gets the length of the symbol table in mips
+    def __len__(self):
+        total_len = 0
+        for element in self.elements:
+            # TODO let this calculation support arrays :)
+            total_len += 4
+        return total_len
+
+    # This function will get the index of the locations position in the global table
+    def get_index_offset(self, location):
+        for i, v in enumerate(SymbolTable.total_table):
+            if v == location:
+                # TODO let this calculation support arrays :)
+                return 4 * i
 
     def get_symbol_table(self, location):
         return self.__get_symbol_table(location)
@@ -158,3 +174,15 @@ class SymbolTable:
         # Finish the cluster subgraph
         SymbolTable.dot_output += "\t\tlabel = \"Symbol Table\";\n" \
                                   "\t}\n"
+
+    # This will merge all the variables into a single dict
+    def merge(self):
+        # This expression will merge the current dict with the global one
+        SymbolTable.total_table = {**self.elements, **SymbolTable.total_table}
+        # Now merge all its children
+        for child in self.children:
+            child.merge()
+
+    def sum_up(self):
+        for i, v in enumerate(self.elements):
+            print(i)

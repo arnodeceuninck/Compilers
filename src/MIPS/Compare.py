@@ -6,11 +6,11 @@ def mips_compare(ast):
 
 
 def mips_default_compare(ast):
-    pass
+    return ""
 
 
 def mips_logic_and(ast):
-    pass
+    return ""
 
 
 from src.MIPS.MIPS import mips_code, mips, variable, get_mips_type

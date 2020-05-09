@@ -1,10 +1,4 @@
-int a;
-int b;
-
-void f(){
-}
-
 int main(){
-    f();
-    int c;
+    float x = 1.0;
+   	return 1;
 }

@@ -57,7 +57,7 @@ def mips_type_c_array(ast):
 
 
 def mips_default_constant(ast):
-    pass
+    return ""
 
 
 def mips_c_array(ast):
@@ -65,11 +65,11 @@ def mips_c_array(ast):
 
 
 def mips_c_char(ast):
-    pass
+    return ""
 
 
 def mips_c_string(ast):
-    pass
+    return ""
 
 
 from src.MIPS.MIPS import mips_code, mips, variable, get_mips_type
