@@ -1,12 +1,42 @@
 def mips_constant(ast):
-    if isinstance(ast, CArray):
-        mips_c_array(ast)
-    elif isinstance(ast, CChar):
-        mips_c_char(ast)
-    elif isinstance(ast, CString):
-        mips_c_string(ast)
+    if isinstance(ast, LLVMConstFloat):
+        mips_c_float(ast)
+    elif isinstance(ast, LLVMConstInt):
+        mips_c_int(ast)
     else:
         mips_default_constant(ast)
+
+
+def mips_c_float(ast):
+    # If the parent is an assignment then we need to just return since we store it afterwards into that location
+    if isinstance(ast.parent, LLVMAssignment):
+        return
+
+    # We need to check which side of the equation we are so we can load the variable into the correct register
+    # Check if we are the left side of the parent
+    if ast.parent[0] == ast:
+        code = "lw $t0, {index_offset}($gp)\n"
+    else:
+        code = "lw $t1, {index_offset}($gp)\n"
+
+    # Add the correct index offset to the statement
+    code.format(index_offset=ast.get_index_offset())
+
+    # Add the newly generated code to the mips code
+    mips.output += code
+
+
+def mips_c_int(ast):
+    # We need to check which side of the operation we are so we can load the variable into the correct register
+
+    # Check if we are the left side of the parent
+    if ast.parent[0] == ast:
+        code = "li $t0, {load_value}\n".format(load_value=str(ast.value))
+    else:
+        code = "li $t1, {load_value}\n".format(load_value=str(ast.value))
+
+    # Add the newly generated code to the mips code
+    mips.output += code
 
 
 def mips_type_constant(ast):
@@ -73,3 +103,4 @@ def mips_c_string(ast):
 
 
 from src.MIPS.MIPS import mips_code, mips, variable, get_mips_type
+from src.LLVMAst.LLVMAst import LLVMConst, LLVMConstFloat, LLVMConstInt

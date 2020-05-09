@@ -7,76 +7,81 @@ class mips:
 
 
 def mips_code(mips_ast):
-    # mips.output += mips_ast.comments()
+    # generate the global mips along with the variables using it, like the constant floats
+    if not mips_ast.parent:
+        global_mips(mips_ast)
+        mips.output += ".text\n"
 
     if isinstance(mips_ast, (LLVMOperationSequence, LLVMCode)):
         mips_operation_sequence(mips_ast)
-    # elif isinstance(mips_ast, LLVMOperator):
-    #     mips_operator(mips_ast)
+    if isinstance(mips_ast, LLVMAssignment):
+        mips_assign(mips_ast)
+    elif isinstance(mips_ast, LLVMOperation):
+        mips_operator(mips_ast)
     elif isinstance(mips_ast, LLVMFunction):
         mips_function(mips_ast)
     elif isinstance(mips_ast, LLVMArgumentList):
         mips_arguments(mips_ast)
-    # elif isinstance(mips_ast, LLVMConstant):
-    #     mips_constant(mips_ast)
+    elif isinstance(mips_ast, LLVMConst):
+        mips_constant(mips_ast)
     # elif isinstance(mips_ast, LLVMReservedType):
     #     mips_reserved_type(mips_ast)
-    # elif isinstance(mips_ast, Variable):
-    #     mips_variable(mips_ast)
+    elif isinstance(mips_ast, LLVMVariable):
+        mips_variable(mips_ast)
     else:
         return ""
-        raise Exception("Unknown AST")
 
 
-def get_mips_type(ast, ignore_array=False):
-    if isinstance(ast, Operator):
-        return mips_type_operate(ast)
-    elif isinstance(ast, Function):
-        return mips_type_function(ast)
-    elif isinstance(ast, Constant):
-        return mips_type_constant(ast)
-    elif isinstance(ast, Variable):
-        return mips_type_variable(ast, ignore_array)
+def get_mips_type(mips_ast, ignore_array=False):
+    if isinstance(mips_ast, Operator):
+        return mips_type_operate(mips_ast)
+    elif isinstance(mips_ast, Function):
+        return mips_type_function(mips_ast)
+    elif isinstance(mips_ast, Constant):
+        return mips_type_constant(mips_ast)
+    elif isinstance(mips_ast, Variable):
+        return mips_type_variable(mips_ast, ignore_array)
     raise Exception("I didn't think the code would get this far")
 
 
-def mips_type_function(ast):
-    if ast.return_type == "int":
+def mips_type_function(mips_ast):
+    if mips_ast.return_type == "int":
         return 'i32'
-    elif ast.return_type == "bool":
+    elif mips_ast.return_type == "bool":
         return 'i1'
-    elif ast.return_type == "float":
+    elif mips_ast.return_type == "float":
         return 'float'
-    elif ast.return_type == "char":
+    elif mips_ast.return_type == "char":
         return 'i8'
-    elif ast.return_type == "void":
+    elif mips_ast.return_type == "void":
         return 'void'
 
 
-def mips_operator(ast):
-    if isinstance(ast, LLVMBinary):
-        mips_binary(ast)
-    else:
-        return ""
-        raise Exception("Unknown AST")
+def mips_operator(mips_ast):
+    mips_binary(mips_ast)
 
 
-def mips_binary(ast):
-    if isinstance(ast, Assign):
-        mips_assign(ast)
-    elif isinstance(ast, Compare):
-        mips_compare(ast)
-    elif isinstance(ast, Operate):
-        mips_operate(ast)
+def mips_binary(mips_ast):
+    # TODO support float
+    if isinstance(mips_ast, LLVMBinaryOperation):
+        if mips_ast.operation == "add":
+            mips_b_add(mips_ast)
+    elif isinstance(mips_ast, LLVMCompareOperation):
+        mips_compare(mips_ast)
     else:
         raise Exception("Unknown AST")
 
 
-def mips_include(ast):
+def mips_b_add(mips_ast):
+    # TODO support float
+    mips.output += "\tadd $s0, $t0, $t1\n"
+
+
+def mips_include(mips_ast):
     return ""
 
 
-def mips_arguments(ast):
+def mips_arguments(mips_ast):
     return ""
 
 
@@ -96,7 +101,7 @@ def build_start_stackframe(symbol_table: SymbolTable):
     frame_offset = -4
     # We know that the first thing we need to store is the return address
     # So we store it first on the stack
-    stackframe_string += "\tsw	$ra, -4($fp)\n"
+    stackframe_string += "\tsw $ra, -4($fp)\n"
 
     # We need to iterate over all the elements of the current symbol table in order to save all their values
     for i, v in enumerate(symbol_table.elements):
@@ -108,6 +113,8 @@ def build_start_stackframe(symbol_table: SymbolTable):
         stackframe_string += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
         # store this variable into the stack
         stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+
+    stackframe_string += "\n"
     return stackframe_string
 
 
@@ -131,7 +138,7 @@ def build_end_stackframe(symbol_table: SymbolTable):
         frame_offset += 4
 
     # We retrieve the return address from the stack
-    stackframe_string += "\tsw	$ra, -4($fp)\n"
+    stackframe_string += "\tsw $ra, -4($fp)\n"
     # Then we change the stackpointers location to the one before the previous function
     stackframe_string += "\tmove $fp, $sp\n"
     # We need to load the old framepointer on to the stack
@@ -141,61 +148,59 @@ def build_end_stackframe(symbol_table: SymbolTable):
     return stackframe_string
 
 
-def mips_function(ast):
+def mips_function(mips_ast):
     # Create the label for the current function
-    mips.output += ast.value + ":"
+    mips.output += mips_ast.value + ":\n"
 
     # We need to construct the stack first in order to maintain the variables in the used variables in the callee
-    mips.output += build_start_stackframe(ast.symbol_table.children[0])
+    mips.output += build_start_stackframe(mips_ast.symbol_table.children[0])
 
     # We need to generate mips code for all the corresponding children
-    for child in ast.children:
+    for child in mips_ast.children:
         mips_code(child)
 
     # We need to deconstruct the stackframe
-    mips.output += build_end_stackframe(ast.symbol_table.children[0])
+    mips.output += build_end_stackframe(mips_ast.symbol_table.children[0])
 
 
-def global_mips(ast):
-    mips_output = mips.output
-    mips.output = ".data"
-
-    # The llvm code is stored in the llvm code variable of the ast, we need to remove it from
-    # there and store it into another return variable for this function
-    ret_val = mips.output
-    mips.output = mips_output
-    return ret_val
+def global_mips(mips_ast):
+    mips.output = ".data\n"
 
 
-def mips_assign(ast):
-    return ""
+def mips_assign(mips_ast):
+    # Generate the mips code for the right side
+    mips_code(mips_ast[1])
+
+    # TODO support floats
+    # Store this value into the variable
+    mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
 
 
-def mips_operation_sequence(ast):
+def mips_operation_sequence(mips_ast):
     # ATTENTION we do not need to generate llvm code for children that are defined in the global scope as variables
-    # mips.output += ast.comments()
-    for child in ast.children:
+    # mips.output += mips_ast.comments()
+    for child in mips_ast.children:
         # If there is no parent, we are the root statement sequence and the child is not a function
         # we do can not generate mips_code
-        if not ast.parent and isinstance(child, LLVMVariable):
+        if not mips_ast.parent and isinstance(child, LLVMVariable):
             continue
         mips_code(child)
     mips.output += '\n'
 
 
 # This piece of code will create a printf statement if it is necessary
-def get_mips_print(ast):
+def get_mips_print(mips_ast):
     return ""
 
 
 # This piece of code will create the scan of the code
-def get_mips_scan(ast):
+def get_mips_scan(mips_ast):
     return ""
 
 
 # Get the variable for the node (and load it from memory if required)
 # Store must be true when you want to store into the variable
-def variable(ast, store: bool = False, indexed: bool = False, index=0):
+def variable(mips_ast, store: bool = False, indexed: bool = False, index=0):
     return ""
 
 
@@ -205,23 +210,23 @@ def goto(label: str):
 
 
 # Variable should be mips_formated, e.g. %1
-def mips_load(ast, var: str):
+def mips_load(mips_ast, var: str):
     return ""
 
 
-def index_load(ast, result, index):
+def index_load(mips_ast, result, index):
     return ""
 
 
-def mips_argument(ast):
+def mips_argument(mips_ast):
     return ""
 
 
-# Write the llvm version of the ast to the filename
-def to_mips(ast, filename):
+# Write the llvm version of the mips_ast to the filename
+def to_mips(mips_ast, filename):
     mips.output = ""
 
-    mips_code(ast)
+    mips_code(mips_ast)
 
     # Write output to the outputfile
     outputFile = open(filename, "w")
@@ -230,3 +235,7 @@ def to_mips(ast, filename):
 
 
 from src.LLVMAst.LLVMAst import *
+from src.MIPS.Compare import *
+from src.MIPS.Constant import *
+from src.MIPS.Operate import *
+from src.MIPS.Variable import *

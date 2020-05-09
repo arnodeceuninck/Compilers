@@ -39,6 +39,41 @@ class LLVMAst:
         for child in self.children:
             child.traverse(function)
 
+    # This function will get the index of the variable position in the global table
+    # NOTE: this will only work in variable
+    def get_index_offset(self):
+        # Seek the top-most symbol table
+        _parent = self
+        while _parent.parent:
+            _parent = _parent.parent
+
+        # Store the symbol table
+        symbol_table = _parent.symbol_table
+        for i, v in enumerate(symbol_table.total_table):
+            if v == self.value:
+                # TODO let this calculation support arrays :)
+                return 4 * i
+
+    # This method tries to find the position of a node with respect to the first node with a symbol table in it
+    # The parent nr is a way of saying which parent we need to use, first we seek the parent then we go digging
+    def get_position(self, parent_nr=0):
+        # This will go the the max of parent_nr for seeking a parent
+        parent = self.parent
+        child = self
+        while parent_nr:
+            child = parent
+            parent = parent.parent
+            parent_nr -= 1
+
+        position = 0
+        # Iterate over all the children of the operation sequence and check if the ast node is met
+        # If it is met, then this will be the final position at which the variable is declared
+        for _child in parent:
+            if _child == child:
+                break
+            position += 1
+        return position
+
 
 # The root
 class LLVMCode(LLVMAst):

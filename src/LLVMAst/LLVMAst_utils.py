@@ -175,6 +175,5 @@ def compile_llvm(input_file):
     make_llvm_ast(javaForLife)
     # Generate the mips code
     mips_code(javaForLife)
-
     print(mips.output)
     return javaForLife
