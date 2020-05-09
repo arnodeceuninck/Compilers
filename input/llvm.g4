@@ -51,7 +51,7 @@ const_int: INT_ID;
 
 const_float: FLOAT_ID;
 
-return_: 'ret' rettype=type_ variable;
+return_: 'ret' rettype=type_ (var=variable)?; // variable is optional in case of void
 
 variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot of errors if i don't add int id
 

@@ -178,7 +178,8 @@ class LLVMListener(ParseTreeListener):
 
     # Exit a parse tree produced by llvmParser#return_.
     def exitReturn_(self, ctx: llvmParser.Return_Context):
-        self.simplify(1)
+        if ctx.var:
+            self.simplify(1)
         pass
 
     # Enter a parse tree produced by llvmParser#variable.
