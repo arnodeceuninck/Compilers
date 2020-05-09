@@ -57,6 +57,7 @@ def mips_operator(ast):
     if isinstance(ast, LLVMBinary):
         mips_binary(ast)
     else:
+        return ""
         raise Exception("Unknown AST")
 
 
@@ -89,7 +90,7 @@ def build_start_stackframe(symbol_table: SymbolTable):
     # we get this by getting the amount of elements in the symbol table
     # + 4 because we have the return address to take into account
     # another + 4 because we need to take the fp into account that is saved
-    stackframe_size = len(symbol_table) + 4 + 4
+    stackframe_size = symbol_table.get_len() + 4 + 4
     # We decide form the line for reserving the amount of space on the stack
     stackframe_string += "\tsubu $sp, $sp, {reserve_amount}\n".format(reserve_amount=str(stackframe_size))
     frame_offset = -4
@@ -114,7 +115,7 @@ def build_end_stackframe(symbol_table: SymbolTable):
     stackframe_string = ""
 
     # The frame offset will be the size of the stored variable amount we need to start 4 offset lower
-    frame_offset = -len(symbol_table) - 4
+    frame_offset = -symbol_table.get_len() - 4
 
     # We need to iterate over all the elements of the current symbol table in order to save all their values
     for i, v in enumerate(symbol_table.elements):

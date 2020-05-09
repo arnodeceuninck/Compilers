@@ -130,12 +130,31 @@ def assignment(ast):
             pass
 
 
+def remove_allocate(ast):
+    # If the current variable is not an allocate then do proceed without doing anything
+    if not isinstance(ast, LLVMAllocate):
+        return
+
+    # Store the operation sequence in order to use it to remove the allocate out of the tree
+    operation_sequence = ast.parent.parent
+    # Get the position of the allocate
+    index = ast.get_position(2)
+    # Delete this child
+    del operation_sequence.children[index]
+
+    # Remove the link with the operation sequence by setting the parent node to None
+    ast.parent.parent = None
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # Makes a tree of the symbol tables
     ast.traverse(connect_symbol_table)
     # seeks the types for all the variables in the tree
-    ast.traverse(assignment)  # Symbol table checks
+    ast.traverse(assignment)
+
+    # We need to remove all the allocate expressions, cause they serve no purpose
+    ast.traverse(remove_allocate)
 
     # merge all the symbol tables into 1 big dict this we can use for assigning variables
     ast.symbol_table.merge()

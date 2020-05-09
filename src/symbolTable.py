@@ -38,13 +38,9 @@ class SymbolTable:
     def __getitem__(self, location) -> SymbolTableElement:
         return self.__get_symbol_table(location).elements[location]
 
-    # Gets the length of the symbol table in mips
-    def __len__(self):
-        total_len = 0
-        for element in self.elements:
-            # TODO let this calculation support arrays :)
-            total_len += 4
-        return total_len
+    # get length of the symbol table for mips use
+    def get_len(self):
+        return len(self.elements) * 4
 
     # This function will get the index of the locations position in the global table
     def get_index_offset(self, location):
