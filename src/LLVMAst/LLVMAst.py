@@ -315,8 +315,9 @@ class LLVMArrayIndex(LLVMAst):
 
 
 # TODO: use these classes as type in the other classes
-class LLVMType:
+class LLVMType(LLVMAst):
     def __init__(self, type):
+        super().__init__(type)
         self.type = type
 
     def __str__(self):

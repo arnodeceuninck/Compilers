@@ -29,6 +29,8 @@ def mips_code(mips_ast):
         mips_return(mips_ast)
     elif isinstance(mips_ast, LLVMVariable):
         mips_variable(mips_ast)
+    elif isinstance(mips_ast, LLVMStore):
+        mips_store(mips_ast)
     else:
         return ""
 
@@ -56,6 +58,17 @@ def mips_type_function(mips_ast):
         return 'i8'
     elif mips_ast.return_type == "void":
         return 'void'
+
+
+def mips_store(mips_ast):
+    # TODO pointervalues
+    # Load the variable to store into register $t0
+    var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[0]))
+    mips.output += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+
+    # Store this variable then on the location of the variable where the value needs to be stored
+    var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
+    mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
 
 
 def mips_return(mips_ast):

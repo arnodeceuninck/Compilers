@@ -1,9 +1,10 @@
 #include <stdio.h>
 
-void f(int i){}
+int f(int i){return 0;}
 
 int main(){
     int x = 1;
-    f(1);
+    printf("test");
+    x = f(1);
    	return 1;
 }

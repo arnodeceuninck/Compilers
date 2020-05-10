@@ -52,7 +52,10 @@ def assignment(ast):
         for i in range(len(ast.children)):
             location = str(i)
             type = ast.children[i]
-            ast.parent.parent.symbol_table.insert(location, type)
+            try:
+                ast.parent.parent.symbol_table.insert(location, type)
+            except:
+                pass
 
     # 2. If the ast is an allocate, then we know that the right child of the parent will contain the type and its
     # left child the variable
@@ -108,7 +111,10 @@ def assignment(ast):
     elif isinstance(ast, LLVMVariable) and isinstance(ast.parent, LLVMStore) and ast.parent[0] != ast:
         defined_var = ast.parent[0]
         symbol_table = ast.parent.parent.symbol_table
-        symbol_table_element = symbol_table[defined_var.value]
+        try:
+            symbol_table_element = symbol_table[defined_var.value]
+        except:
+            return
         type = symbol_table_element.type
         location = ast.value
 
@@ -124,6 +130,20 @@ def assignment(ast):
             isinstance(ast.parent[1], LLVMLoad):
         symbol_table = ast.parent.parent.symbol_table
         type = ast.parent[1].type
+        location = ast.value
+
+        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+        try:
+            symbol_table.insert(location, type)
+        except:
+            pass
+
+    # 7. If the right hand side is a function call then we need to take the return value and set it
+    elif isinstance(ast, LLVMVariable) and \
+            isinstance(ast.parent, LLVMAssignment) and \
+            isinstance(ast.parent[1], LLVMFunctionUse):
+        symbol_table = ast.parent.parent.symbol_table
+        type = ast.parent[1].rettype
         location = ast.value
 
         # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
