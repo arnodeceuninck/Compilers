@@ -83,10 +83,10 @@ class LLVMCode(LLVMAst):
 
 
 class LLVMFunction(LLVMAst):
-    def __init__(self, name, rettype):
+    def __init__(self, name):
         super().__init__(name)
         self.name = name
-        self.rettype = LLVMType(rettype)
+        self.rettype = None
         self.symbol_table = SymbolTable(self.id())
 
     def __str__(self):
@@ -94,10 +94,10 @@ class LLVMFunction(LLVMAst):
 
 
 class LLVMFunctionUse(LLVMAst):
-    def __init__(self, name, rettype):
+    def __init__(self, name):
         super().__init__(name)
         self.name = name
-        self.rettype = LLVMType(rettype)
+        self.rettype = None
 
     def __str__(self):
         return "Function call: {name}".format(name=self.name)
@@ -113,30 +113,30 @@ class LLVMOperationSequence(LLVMAst):
 
 
 class LLVMOperation(LLVMAst):
-    def __init__(self, operation, optype):
+    def __init__(self, operation):
         super().__init__(operation)
         self.operation = operation
-        self.optype = LLVMType(optype)
+        self.optype = None
 
 
 class LLVMBinaryOperation(LLVMOperation):
-    def __init__(self, operation, optype):
-        super().__init__(operation, optype)
+    def __init__(self, operation):
+        super().__init__(operation)
 
 
 class LLVMCompareOperation(LLVMBinaryOperation):
-    def __init__(self, operation, optype):
-        super().__init__(operation, optype)
+    def __init__(self, operation):
+        super().__init__(operation)
 
 
 class LLVMFloatCompareOperation(LLVMBinaryOperation):
-    def __init__(self, operation, optype):
-        super().__init__(operation, optype)
+    def __init__(self, operation):
+        super().__init__(operation)
 
 
 class LLVMIntCompareOperation(LLVMBinaryOperation):
-    def __init__(self, operation, optype):
-        super().__init__(operation, optype)
+    def __init__(self, operation):
+        super().__init__(operation)
 
 
 class LLVMAssignment(LLVMAst):
@@ -173,17 +173,17 @@ class LLVMConstFloat(LLVMConst):
 
 
 class LLVMStore(LLVMAst):
-    def __init__(self, optype):
+    def __init__(self):
         super().__init__("LLVM Store")
-        self.type = LLVMType(optype)
+        self.type = None
 
 
 class LLVMAllocate(LLVMAst):
-    def __init__(self, optype, align, global_=False):
+    def __init__(self, align, global_=False):
         super().__init__("LLVM Allocate")
-        self.type = optype # Should already be a llvm type
         self.align = align
         self.global_ = bool(global_)
+        self.type = None
 
     def __str__(self):
         return "{allo_type} {type} {align}".format(allo_type="Global" if self.global_ else "Alocate", type=self.type, align=self.align)
@@ -206,28 +206,28 @@ class LLVMPrint(LLVMAst):
 
 
 class LLVMDeclare(LLVMAst):
-    def __init__(self, fname, rettype):
+    def __init__(self, fname):
         super().__init__(fname)
         self.name = fname
-        self.rettype = LLVMType(rettype)
+        self.rettype = None
 
     def __str__(self):
         return "Declare {rettype} {name}".format(rettype=self.rettype, name=self.name)
 
 
 class LLVMLoad(LLVMAst):
-    def __init__(self, type):
+    def __init__(self):
         super().__init__("LLVM Load")
-        self.type = LLVMType(type)
+        self.type = None
 
     def __str__(self):
         return "load {type}".format(type=self.type)
 
 
 class LLVMReturn(LLVMAst):
-    def __init__(self, type):
+    def __init__(self):
         super().__init__("LLVM return")
-        self.type = LLVMType(type)
+        self.type = None
 
     def __str__(self):
         return "return {type}".format(type=self.type)
@@ -239,9 +239,12 @@ class LLVMArgumentList(LLVMAst):
 
 
 class LLVMArgument(LLVMAst):
-    def __init__(self, type):
-        super().__init__(type)
-        self.type = LLVMType(type)
+    def __init__(self):
+        super().__init__("Argument")
+        self.type = None
+
+    def __str__(self):
+        return "Argument: {type}".format(type=self.type)
 
 
 class LLVMUseArgumentList(LLVMAst):
@@ -250,9 +253,9 @@ class LLVMUseArgumentList(LLVMAst):
 
 
 class LLVMUseArgument(LLVMAst):
-    def __init__(self, type):
-        super().__init__(type)
-        self.type = LLVMType(type)
+    def __init__(self):
+        super().__init__("Use argument")
+        self.type = None
 
     def __str__(self):
         return "Argument {type}".format(type=self.type)
@@ -277,13 +280,13 @@ class LLVMLabel(LLVMAst):
 
 
 class LLVMExtension(LLVMOperation):
-    def __init__(self, op, from_type, to_type):
-        super().__init__(op, to_type)
-        self.from_type = LLVMType(from_type)
-        self.to_type = LLVMType(to_type)
+    def __init__(self, op):
+        super().__init__(op)
+        self.from_type = None
+        self.to_type = None
 
     def __str__(self):
-        return "fpext {from_} to {to_}".format(from_=self.from_type, to_=self.to_type)
+        return "{op} {from_} to {to_}".format(op=self.operation, from_=self.from_type, to_=self.to_type)
 
 
 class LLVMBranch(LLVMAst):
@@ -297,18 +300,18 @@ class LLVMNormalBranch(LLVMBranch):
 
 
 class LLVMConditionalBranch(LLVMBranch):
-    def __init__(self, optype):
+    def __init__(self):
         super().__init__("Conditional Branch")
-        self.optype = LLVMType(optype)
+        self.optype = None
 
 class LLVMArrayIndex(LLVMAst):
-    def __init__(self, type, index):
+    def __init__(self):
         super().__init__("Pointer index")
-        self.type = type
-        self.index = index
+        self.type = None
+        # self.index = index # in child
 
     def __str__(self):
-        return "Index {}".format(self.index)
+        return "Index {}".format(self.type)
 
 
 # TODO: use these classes as type in the other classes
@@ -321,10 +324,10 @@ class LLVMType:
 
 
 class LLVMArrayType(LLVMType):
-    def __init__(self, size, type):
-        super().__init__(type)
+    def __init__(self, size):
+        super().__init__("Array type")
         self.size = size
-        self.type = LLVMType(type)
+        self.type = None
 
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)
