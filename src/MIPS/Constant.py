@@ -31,9 +31,9 @@ def mips_c_int(ast):
 
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
-        code = "li $t0, {load_value}\n".format(load_value=str(ast.value))
+        code = "\tli $t0, {load_value}\n".format(load_value=str(ast.value))
     else:
-        code = "li $t1, {load_value}\n".format(load_value=str(ast.value))
+        code = "\tli $t1, {load_value}\n".format(load_value=str(ast.value))
 
     # Add the newly generated code to the mips code
     mips.output += code

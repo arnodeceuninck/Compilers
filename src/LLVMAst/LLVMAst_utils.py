@@ -7,6 +7,7 @@ from src.Dot.dot import dot
 import sys
 from gen_llvm import llvmLexer, llvmParser
 from src.LLVMAst.LLVMAst_utils import *
+from src.LLVMAst.LLVMAst import *
 # import gen_llvm.llvmLexer
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 
@@ -45,11 +46,13 @@ def assignment(ast):
     # Add symbol to symbol table
     # 1. if the current ast node is an argument list we need to add variables with 0-... to the symbol table of the function
     if isinstance(ast, LLVMArgumentList):
+        if ast.children and isinstance(ast[0], LLVMUseArgumentList):
+            return
         # Iterate over all the children to add all the arguments to the function scope
         for i in range(len(ast.children)):
             location = str(i)
-            type = ast.children[i].type
-            ast.parent.symbol_table.insert(location, type)
+            type = ast.children[i]
+            ast.parent.parent.symbol_table.insert(location, type)
 
     # 2. If the ast is an allocate, then we know that the right child of the parent will contain the type and its
     # left child the variable
@@ -138,7 +141,7 @@ def remove_allocate(ast):
     # Store the operation sequence in order to use it to remove the allocate out of the tree
     operation_sequence = ast.parent.parent
     # Get the position of the allocate
-    index = ast.get_position(2)
+    index = ast.get_position(1)
     # Delete this child
     del operation_sequence.children[index]
 
@@ -146,13 +149,29 @@ def remove_allocate(ast):
     ast.parent.parent = None
 
 
+def remove_printf_declaration(ast):
+    # TODO Check if the printf declaration is the one of stdio
+    if not isinstance(ast, LLVMDeclare):
+        return
+    elif ast.name != "printf":
+        return
+
+    # Remove the parents link to its child
+    index = ast.get_position(0)
+    # Set the link of this child to none in order to remove it
+    del ast.parent.children[index]
+    # Then its parent so it can be deleted by python itself
+    ast.parent = None
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
+    # We need to remove printf as a function declaration because it causes all kind of issues
+    ast.traverse(remove_printf_declaration)
     # Makes a tree of the symbol tables
     ast.traverse(connect_symbol_table)
     # seeks the types for all the variables in the tree
     ast.traverse(assignment)
-
     # We need to remove all the allocate expressions, cause they serve no purpose
     ast.traverse(remove_allocate)
 
@@ -175,5 +194,10 @@ def compile_llvm(input_file):
     make_llvm_ast(javaForLife)
     # Generate the mips code
     mips_code(javaForLife)
+    # We just need to add the exit in llvm
+    mips.output += "exit:\n"
+    mips.output += "\tjal main\n"
+    mips.output += "\tli $v0, 10\n"
+    mips.output += "\tsyscall\n"
     print(mips.output)
     return javaForLife

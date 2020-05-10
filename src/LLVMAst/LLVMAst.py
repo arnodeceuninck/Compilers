@@ -60,7 +60,7 @@ class LLVMAst:
         # This will go the the max of parent_nr for seeking a parent
         parent = self.parent
         child = self
-        while parent_nr:
+        while parent_nr and parent:
             child = parent
             parent = parent.parent
             parent_nr -= 1

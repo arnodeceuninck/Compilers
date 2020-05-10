@@ -11,6 +11,7 @@ def mips_code(mips_ast):
     if not mips_ast.parent:
         global_mips(mips_ast)
         mips.output += ".text\n"
+        mips.output += "j exit\n"
 
     if isinstance(mips_ast, (LLVMOperationSequence, LLVMCode)):
         mips_operation_sequence(mips_ast)
@@ -24,8 +25,8 @@ def mips_code(mips_ast):
         mips_arguments(mips_ast)
     elif isinstance(mips_ast, LLVMConst):
         mips_constant(mips_ast)
-    # elif isinstance(mips_ast, LLVMReservedType):
-    #     mips_reserved_type(mips_ast)
+    elif isinstance(mips_ast, LLVMReturn):
+        mips_return(mips_ast)
     elif isinstance(mips_ast, LLVMVariable):
         mips_variable(mips_ast)
     else:
@@ -57,6 +58,22 @@ def mips_type_function(mips_ast):
         return 'void'
 
 
+def mips_return(mips_ast):
+    # If we do not return void then jump to the end and go to the stackframe part in mips
+    if mips_ast.type.type == "void":
+        mips.output += "\tj exit.{f_name}\n".format(f_name=mips_ast.parent.parent.value)
+        return
+
+    # Load the variable in $t0 or $f0 depending on the type
+    mips_code(mips_ast[0])
+    # TODO fix that all the types become int and float
+    if type != "float":
+        mips.output += "\tmove $v0, $t0\n"
+
+    # Go to the stackframe part
+    mips.output += "\tj exit.{f_name}\n".format(f_name=mips_ast.parent.parent.value)
+
+
 def mips_operator(mips_ast):
     mips_binary(mips_ast)
 
@@ -73,6 +90,9 @@ def mips_binary(mips_ast):
 
 
 def mips_b_add(mips_ast):
+    # Generate mips code for the left and right side of the equation
+    mips_code(mips_ast[0])
+    mips_code(mips_ast[1])
     # TODO support float
     mips.output += "\tadd $s0, $t0, $t1\n"
 
@@ -149,6 +169,8 @@ def build_end_stackframe(symbol_table: SymbolTable):
 
 
 def mips_function(mips_ast):
+    if isinstance(mips_ast.parent, LLVMOperationSequence):
+        return ""
     # Create the label for the current function
     mips.output += mips_ast.value + ":\n"
 
@@ -159,7 +181,8 @@ def mips_function(mips_ast):
     for child in mips_ast.children:
         mips_code(child)
 
-    # We need to deconstruct the stackframe
+    # We need to deconstruct the stackframe but first make a label in order to be able to jump to it
+    mips.output += "exit.{function_name}:\n".format(function_name=mips_ast.value)
     mips.output += build_end_stackframe(mips_ast.symbol_table.children[0])
 
 

@@ -1,4 +1,9 @@
+#include <stdio.h>
+
+void f(int i){}
+
 int main(){
-    float x = 1.0;
+    int x = 1;
+    f(1);
    	return 1;
 }

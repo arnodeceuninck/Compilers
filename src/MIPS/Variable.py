@@ -6,12 +6,12 @@ def mips_variable(ast):
     # We need to check which side of the operation we are so we can load the variable into the correct register
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
-        code = "lw $t0, {index_offset}($gp)\n"
+        code = "\tlw $t0, {index_offset}($gp)\n"
     else:
-        code = "lw $t1, {index_offset}($gp)\n"
+        code = "\tlw $t1, {index_offset}($gp)\n"
 
     # Add the correct index offset to the statement
-    code.format(index_offset=ast.get_index_offset())
+    code = code.format(index_offset=ast.get_index_offset())
 
     # Add the newly generated code to the mips code
     mips.output += code
