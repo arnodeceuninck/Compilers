@@ -14,7 +14,7 @@ class LLVMListener(ParseTreeListener):
     def __init__(self):
         self.trees = []  # A stack containing all subtrees
         self.type_ctr = 0 # Increases when expecting a type, must be uses when a type is twice, e.g. in store, we only want to add one type to the tree
-
+        self.disable_arg_list = False # Must be disabled on function call (for argument list with printf)
     # Add an AST with given node to the stack
     def add(self, ast):
         self.trees.append(ast)
@@ -69,6 +69,7 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#function_call.
     def enterFunction_call(self, ctx: llvmParser.Function_callContext):
+        self.disable_arg_list = True
         self.add(LLVMFunctionUse(name=ctx.fname.text))
         self.type_ctr += 1 # Expecting return type
         pass
@@ -82,6 +83,7 @@ class LLVMListener(ParseTreeListener):
         self.add(funccall)
         self.add(args)
         self.simplify(1)
+        self.disable_arg_list = False
         pass
 
     # Enter a parse tree produced by llvmParser#scope.
@@ -278,11 +280,15 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#argument_list.
     def enterArgument_list(self, ctx: llvmParser.Argument_listContext):
+        if self.disable_arg_list:
+            return
         self.add(LLVMArgumentList())
         pass
 
     # Exit a parse tree produced by llvmParser#argument_list.
     def exitArgument_list(self, ctx: llvmParser.Argument_listContext):
+        if self.disable_arg_list:
+            return
         tree = self.trees[len(self.trees) - 1]
         children = 0
         while not isinstance(tree, LLVMArgumentList):
@@ -293,12 +299,16 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#argument.
     def enterArgument(self, ctx: llvmParser.ArgumentContext):
+        if self.disable_arg_list:
+            return
         self.add(LLVMArgument())
         self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#argument.
     def exitArgument(self, ctx: llvmParser.ArgumentContext):
+        if self.disable_arg_list:
+            return
         type = self.trees.pop()
         op = self.trees.pop()
         op.type = type
