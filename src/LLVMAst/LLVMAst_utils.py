@@ -184,6 +184,167 @@ def remove_printf_declaration(ast):
     ast.parent = None
 
 
+# We seek the root of the ast here
+def get_root(ast):
+    root = ast
+    # Because the root has no parent we can use this in our advantage and seek the root like this
+    while root.parent:
+        root = root.parent
+    return root
+
+
+# We generate global code because we cant load floats directly so a intermediate step is required
+def make_float_memory(ast):
+    # If the statement is not a float then do not continue
+    if not isinstance(ast, LLVMConstFloat):
+        return
+
+    print(ast.value)
+    root = get_root(ast)
+    # We need to make a new variable to identify the const floats
+    var = ".f" + str(ast.id())
+    var_ast = LLVMVariable(var)
+    # We need the constant
+    const = ast.value
+    const_ast = LLVMConstFloat(const)
+
+    # Generate the global variable for the const float
+    const_float_ast = LLVMAssignment()
+    const_float_ast.children.append(var_ast)
+    const_float_ast.children.append(const_ast)
+    # Set the correct parent of both children
+    var_ast.parent = const_float_ast
+    const_ast.parent = const_float_ast
+
+    # Prepend it to the children of the root
+    root_children = root.children.copy()
+    root.children.clear()
+    root.children.append(const_float_ast)
+    root.children += root_children
+    # Set the root as parent
+    const_float_ast.parent = root
+
+    # TODO make a copy of this in the LLVMAst class
+    # Convert the current ast node into a variable so we can load it next time
+    cur_ast = ast
+    ast = LLVMVariable(var)
+    ast.parent = cur_ast.parent
+    ast.parent.children[ast.parent.children.index(cur_ast)] = ast
+    return ast
+
+
+def remove_null(string_list: list) -> list:
+    # Remove the last 3 null terminating characters
+    string_list[len(string_list) - 1] = string_list[len(string_list) - 1][:-3]
+    return string_list
+
+
+def cut_format_string(string: str) -> list:
+    string_list = list()
+    element = ""
+    idx = 0
+    string = str(string[1:-1])
+    while idx < len(string):
+        # We check for a format tag, because if there is then we need to split the string
+        if string[idx] == '%':
+            if string[idx - 1] == "\\":
+                idx += 1
+                continue
+            string_list.append(element)
+            element = ""
+            if string[idx + 1] == "d":
+                string_list.append(LLVMConstInt("d"))
+            elif string[idx + 1] == "f":
+                string_list.append(LLVMConstFloat("f"))
+            elif string[idx + 1] == "s":
+                pass
+            elif string[idx + 1] == "c":
+                pass
+
+            idx += 2
+            continue
+        element += string[idx]
+        idx += 1
+
+    if len(element):
+        string_list.append(element)
+    return remove_null(string_list)
+
+
+def search_string(string_id: str, ast: LLVMAst) -> str:
+    root = get_root(ast)
+    for child in root.children:
+        if isinstance(child, LLVMFunction):
+            return ""
+        if child.children[0].name == string_id:
+            return child.children[1].printvar
+
+
+def make_string_id(node_id: str, string_id: str) -> str:
+    return ".str." + node_id + "." + string_id
+
+
+def make_string_global(string: str, string_id, ast) -> None:
+    root = get_root(ast)
+    var_ast = LLVMVariable(string_id)
+    const_ast = LLVMPrintStr(string, len(string))
+
+    # Generate the global variable for the const float
+    assignment_ast = LLVMAssignment()
+    assignment_ast.children.append(var_ast)
+    assignment_ast.children.append(const_ast)
+    # Set the correct parent of both children
+    var_ast.parent = assignment_ast
+    const_ast.parent = assignment_ast
+
+    # append it to the children of the root
+    root.children.append(assignment_ast)
+    # Set the root as parent
+    assignment_ast.parent = root
+
+
+def make_printf_global(cut_string: list, ast: LLVMAst):
+    for idx in range(len(cut_string)):
+        if isinstance(cut_string[idx], str):
+            string_id = make_string_id(str(ast.id()), str(idx))
+            make_string_global(cut_string[idx], string_id, ast)
+
+
+def create_printf_arguments(ast, cut_string):
+    arguments = list()
+    for idx in range(len(cut_string)):
+        if isinstance(cut_string[idx], str):
+            string_id = make_string_id(str(ast.id()), str(idx))
+            new_argument = LLVMVariable(string_id)
+            new_argument.type = "String"
+        else:
+            new_argument = cut_string[idx]
+        new_argument.parent = ast
+        arguments.append(new_argument)
+
+    return arguments
+
+
+def split_printf_arguments(ast: LLVMAst, cut_string):
+    printf_arguments = create_printf_arguments(ast, cut_string)
+    ast.children = printf_arguments
+
+
+def create_printf(ast):
+    if not isinstance(ast, LLVMFunctionUse):
+        return
+    elif not ast.name == "printf":
+        return
+
+    string_id = ast.children[0].children[0].name
+    string = search_string(string_id, ast)
+    cut_string = cut_format_string(string)
+
+    # Make correct children out of the printf statement on the global scope
+    make_printf_global(cut_string, ast)
+    split_printf_arguments(ast, cut_string)
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
@@ -194,6 +355,10 @@ def make_llvm_ast(ast):
     ast.traverse(assignment)
     # We need to remove all the allocate expressions, cause they serve no purpose
     ast.traverse(remove_allocate)
+    # Because load immediate for floats doesnt work
+    ast.traverse(make_float_memory)
+    # Cut the printf statement into pieces in order to be compilable in llvm
+    ast.traverse(create_printf)
 
     # merge all the symbol tables into 1 big dict this we can use for assigning variables
     ast.symbol_table.merge()

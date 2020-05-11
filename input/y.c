@@ -1,7 +1,6 @@
 #include <stdio.h>
+
 int main(){
-    int x = 1;
-//    printf("test");
-    printf("Yeet %d", x);
+    printf("test %d; 123", 2);
    	return 1;
 }

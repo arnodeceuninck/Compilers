@@ -12,6 +12,9 @@ def mips_code(mips_ast):
         global_mips(mips_ast)
         mips.output += ".text\n"
         mips.output += "j exit\n"
+    # Skip if the parent is llvm code because we are in the global scope
+    if isinstance(mips_ast, LLVMAssignment) and isinstance(mips_ast.parent, LLVMCode):
+        return
 
     if isinstance(mips_ast, (LLVMOperationSequence, LLVMCode)):
         mips_operation_sequence(mips_ast)
@@ -93,9 +96,21 @@ def mips_operator(mips_ast):
 
 def mips_binary(mips_ast):
     # TODO support float
+    if isinstance(mips_ast, LLVMExtension):
+        return
     if isinstance(mips_ast, LLVMBinaryOperation):
+        # This is valid for every equation
+        # Generate mips code for the left and right side of the equation
+        mips_code(mips_ast[0])
+        mips_code(mips_ast[1])
         if mips_ast.operation == "add":
             mips_b_add(mips_ast)
+        elif mips_ast.operation == "sub":
+            mips_b_sub(mips_ast)
+        elif mips_ast.operation == "sdiv":
+            mips_b_div(mips_ast)
+        elif mips_ast.operation == "mul":
+            mips_b_mul(mips_ast)
     elif isinstance(mips_ast, LLVMCompareOperation):
         mips_compare(mips_ast)
     else:
@@ -103,15 +118,30 @@ def mips_binary(mips_ast):
 
 
 def mips_b_add(mips_ast):
-    # Generate mips code for the left and right side of the equation
-    mips_code(mips_ast[0])
-    mips_code(mips_ast[1])
-    # TODO support float
+    # TODO support float -> add.s
     mips.output += "\tadd $s0, $t0, $t1\n"
 
 
+def mips_b_sub(mips_ast):
+    # TODO support float -> sub.s
+    mips.output += "\tsub $s0, $t0, $t1\n"
+
+
+def mips_b_div(mips_ast):
+    # TODO support float -> sub.s
+    mips.output += "\tdiv $t0, $t1\n"
+    mips.output += "\tmflo $s0\n"
+
+
+def mips_b_mul(mips_ast):
+    # TODO support float -> mult.s
+    mips.output += "\tmult $t0, $t1\n"
+    mips.output += "\tmflo $s0\n"
+
+
+# Do nothing on a mips include
 def mips_include(mips_ast):
-    return ""
+    pass
 
 
 def mips_arguments(mips_ast):

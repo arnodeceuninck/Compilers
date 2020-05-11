@@ -15,12 +15,12 @@ def mips_c_float(ast):
     # We need to check which side of the equation we are so we can load the variable into the correct register
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
-        code = "lw $t0, {index_offset}($gp)\n"
+        code = "\tl.s $f0, .f{id}\n".format(id=ast.id())
     else:
-        code = "lw $t1, {index_offset}($gp)\n"
+        code = "\tl.s $f1, .f{id}\n".format(id=ast.id())
 
     # Add the correct index offset to the statement
-    code.format(index_offset=ast.get_index_offset())
+    code = code.format(index_offset=ast.get_index_offset())
 
     # Add the newly generated code to the mips code
     mips.output += code
@@ -28,7 +28,6 @@ def mips_c_float(ast):
 
 def mips_c_int(ast):
     # We need to check which side of the operation we are so we can load the variable into the correct register
-
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
         code = "\tli $t0, {load_value}\n".format(load_value=str(ast.value))
@@ -103,4 +102,4 @@ def mips_c_string(ast):
 
 
 from src.MIPS.MIPS import mips_code, mips, variable, get_mips_type
-from src.LLVMAst.LLVMAst import LLVMConst, LLVMConstFloat, LLVMConstInt
+from src.LLVMAst.LLVMAst import *

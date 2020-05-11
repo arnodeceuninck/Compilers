@@ -193,7 +193,8 @@ class LLVMAllocate(LLVMAst):
         self.type = None
 
     def __str__(self):
-        return "{allo_type} {type} {align}".format(allo_type="Global" if self.global_ else "Alocate", type=self.type, align=self.align)
+        return "{allo_type} {type} {align}".format(allo_type="Global" if self.global_ else "Alocate", type=self.type,
+                                                   align=self.align)
 
 
 class LLVMPrintStr(LLVMAst):
@@ -311,6 +312,7 @@ class LLVMConditionalBranch(LLVMBranch):
         super().__init__("Conditional Branch")
         self.optype = None
 
+
 class LLVMArrayIndex(LLVMAst):
     def __init__(self):
         super().__init__("Pointer index")
@@ -329,6 +331,7 @@ class LLVMType(LLVMAst):
 
     def __str__(self):
         return self.type
+
 
 class LLVMStringType(LLVMAst):
     def __init__(self, length):
