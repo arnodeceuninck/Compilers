@@ -10,9 +10,9 @@ argument: type_;
 
 use_arg_list: (use_argument)?(',' use_argument)*;
 
-use_argument: normal_argument | string_argument;
+use_argument: typed_variable | string_argument;
+typed_variable: type_ value;
 string_argument: 'i8* getelementptr inbounds ([' c_count=INT_ID 'x i8], [' INT_ID 'x i8]* ' prtstr=variable ', i32 0, i32 0)';
-normal_argument: type_ variable;
 
 scope: '{' operation_sequence '}';
 
@@ -62,7 +62,7 @@ array_type: '[' max_count=INT_ID 'x' element_type=normal_type ']';
 function_call: 'call' rettype=type_ ('(' argument_list ')')? '@' fname=VAR_NAME '(' use_arg_list ')';
 //print_function: 'call i32 (i8*, ...) @printf(' (',' use_arg_list)? ')';
 
-print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_ID ', align 1';
+print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_ID ', align' align_id=INT_ID;
 
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 

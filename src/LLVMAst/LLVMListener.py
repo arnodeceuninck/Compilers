@@ -320,22 +320,20 @@ class LLVMListener(ParseTreeListener):
         self.simplify(children)
         pass
 
-    # Enter a parse tree produced by llvmParser#normal_argument.
-    def enterNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
-        self.add(LLVMUseArgument())
-        self.type_ctr += 1 # Expecting type
+    # Enter a parse tree produced by llvmParser#typed_variable.
+    def enterTyped_variable(self, ctx: llvmParser.Typed_variableContext):
+        # self.add(LLVMUseArgument())
+        self.type_ctr += 1  # Expecting type
         pass
 
-    # Exit a parse tree produced by llvmParser#normal_argument.
-    def exitNormal_argument(self, ctx: llvmParser.Normal_argumentContext):
+    # Exit a parse tree produced by llvmParser#typed_variable.
+    def exitTyped_variable(self, ctx: llvmParser.Typed_variableContext):
         v1 = self.trees.pop()
         type = self.trees.pop()
-        op = self.trees.pop()
-        op.type = type
-        self.add(op)
+        v1.type = type
         self.add(v1)
-        self.simplify(1)
         pass
+
 
     # Enter a parse tree produced by llvmParser#print_str.
     def enterPrint_str(self, ctx: llvmParser.Print_strContext):
@@ -348,12 +346,15 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#string_argument.
     def enterString_argument(self, ctx: llvmParser.String_argumentContext):
-        self.add(LLVMStringArgument(ctx.c_count.text))
+        self.add(LLVMStringType(ctx.c_count.text))
         pass
 
     # Exit a parse tree produced by llvmParser#string_argument.
     def exitString_argument(self, ctx: llvmParser.String_argumentContext):
-        self.simplify(1)
+        v1 = self.trees.pop()
+        type = self.trees.pop()
+        v1.type = type
+        self.add(v1)
         pass
 
     # Enter a parse tree produced by llvmParser#label.

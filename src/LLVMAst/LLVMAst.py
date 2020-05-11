@@ -148,6 +148,13 @@ class LLVMVariable(LLVMAst):
     def __init__(self, name):
         super().__init__(name)
         self.name = name
+        self.type = None  # Currently only set with use argument
+
+    def __str__(self):
+        if self.type:
+            return "{} {}".format(self.type, self.name)
+        else:
+            return self.name
 
 
 class LLVMConst(LLVMAst):
@@ -322,6 +329,11 @@ class LLVMType(LLVMAst):
 
     def __str__(self):
         return self.type
+
+class LLVMStringType(LLVMAst):
+    def __init__(self, length):
+        super().__init__("String")
+        self.length = length
 
 
 class LLVMArrayType(LLVMType):
