@@ -430,7 +430,7 @@ def make_llvm_ast(ast):
     ast.symbol_table.merge()
 
 
-def compile_llvm(input_file):
+def compile_llvm(input_file, output_file, debug_dot=False):
     input_stream = FileStream(input_file)
     lexer = llvmLexer.llvmLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -440,6 +440,9 @@ def compile_llvm(input_file):
     walker = ParseTreeWalker()
     walker.walk(customListener, tree)
     javaForLife = customListener.trees[0]
+
+    if debug_dot:
+        dot(javaForLife, "output/llvm_debug_tree.dot")
 
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
@@ -451,5 +454,8 @@ def compile_llvm(input_file):
     mips.output += "\tjal main\n"
     mips.output += "\tli $v0, 10\n"
     mips.output += "\tsyscall\n"
-    print(mips.output)
+    text_file = open(output_file, "w")
+    n = text_file.write(mips.output)
+    text_file.close()
+    # print(mips.output)
     return javaForLife

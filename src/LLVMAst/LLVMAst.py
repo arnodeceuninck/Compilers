@@ -375,5 +375,4 @@ class LLVMArrayType(LLVMType):
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)
 
-
-from symbolTable import *
+from src.symbolTable import *

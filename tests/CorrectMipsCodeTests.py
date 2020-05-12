@@ -1,6 +1,7 @@
 import unittest
 
 from src.Node.AST_utils import *
+from src.LLVMAst.LLVMAst_utils import compile_llvm
 from src.ErrorListener import *
 import inspect
 import unittest
@@ -8,7 +9,7 @@ import subprocess
 from src.LLVM.LLVM import to_LLVM
 
 
-class CorrectCodeTests(unittest.TestCase):
+class CorrectMipsCodeTests(unittest.TestCase):
     def help_compare(self, file1, file2):
         # src: https://stackoverflow.com/questions/42512016/how-to-compare-two-files-as-part-of-unittest-while-getting-useful-output-in-cas
         file1 = open(file1)
@@ -25,8 +26,9 @@ class CorrectCodeTests(unittest.TestCase):
         AST.reset()
 
         input_file: str = "CompilersBenchmark/CorrectCode/" + test_name + ".c"
-        output_file: str = "tests/output/CorrectCodeOutput.ll"  # Required because some errors only get raised when compiling
-        code_output: str = "tests/output/code_result.txt"
+        temp_file: str = "tests/output/CorrectCodeOutput.ll"
+        output_file: str = "tests/output/CorrectMipsCodeOutput.asm"  # Required because some errors only get raised when compiling
+        code_output: str = "tests/output/code_mips_result.txt"
 
         # Get the clang output
         clang_executable = "tests/output/clang_code"
@@ -39,9 +41,10 @@ class CorrectCodeTests(unittest.TestCase):
         # Get the output from our compiler
         tree: AST = compile(input_file, catch_error=False)
         # tree.constant_folding()
-        to_LLVM(tree, output_file)
+        to_LLVM(tree, temp_file)
+        compile_llvm(temp_file, output_file, debug_dot=True)
 
-        pass_arg = ["sh", "tests/CorrectCode.sh", output_file, code_output]
+        pass_arg = ["sh", "tests/CorrectMipsCode.sh", output_file, code_output]
         return_code = subprocess.call(pass_arg)
 
         # Check the outputs
