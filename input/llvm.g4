@@ -12,7 +12,7 @@ use_arg_list: (use_argument)?(',' use_argument)*;
 
 use_argument: typed_variable | string_argument;
 typed_variable: type_ value;
-string_argument: 'i8* getelementptr inbounds ([' c_count=INT_ID 'x i8], [' INT_ID 'x i8]* ' prtstr=variable ', i32 0, i32 0)';
+string_argument: 'i8* getelementptr inbounds ([' c_count=INT_ID ' x i8], [' INT_ID ' x i8]* ' prtstr=variable ', i32 0, i32 0)';
 
 scope: '{' operation_sequence '}';
 
@@ -57,7 +57,7 @@ variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot o
 
 type_: normal_type | array=array_type;
 normal_type: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | double='i64' | '...') (ptr='*')?; // ... for printf
-array_type: '[' max_count=INT_ID 'x' element_type=normal_type ']';
+array_type: '[' max_count=INT_ID ' x ' element_type=normal_type ']';
 
 function_call: 'call' rettype=type_ ('(' argument_list ')')? '@' fname=VAR_NAME '(' use_arg_list ')';
 //print_function: 'call i32 (i8*, ...) @printf(' (',' use_arg_list)? ')';
