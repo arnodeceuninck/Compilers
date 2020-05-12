@@ -251,6 +251,8 @@ def make_float_memory(ast):
 
 
 def remove_null(string_list: list) -> list:
+    if not isinstance(string_list[len(string_list) - 1], str):
+        return string_list
     # Remove the last 3 null terminating characters
     string_list[len(string_list) - 1] = string_list[len(string_list) - 1][:-3]
     return string_list
@@ -267,14 +269,17 @@ def cut_format_string(string: str) -> list:
             if string[idx - 1] == "\\":
                 idx += 1
                 continue
-            string_list.append(element)
+            if len(element):
+                string_list.append(element)
             element = ""
             if string[idx + 1] == "d":
                 string_list.append(LLVMConstInt("d"))
             elif string[idx + 1] == "f":
                 string_list.append(LLVMConstFloat("f"))
             elif string[idx + 1] == "s":
-                pass
+                variable = LLVMVariable("s")
+                variable.type = "string"
+                string_list.append(variable)
             elif string[idx + 1] == "c":
                 pass
 
@@ -283,7 +288,7 @@ def cut_format_string(string: str) -> list:
         element += string[idx]
         idx += 1
 
-    if len(element):
+    if len(element) and element != "\\00":
         string_list.append(element)
     return remove_null(string_list)
 
@@ -335,7 +340,9 @@ def create_printf_arguments(ast, cut_string):
             new_argument = LLVMVariable(string_id)
             new_argument.type = "String"
         else:
-            new_argument = cut_string[idx]
+            if not idx:
+                idx += 1
+            new_argument = ast.children[0].children[idx]
         new_argument.parent = ast
         arguments.append(new_argument)
 
@@ -430,6 +437,16 @@ def make_llvm_ast(ast):
     ast.symbol_table.merge()
 
 
+def generate_mips_code(javaForLife):
+    # Generate the mips code
+    mips_code(javaForLife)
+    # We just need to add the exit in llvm
+    mips.output += "exit:\n"
+    mips.output += "\tjal main\n"
+    mips.output += "\tli $v0, 10\n"
+    mips.output += "\tsyscall\n"
+
+
 def compile_llvm(input_file, output_file, debug_dot=False):
     input_stream = FileStream(input_file)
     lexer = llvmLexer.llvmLexer(input_stream)
@@ -447,15 +464,8 @@ def compile_llvm(input_file, output_file, debug_dot=False):
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
 
-    # Generate the mips code
-    mips_code(javaForLife)
-    # We just need to add the exit in llvm
-    mips.output += "exit:\n"
-    mips.output += "\tjal main\n"
-    mips.output += "\tli $v0, 10\n"
-    mips.output += "\tsyscall\n"
-    text_file = open(output_file, "w")
-    n = text_file.write(mips.output)
-    text_file.close()
+    generate_mips_code(javaForLife)
+
+    mips().to_file(output_file)
     # print(mips.output)
     return javaForLife

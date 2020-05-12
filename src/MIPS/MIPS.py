@@ -5,6 +5,11 @@ from src.symbolTable import SymbolTable
 class mips:
     output = ""
 
+    def to_file(self, output_file):
+        text_file = open(output_file, "w")
+        n = text_file.write(mips.output)
+        text_file.close()
+
 
 def mips_code(mips_ast):
     # generate the global mips along with the variables using it, like the constant floats
@@ -24,6 +29,8 @@ def mips_code(mips_ast):
         mips_operator(mips_ast)
     elif isinstance(mips_ast, LLVMFunction):
         mips_function(mips_ast)
+    elif isinstance(mips_ast, LLVMFunctionUse):
+        mips_function_use(mips_ast)
     elif isinstance(mips_ast, LLVMArgumentList):
         mips_arguments(mips_ast)
     elif isinstance(mips_ast, LLVMConst):
@@ -211,9 +218,49 @@ def build_end_stackframe(symbol_table: SymbolTable):
     return stackframe_string
 
 
-def mips_function(mips_ast):
+def mips_print_string(location):
+    mips_call_code = 4
+    mips.output += "\n"
+    mips.output += "\tla $a0, $t0\n"
+
+
+def mips_print_float(location):
+    mips_call_code = 2
+
+
+def mips_print_int(location):
+    mips_call_code = 1
+    pass
+
+
+def mips_print_char(location):
+    mips_call_code = 11
+    pass
+
+
+def mips_print(mips_ast):
+    location = mips_ast.value
+    var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
+    if var_type == "string":
+        mips_print_string(location)
+    if var_type == "int":
+        mips_print_int(location)
+    if var_type == "float":
+        mips_print_float(location)
+    if var_type == "char":
+        mips_print_char(location)
+
+
+def mips_function_use(mips_ast):
+    if mips_ast.name == "printf" and not isinstance(mips_ast.children[0], LLVMUseArgumentList):
+        for child in mips_ast.children:
+            mips_print(child)
+    # Function call
     if isinstance(mips_ast.parent, LLVMOperationSequence):
         return ""
+
+
+def mips_function(mips_ast):
     # Create the label for the current function
     mips.output += mips_ast.value + ":\n"
 
