@@ -231,8 +231,18 @@ def mips_print_float(mips_ast):
 
 
 def mips_print_int(mips_ast):
+    mips_code(mips_ast)
+
+    # Get the place where the variable is saved
+    var_save_location = "$t0"
+    if mips_ast.parent.children.index(mips_ast):
+        var_save_location = "$t1"
+
     mips_call_code = 1
-    pass
+    mips.output += "\n"
+    mips.output += "\tmove $a0, {var_save_location}\n".format(var_save_location=var_save_location)
+    mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
+    mips.output += "\tsyscall\n"
 
 
 def mips_print_char(mips_ast):
