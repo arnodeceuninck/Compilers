@@ -173,6 +173,9 @@ class LLVMConstInt(LLVMConst):
     def get_mips_type(self):
         return ".word"
 
+    def get_type(self):
+        return "int"
+
 
 class LLVMConstFloat(LLVMConst):
     def __init__(self, value):
@@ -186,6 +189,9 @@ class LLVMConstFloat(LLVMConst):
 
     def get_mips_type(self):
         return ".float"
+
+    def get_type(self):
+        return "float"
 
 
 class LLVMStore(LLVMAst):
@@ -217,6 +223,9 @@ class LLVMPrintStr(LLVMAst):
 
     def get_mips_type(self):
         return ".asciiz"
+
+    def get_type(self):
+        return "string"
 
     def get_str_value(self):
         return "\"" + self.printvar + "\""
