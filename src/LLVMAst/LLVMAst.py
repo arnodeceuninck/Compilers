@@ -1,4 +1,3 @@
-
 # This will set the offset per type, and put it in the dict
 def set_offset(llvm_ast):
     # The variable needs to be a llvm variable
@@ -168,6 +167,12 @@ class LLVMConstInt(LLVMConst):
     def __str__(self):
         return "int {val}".format(val=self.constval)
 
+    def get_str_value(self):
+        return self.constval
+
+    def get_mips_type(self):
+        return ".word"
+
 
 class LLVMConstFloat(LLVMConst):
     def __init__(self, value):
@@ -175,6 +180,12 @@ class LLVMConstFloat(LLVMConst):
 
     def __str__(self):
         return "float {val}".format(val=self.constval)
+
+    def get_str_value(self):
+        return self.constval
+
+    def get_mips_type(self):
+        return ".float"
 
 
 class LLVMStore(LLVMAst):
@@ -203,6 +214,12 @@ class LLVMPrintStr(LLVMAst):
 
     def __str__(self):
         return "Printstr {var}".format(var=self.printvar)
+
+    def get_mips_type(self):
+        return ".asciiz"
+
+    def get_str_value(self):
+        return "\"" + self.printvar + "\""
 
 
 class LLVMPrint(LLVMAst):
@@ -274,6 +291,9 @@ class LLVMStringArgument(LLVMAst):
 
     def __str__(self):
         return "String Argument: {c} chars".format(c=self.ccount)
+
+    def get_mips_type(self):
+        return ".asciiz"
 
 
 class LLVMLabel(LLVMAst):

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-int main(){
-    printf("test %d; 123", 2);
-   	return 1;
+int main() {
+  int i = 1;
+  printf("yeet");
+  return 1;
 }

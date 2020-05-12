@@ -230,7 +230,17 @@ def mips_function(mips_ast):
 
 
 def global_mips(mips_ast):
+    if not isinstance(mips_ast, LLVMCode):
+        return
     mips.output = ".data\n"
+    for child in mips_ast.children:
+        # If we encounter a function we do not need to generate mips code for that
+        if isinstance(child, LLVMFunction):
+            continue
+        var_name = child.children[0].name
+        var_value = child.children[1].get_str_value()
+        var_type = child.children[1].get_mips_type()
+        mips.output += "\t" + var_name + ": " + var_type + " " + var_value + "\n"
 
 
 def mips_assign(mips_ast):
