@@ -218,22 +218,24 @@ def build_end_stackframe(symbol_table: SymbolTable):
     return stackframe_string
 
 
-def mips_print_string(location):
+def mips_print_string(mips_ast):
     mips_call_code = 4
     mips.output += "\n"
-    mips.output += "\tla $a0, $t0\n"
+    mips.output += "\tla $a0, {string_label}\n".format(string_label=mips_ast.value)
+    mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
+    mips.output += "\tsyscall\n"
 
 
-def mips_print_float(location):
+def mips_print_float(mips_ast):
     mips_call_code = 2
 
 
-def mips_print_int(location):
+def mips_print_int(mips_ast):
     mips_call_code = 1
     pass
 
 
-def mips_print_char(location):
+def mips_print_char(mips_ast):
     mips_call_code = 11
     pass
 
@@ -241,14 +243,15 @@ def mips_print_char(location):
 def mips_print(mips_ast):
     location = mips_ast.value
     var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
+    mips_code(mips_ast)
     if var_type == "string":
-        mips_print_string(location)
-    if var_type == "int":
-        mips_print_int(location)
-    if var_type == "float":
-        mips_print_float(location)
-    if var_type == "char":
-        mips_print_char(location)
+        mips_print_string(mips_ast)
+    elif var_type == "int":
+        mips_print_int(mips_ast)
+    elif var_type == "float":
+        mips_print_float(mips_ast)
+    elif var_type == "char":
+        mips_print_char(mips_ast)
 
 
 def mips_function_use(mips_ast):

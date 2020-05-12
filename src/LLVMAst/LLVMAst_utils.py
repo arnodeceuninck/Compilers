@@ -415,6 +415,22 @@ def reorder_root_children(ast):
     root.children = first_children + last_children
 
 
+def make_print_string(string):
+    if string[-1:] == "\"":
+        string = string[1:-1]
+    if string[-3:] == "\\00":
+        string = string[:-3]
+    return string
+
+
+def rewrite_printstr(ast):
+    if not isinstance(ast, LLVMPrintStr):
+        return
+
+    ast.printvar = make_print_string(ast.value)
+    ast.value = ast.printvar
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
@@ -423,6 +439,8 @@ def make_llvm_ast(ast):
     ast.traverse(make_float_memory)
     # Cut the printf statement into pieces in order to be compilable in llvm
     ast.traverse(create_printf)
+    # Clean up all the strings such that they have a non " and non \00 appearance
+    ast.traverse(rewrite_printstr)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
 
