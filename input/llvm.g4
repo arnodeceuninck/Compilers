@@ -27,15 +27,15 @@ branch: conditional_branch | normal_branch;
 conditional_branch: 'br' optype=type_ variable ', label' iftrue=variable ', label' iffalse=variable;
 normal_branch: 'br' 'label' variable;
 
-store: 'store' optype=type_ variable ',' type_'*' variable (', align' align=INT_ID)?; // same todo as with load
+store: 'store' optype=type_ variable ',' type_ variable (', align' align=INT_ID)?; // same todo as with load
 
-load: 'load' optype=type_ ',' type_'*' variable (', align' align=INT_ID)?; // TODO: is align required in tree? probably it is for arrays
+load: 'load' optype=type_ ',' type_ variable (', align' align=INT_ID)?; // TODO: is align required in tree? probably it is for arrays
 
 assignment: variable '=' rvalue;
 
 rvalue: alocation | function_call | print_str | load | expression | extension | ptr_index;
 
-extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui') type_from=type_ variable 'to' type_to=type_;
+extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui' | 'uitofp') type_from=type_ variable 'to' type_to=type_;
 
 expression: binary | compare;
 compare: float_compare | int_compare;

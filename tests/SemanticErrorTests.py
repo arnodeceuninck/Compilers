@@ -1,4 +1,4 @@
-from test import *
+from tests.test import *
 from src.ErrorListener import *
 from src.LLVM.LLVM import to_LLVM
 import inspect
@@ -14,8 +14,8 @@ class SemanticErrorTests(unittest.TestCase):
 
         AST.reset()
 
-        input_file: str = "../CompilersBenchmark/SemanticErrors/" + test_name + ".c"
-        output_file: str = "output/SemanticErrorOutput.ll"  # Required because some errors only get raised when compiling
+        input_file: str = "CompilersBenchmark/SemanticErrors/" + test_name + ".c"
+        output_file: str = "tests/output/SemanticErrorOutput.ll"  # Required because some errors only get raised when compiling
 
         errored = False
         try:
@@ -173,3 +173,6 @@ class SemanticErrorTests(unittest.TestCase):
 
     def test_variableRedefinition6(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+
+if __name__ == '__main__':
+    unittest.main()
