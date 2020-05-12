@@ -40,7 +40,14 @@ class SymbolTable:
 
     # get length of the symbol table for mips use
     def get_len(self):
-        return len(self.elements) * 4
+        total_length = 0
+        for el in self.elements:
+            element = self.elements[el].type
+            if isinstance(element, LLVMArrayType):
+                total_length += element.size * 4
+            else:
+                total_length += 4
+        return total_length
 
     # This function will get the index of the locations position in the global table
     def get_index_offset(self, location):
@@ -182,3 +189,5 @@ class SymbolTable:
     def sum_up(self):
         for i, v in enumerate(self.elements):
             print(i)
+
+from src.LLVMAst.LLVMAst import LLVMArrayType

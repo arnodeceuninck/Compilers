@@ -1,5 +1,3 @@
-from symbolTable import *
-
 
 # This will set the offset per type, and put it in the dict
 def set_offset(llvm_ast):
@@ -336,14 +334,16 @@ class LLVMType(LLVMAst):
 class LLVMStringType(LLVMAst):
     def __init__(self, length):
         super().__init__("String")
-        self.length = length
+        self.length = int(length)
 
 
 class LLVMArrayType(LLVMType):
     def __init__(self, size):
         super().__init__("Array type")
-        self.size = size
+        self.size = int(size)
         self.type = None
 
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)
+
+from symbolTable import *
