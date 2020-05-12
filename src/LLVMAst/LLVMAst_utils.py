@@ -39,7 +39,7 @@ def connect_symbol_table(ast):
 # An error checking functions to check whether all symbols are already in the symbol table
 # (or insert them when declaring)
 def assignment(ast):
-    # Return if we do not encounter a variable, argument list, allocate or load
+    # Return if we encounter a variable, argument list, allocate or load
     if not isinstance(ast, (LLVMArgumentList, LLVMAllocate, LLVMLoad, LLVMVariable)):
         return
 
@@ -144,6 +144,21 @@ def assignment(ast):
             isinstance(ast.parent[1], LLVMFunctionUse):
         symbol_table = ast.parent.parent.symbol_table
         type = ast.parent[1].rettype
+        location = ast.value
+
+        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+        try:
+            symbol_table.insert(location, type)
+        except:
+            pass
+
+    # 8. If we are in the global scope no operation is used for directly assigning constant values to variables
+    elif isinstance(ast, LLVMVariable) and \
+            isinstance(ast.parent, LLVMAssignment) and \
+            (isinstance(ast.parent[1], LLVMConst) or isinstance(ast.parent[1], LLVMPrintStr)):
+
+        symbol_table = ast.parent.parent.symbol_table
+        type = ast.parent[1].get_type()
         location = ast.value
 
         # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
@@ -369,20 +384,47 @@ def create_printf(ast):
     remove_original_string(string, ast)
 
 
+def get_llvm_node_type(root, type) -> list:
+    ret_list = list()
+    for child in root.children:
+        if isinstance(child, type):
+            ret_list.append(child)
+    return ret_list
+
+
+def get_assignments(root) -> list:
+    return get_llvm_node_type(root, LLVMAssignment)
+
+
+def get_functions(root) -> list:
+    return get_llvm_node_type(root, LLVMFunction)
+
+
+def reorder_root_children(ast):
+    root = get_root(ast)
+    first_children = get_assignments(root)
+    last_children = get_functions(root)
+    root.children.clear()
+    root.children = first_children + last_children
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
     ast.traverse(remove_printf_declaration)
+    # Because load immediate for floats doesnt work
+    ast.traverse(make_float_memory)
+    # Cut the printf statement into pieces in order to be compilable in llvm
+    ast.traverse(create_printf)
+    # Put all the global assignments in front of the root children
+    ast.traverse(reorder_root_children)
+
     # Makes a tree of the symbol tables
     ast.traverse(connect_symbol_table)
     # seeks the types for all the variables in the tree
     ast.traverse(assignment)
     # We need to remove all the allocate expressions, cause they serve no purpose
     ast.traverse(remove_allocate)
-    # Because load immediate for floats doesnt work
-    ast.traverse(make_float_memory)
-    # Cut the printf statement into pieces in order to be compilable in llvm
-    ast.traverse(create_printf)
 
     # merge all the symbol tables into 1 big dict this we can use for assigning variables
     ast.symbol_table.merge()
