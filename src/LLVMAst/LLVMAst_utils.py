@@ -188,7 +188,7 @@ def remove_printf_declaration(ast):
     # TODO Check if the printf declaration is the one of stdio
     if not isinstance(ast, LLVMDeclare):
         return
-    elif ast.name != "printf":
+    elif ast.name not in ["printf", "__isoc99_scanf"]:
         return
 
     # Remove the parents link to its child
@@ -378,7 +378,7 @@ def remove_original_string(string, ast):
 def create_printf(ast):
     if not isinstance(ast, LLVMFunctionUse):
         return
-    elif not ast.name == "printf":
+    elif ast.name not in ["printf", "__isoc99_scanf"]:
         return
 
     string_id = ast.children[0].children[0].name
