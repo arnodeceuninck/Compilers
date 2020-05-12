@@ -202,7 +202,6 @@ def make_float_memory(ast):
     if isinstance(ast.parent.parent, LLVMCode):
         return
 
-    print(ast.value)
     root = get_root(ast)
     # We need to make a new variable to identify the const floats
     var = ".f" + str(ast.id())
@@ -333,6 +332,27 @@ def split_printf_arguments(ast: LLVMAst, cut_string):
     ast.children = printf_arguments
 
 
+def search_string_ast(string, ast):
+    root = get_root(ast)
+    for child in root.children:
+        if not isinstance(child, LLVMAssignment):
+            continue
+        elif not isinstance(child.children[1], LLVMPrintStr):
+            continue
+        elif child.children[1].printvar != string:
+            continue
+        return child.children[1]
+    return None
+
+
+def remove_original_string(string, ast):
+    root = get_root(ast)
+
+    string_ast = search_string_ast(string, ast)
+    node_to_remove = string_ast.parent
+    del root.children[root.children.index(node_to_remove)]
+
+
 def create_printf(ast):
     if not isinstance(ast, LLVMFunctionUse):
         return
@@ -346,6 +366,7 @@ def create_printf(ast):
     # Make correct children out of the printf statement on the global scope
     make_printf_global(cut_string, ast)
     split_printf_arguments(ast, cut_string)
+    remove_original_string(string, ast)
 
 
 # This will perform all the necessary steps to populate the ast
@@ -380,6 +401,7 @@ def compile_llvm(input_file):
 
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
+
     # Generate the mips code
     mips_code(javaForLife)
     # We just need to add the exit in llvm

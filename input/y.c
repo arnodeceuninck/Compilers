@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-int main(){
-    float i = 1.0;
-   	return 1;
+int main() {
+  int i = 1;
+  printf("yeet");
+  return 1;
 }
