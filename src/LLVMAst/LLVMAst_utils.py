@@ -198,6 +198,9 @@ def make_float_memory(ast):
     # If the statement is not a float then do not continue
     if not isinstance(ast, LLVMConstFloat):
         return
+    # If the parent of the assign is llvmcode then we are in the global scope and we do not need to do anything
+    if isinstance(ast.parent.parent, LLVMCode):
+        return
 
     print(ast.value)
     root = get_root(ast)
