@@ -104,6 +104,7 @@ def mips_operator(mips_ast):
 def mips_binary(mips_ast):
     # TODO support float
     if isinstance(mips_ast, LLVMExtension):
+        print("WARNING: LLVMExtension to MIPS code not yet supported")
         return
     if isinstance(mips_ast, LLVMBinaryOperation):
         # This is valid for every equation
@@ -118,6 +119,8 @@ def mips_binary(mips_ast):
             mips_b_div(mips_ast)
         elif mips_ast.operation == "mul":
             mips_b_mul(mips_ast)
+        elif mips_ast.operation == "srem":
+            mips_b_rem(mips_ast)
     elif isinstance(mips_ast, LLVMCompareOperation):
         mips_compare(mips_ast)
     else:
@@ -144,6 +147,10 @@ def mips_b_mul(mips_ast):
     # TODO support float -> mult.s
     mips.output += "\tmult $t0, $t1\n"
     mips.output += "\tmflo $s0\n"
+
+def mips_b_rem(mips_ast):
+    mips.output += "\tdiv $t0, $t1\n"
+    mips.output += "\tmfhi $s0\n"  # Division result in $LO, remainder in $HI
 
 
 # Do nothing on a mips include
