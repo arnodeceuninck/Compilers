@@ -1,6 +1,10 @@
 #include <stdio.h>
 
 int main() {
-  printf("d: %d", 1+1);
+  int x;
+  int y;
+  if (x < y){
+    printf("YEEEETT");
+  }
   return 1;
 }

@@ -41,6 +41,8 @@ def mips_code(mips_ast):
         mips_variable(mips_ast)
     elif isinstance(mips_ast, LLVMStore):
         mips_store(mips_ast)
+    elif isinstance(mips_ast, LLVMLabel):
+        mips_label(mips_ast)
     else:
         return ""
 
@@ -79,6 +81,9 @@ def mips_store(mips_ast):
     # Store this variable then on the location of the variable where the value needs to be stored
     var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
     mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+
+def mips_label(mips_ast):
+    mips.output += "{name}:\n".format(name=mips_ast.name)
 
 
 def mips_return(mips_ast):
