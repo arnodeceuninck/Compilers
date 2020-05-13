@@ -98,7 +98,11 @@ def mips_normal_branch(mips_ast):
     mips.output += "\tb {label}\n".format(label=mips_ast[0].name)
 
 def mips_conditional_branch(mips_ast):
-    pass
+    # TODO: is the variable from mips_ast[0] loaded into $s0?
+    # Jump to the false label if the var is zero
+    mips.output += "\tbeqz {var}, {label}\n".format(var="$s0", label=mips_ast[2].name)
+    # If not false, it must be true
+    mips.output += "\tb {label}\n".format(label=mips_ast[1].name)
 
 def mips_return(mips_ast):
     # If we do not return void then jump to the end and go to the stackframe part in mips
