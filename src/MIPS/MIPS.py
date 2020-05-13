@@ -43,6 +43,8 @@ def mips_code(mips_ast):
         mips_store(mips_ast)
     elif isinstance(mips_ast, LLVMLabel):
         mips_label(mips_ast)
+    elif isinstance(mips_ast, LLVMBranch):
+        mips_branch(mips_ast)
     else:
         return ""
 
@@ -85,6 +87,18 @@ def mips_store(mips_ast):
 def mips_label(mips_ast):
     mips.output += "{name}:\n".format(name=mips_ast.name)
 
+def mips_branch(mips_ast):
+    if isinstance(mips_ast, LLVMNormalBranch):
+        mips_normal_branch(mips_ast)
+    elif isinstance(mips_ast, LLVMConditionalBranch):
+        mips_conditional_branch(mips_ast)
+
+
+def mips_normal_branch(mips_ast):
+    mips.output += "\tb {label}\n".format(label=mips_ast[0].name)
+
+def mips_conditional_branch(mips_ast):
+    pass
 
 def mips_return(mips_ast):
     # If we do not return void then jump to the end and go to the stackframe part in mips
