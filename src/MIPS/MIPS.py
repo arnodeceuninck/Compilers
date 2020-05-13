@@ -148,6 +148,7 @@ def mips_b_mul(mips_ast):
     mips.output += "\tmult $t0, $t1\n"
     mips.output += "\tmflo $s0\n"
 
+
 def mips_b_rem(mips_ast):
     mips.output += "\tdiv $t0, $t1\n"
     mips.output += "\tmfhi $s0\n"  # Division result in $LO, remainder in $HI

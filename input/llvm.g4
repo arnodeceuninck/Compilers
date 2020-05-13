@@ -69,7 +69,7 @@ declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; 
 ptr_index: 'getelementptr inbounds' a_type=array_type ',' array_type'*' variable ', i64 0, i64' index=value;
 
 OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'fsub' | 'fdiv' | 'sdiv' | 'frem' | 'srem');
-CMP_ID: ('sgt' | 'slt' | 'sle' | 'sge' | 'ne' | 'one' | 'olt' | 'slt' | 'ogt' | 'ole' | 'sle' | 'oge' | 'sge' | 'oeq' | 'eq');
+CMP_ID: ('sgt' | 'slt' | 'sle' | 'sge' | 'ne' | 'one' | 'olt' | 'ogt' | 'ole' | 'sle' | 'oge' | 'sge' | 'oeq' | 'eq');
 INT_ID: [0-9]+;
 FLOAT_ID: [0-9]+[.]?[0-9]*;
 VAR_NAME: [a-zA-Z_0-9.]+;
