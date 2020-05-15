@@ -48,6 +48,8 @@ def mips_code(mips_ast):
         mips_label(mips_ast)
     elif isinstance(mips_ast, LLVMBranch):
         mips_branch(mips_ast)
+    elif isinstance(mips_ast, LLVMLoad):
+        mips_load(mips_ast)
     else:
         return ""
 
@@ -87,8 +89,10 @@ def mips_store(mips_ast):
     var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
     mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
 
+
 def mips_label(mips_ast):
     mips.output += "{name}:\n".format(name=mips_ast.name)
+
 
 def mips_branch(mips_ast):
     if isinstance(mips_ast, LLVMNormalBranch):
@@ -100,12 +104,14 @@ def mips_branch(mips_ast):
 def mips_normal_branch(mips_ast):
     mips.output += "\tb {label}\n".format(label=mips_ast[0].name)
 
+
 def mips_conditional_branch(mips_ast):
     # TODO: is the variable from mips_ast[0] loaded into $s0?
     # Jump to the false label if the var is zero
     mips.output += "\tbeqz {var}, {label}\n".format(var="$s0", label=mips_ast[2].name)
     # If not false, it must be true
     mips.output += "\tb {label}\n".format(label=mips_ast[1].name)
+
 
 def mips_return(mips_ast):
     # If we do not return void then jump to the end and go to the stackframe part in mips
@@ -383,8 +389,14 @@ def goto(label: str):
 
 
 # Variable should be mips_formated, e.g. %1
-def mips_load(mips_ast, var: str):
-    return ""
+def mips_load(mips_ast):
+    # TODO support pointer values
+    # We know that the child will be a variable so we need to load that value
+    mips_code(mips_ast.children[0])
+    # Then we need to put that value stored in $t0 into $s0
+    # so that we can store it in the variable that demands the load
+    mips.output += "\tmove $s0, $t0\n"
+    pass
 
 
 def index_load(mips_ast, result, index):

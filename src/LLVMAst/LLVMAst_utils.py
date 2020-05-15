@@ -444,6 +444,7 @@ def make_llvm_ast(ast):
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
 
+    #### SYMBOL TABLE GENERATION ####
     # Makes a tree of the symbol tables
     ast.traverse(connect_symbol_table)
     # seeks the types for all the variables in the tree
