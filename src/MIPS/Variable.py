@@ -2,19 +2,22 @@ def mips_variable(ast):
     # If the parent is an assignment then we need to just return since we store it afterwards into that location
     if isinstance(ast.parent, LLVMAssignment):
         return
+    if isinstance(ast.type, LLVMStringType) or ast.type == "String":
+        return
 
     # We need to check which side of the operation we are so we can load the variable into the correct register
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
-        code = "\tlw $t0, {index_offset}($gp)\n"
+        code = "\tlw $t0, {var_label}\n"
     else:
-        code = "\tlw $t1, {index_offset}($gp)\n"
+        code = "\tlw $t1, {var_label}\n"
 
     # Add the correct index offset to the statement
-    code = code.format(index_offset=ast.get_index_offset())
+    code = code.format(var_label=ast.name)
 
     # Add the newly generated code to the mips code
     mips.output += code
+
 
 def mips_type_variable(ast, ignore_array=False):
     if isinstance(ast, VInt):
@@ -44,4 +47,4 @@ def mips_default_variable(ast):
 
 
 from src.MIPS.MIPS import mips, mips_code, variable, get_mips_type
-from src.LLVMAst.LLVMAst import LLVMAssignment
+from src.LLVMAst.LLVMAst import LLVMAssignment, LLVMStringType

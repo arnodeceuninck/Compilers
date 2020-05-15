@@ -223,7 +223,7 @@ def make_float_memory(ast):
     var_ast = LLVMVariable(var)
     # We need the constant
     const = ast.value
-    const_ast = LLVMConstFloat(const)
+    const_ast = LLVMConstFloat(const, True)
 
     # Generate the global variable for the const float
     const_float_ast = LLVMAssignment()
@@ -431,6 +431,96 @@ def rewrite_printstr(ast):
     ast.value = ast.printvar
 
 
+def get_const_val(type):
+    if type == "int" or type == "i32":
+        return 0
+    elif type == "float" or type == "double":
+        return 0.0
+    elif type == "char" or type == "i8":
+        return ' '
+
+
+def get_var_node(type, name):
+    variable = LLVMVariable(name)
+    variable.type = type
+    return variable
+
+
+def get_const_node(type, value):
+    const = None
+    if type == "i32" or type == "int":
+        const = LLVMConstInt(value)
+    elif type == "double" or type == "float":
+        const = LLVMConstFloat(value)
+    elif type == "char" or type == "i8":
+        const = LLVMConstChar(value)
+
+    return const
+
+
+def create_assignment(variable, var_name) -> LLVMAssignment:
+    # Create the assignment
+    _assignment = LLVMAssignment()
+    _assignment.id()
+
+    type = variable.type
+    if isinstance(type, LLVMType):
+        type = type.type
+
+    # create the children
+    variable_child = get_var_node(type, var_name)
+    variable_child.id()
+    const_val = get_const_val(type)
+    const_child = get_const_node(type, const_val)
+
+    # Set the children of the assignment
+    _assignment.children.extend([variable_child, const_child])
+    # Set the correct parent for both children
+    variable_child.parent = _assignment
+    variable_child.parent = _assignment
+
+    return _assignment
+
+
+def seek_constant(ast, value):
+    retVal = False
+    if not isinstance(ast, LLVMVariable):
+        return False
+    if value == ast.value:
+        return ast.const
+
+    for child in ast.children:
+        retVal += seek_constant(child, value)
+    return retVal
+
+
+def move_global(root: LLVMCode):
+    global_symbol_table = root.symbol_table
+    total_table = root.symbol_table.total_table
+
+    for key in total_table:
+        try:
+            # This line will error when it is not in the global table
+            # Thus we will create the assignment on exception
+            is_global = global_symbol_table[key]
+        except:
+            type = total_table[key].type
+            if isinstance(type, LLVMType):
+                type = LLVMType
+            # If the variable is a string then it already is defined globally
+            if type == "string":
+                continue
+
+            if type == "float" or type == "double":
+                if seek_constant(root, key):
+                    continue
+
+            _assignment = create_assignment(total_table[key], key)
+            # Because this variable is not global we need to append it to the children of the root
+            root.children.append(_assignment)
+            _assignment.parent = root
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
@@ -454,6 +544,11 @@ def make_llvm_ast(ast):
 
     # merge all the symbol tables into 1 big dict this we can use for assigning variables
     ast.symbol_table.merge()
+
+    # We need to move all the variable assignments to the global scope so we can use this
+    move_global(ast)
+    # Put all the global assignments in front of the root children
+    ast.traverse(reorder_root_children)
 
 
 def generate_mips_code(javaForLife):
