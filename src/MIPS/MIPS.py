@@ -13,7 +13,7 @@ class mips:
 
 def mips_code(mips_ast):
 
-    mips.output += "\t# {comment}\n".format(comment=str(mips_ast))
+    mips.output += "\t# {comment}\n".format(comment=mips_ast.comments() )
 
     # generate the global mips along with the variables using it, like the constant floats
     if not mips_ast.parent:
@@ -48,6 +48,8 @@ def mips_code(mips_ast):
         mips_label(mips_ast)
     elif isinstance(mips_ast, LLVMBranch):
         mips_branch(mips_ast)
+    elif isinstance(mips_ast, LLVMLoad):
+        mips_load(mips_ast)
     else:
         return ""
 
@@ -383,7 +385,12 @@ def goto(label: str):
 
 
 # Variable should be mips_formated, e.g. %1
-def mips_load(mips_ast, var: str):
+def mips_load(mips_ast):
+    # TODO pointervalues
+    # Load the variable to store into register $t0
+    var_offset = mips_ast.parent.parent.symbol_table.get_index_offset(str(mips_ast[0]))
+    mips.output += "\tlw $s0, {offset}($gp)\n".format(offset=str(var_offset))
+
     return ""
 
 

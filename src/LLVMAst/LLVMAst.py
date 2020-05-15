@@ -21,6 +21,9 @@ class LLVMAst:
     def __str__(self):
         return self.value
 
+    def comments(self):
+        return str(self)
+
     def __getitem__(self, item):
         return self.children[item]
 
