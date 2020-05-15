@@ -1,10 +1,7 @@
 #include <stdio.h>
 
 int main() {
-  int x;
-  int y;
-  if (x < y){
-    printf("YEEEETT");
-  }
+  int x = 69;
+  printf("Value: %d", x);
   return 1;
 }

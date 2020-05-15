@@ -287,7 +287,7 @@ def mips_print(mips_ast):
     mips_code(mips_ast)
     if var_type == "string":
         mips_print_string(mips_ast)
-    elif var_type == "int":
+    elif var_type == "int" or str(var_type) == "i32":
         mips_print_int(mips_ast)
     elif var_type == "float":
         mips_print_float(mips_ast)
