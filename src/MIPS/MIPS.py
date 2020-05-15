@@ -12,6 +12,9 @@ class mips:
 
 
 def mips_code(mips_ast):
+
+    mips.output += "\t# {comment}\n".format(comment=str(mips_ast))
+
     # generate the global mips along with the variables using it, like the constant floats
     if not mips_ast.parent:
         global_mips(mips_ast)
@@ -121,33 +124,36 @@ def mips_return(mips_ast):
 
 
 def mips_operator(mips_ast):
-    mips_binary(mips_ast)
+    if isinstance(mips_ast, LLVMExtension):
+        print("WARNING: LLVMExtension to MIPS code not yet supported, moving instead")
+        mips_code(mips_ast[0])
+        mips.output += "\tadd $s0, $t0, 0\n"
+        return
+    elif isinstance(mips_ast, LLVMBinaryOperation):
+        mips_binary(mips_ast)
 
 
 def mips_binary(mips_ast):
+    assert isinstance(mips_ast, LLVMBinaryOperation)
     # TODO support float
-    if isinstance(mips_ast, LLVMExtension):
-        print("WARNING: LLVMExtension to MIPS code not yet supported")
-        return
-    if isinstance(mips_ast, LLVMBinaryOperation):
-        # This is valid for every equation
-        # Generate mips code for the left and right side of the equation
-        mips_code(mips_ast[0])
-        mips_code(mips_ast[1])
-        if mips_ast.operation == "add":
-            mips_b_add(mips_ast)
-        elif mips_ast.operation == "sub":
-            mips_b_sub(mips_ast)
-        elif mips_ast.operation == "sdiv":
-            mips_b_div(mips_ast)
-        elif mips_ast.operation == "mul":
-            mips_b_mul(mips_ast)
-        elif mips_ast.operation == "srem":
-            mips_b_rem(mips_ast)
+    # This is valid for every equation
+    # Generate mips code for the left and right side of the equation
+    mips_code(mips_ast[0])
+    mips_code(mips_ast[1])
+    if mips_ast.operation == "add":
+        mips_b_add(mips_ast)
+    elif mips_ast.operation == "sub":
+        mips_b_sub(mips_ast)
+    elif mips_ast.operation == "sdiv":
+        mips_b_div(mips_ast)
+    elif mips_ast.operation == "mul":
+        mips_b_mul(mips_ast)
+    elif mips_ast.operation == "srem":
+        mips_b_rem(mips_ast)
     elif isinstance(mips_ast, LLVMCompareOperation):
         mips_compare(mips_ast)
     else:
-        raise Exception("Unknown AST")
+        raise Exception("Unknown Operation")
 
 
 def mips_b_add(mips_ast):

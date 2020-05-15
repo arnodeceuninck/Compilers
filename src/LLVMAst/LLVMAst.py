@@ -126,12 +126,12 @@ class LLVMCompareOperation(LLVMBinaryOperation):
         super().__init__(operation)
 
 
-class LLVMFloatCompareOperation(LLVMBinaryOperation):
+class LLVMFloatCompareOperation(LLVMCompareOperation):
     def __init__(self, operation):
         super().__init__(operation)
 
 
-class LLVMIntCompareOperation(LLVMBinaryOperation):
+class LLVMIntCompareOperation(LLVMCompareOperation):
     def __init__(self, operation):
         super().__init__(operation)
 
