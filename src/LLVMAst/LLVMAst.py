@@ -182,6 +182,9 @@ class LLVMConstChar(LLVMConst):
     def get_mips_type(self):
         return ".byte"
 
+    def get_type(self):
+        return "i8"
+
 
 class LLVMConstInt(LLVMConst):
     def __init__(self, value):
@@ -197,7 +200,7 @@ class LLVMConstInt(LLVMConst):
         return ".word"
 
     def get_type(self):
-        return "int"
+        return "i32"
 
 
 class LLVMConstFloat(LLVMConst):
@@ -381,10 +384,16 @@ class LLVMType(LLVMAst):
         self.ptr = ptr
 
     def __str__(self):
-        return self.type + "*"*self.ptr
+        return self.type + "*" * self.ptr
 
 
-class LLVMStringType(LLVMAst):
+class LLVMIntType(LLVMType):
+    def __init__(self, length):
+        super().__init__("String")
+        self.length = int(length)
+
+
+class LLVMStringType(LLVMType):
     def __init__(self, length):
         super().__init__("String")
         self.length = int(length)

@@ -89,10 +89,7 @@ def assignment(ast):
         type = None
         # If we find that this so called variable is a constant then we need to seek the type
         if isinstance(defined_var, LLVMConst):
-            if isinstance(defined_var, LLVMConstFloat):
-                type = "float"
-            elif isinstance(defined_var, LLVMConstInt):
-                type = "int"
+            type = defined_var.get_type()
         # Else if it is a variable then we need to get the type of the LLVMVariable from the table
         elif isinstance(defined_var, LLVMVariable):
             # Seek the variable in the symbol table
@@ -269,7 +266,7 @@ def cut_format_string(string: str) -> list:
     while idx < len(string):
         if string[idx] == "\\":
             # Should always be 2 chars after a backslash
-            escaped = string[idx] + string[idx+1] + string[idx+2]
+            escaped = string[idx] + string[idx + 1] + string[idx + 2]
             to = translations.get(escaped)
             if to:
                 string1 = string[:idx]
@@ -535,6 +532,18 @@ def move_global(root: LLVMCode):
             _assignment.parent = root
 
 
+def make_correct_llvm_type(ast):
+    if not isinstance(ast, LLVMVariable):
+        return
+
+    if ast.type == "String":
+        ast.type = LLVMStringType(0)
+    elif ast.type == "int":
+        ast.type = "i32"
+    elif ast.type == "char":
+        ast.type = "i8"
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
@@ -547,6 +556,8 @@ def make_llvm_ast(ast):
     ast.traverse(rewrite_printstr)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
+    # Make all the types to LLVMType in order to have a great consistency over the entire codebase
+    ast.traverse(make_correct_llvm_type)
 
     #### SYMBOL TABLE GENERATION ####
     # Makes a tree of the symbol tables
@@ -563,6 +574,8 @@ def make_llvm_ast(ast):
     move_global(ast)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
+    # Make all the types to LLVMType in order to have a great consistency over the entire codebase
+    ast.traverse(make_correct_llvm_type)
 
 
 def generate_mips_code(javaForLife):
