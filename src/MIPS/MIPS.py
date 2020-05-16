@@ -81,7 +81,10 @@ def mips_type_function(mips_ast):
 
 def mips_store(mips_ast):
     # New code
-    mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
+    if mips_ast.type.ptr:
+        mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
+    else:
+        mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
     mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
 
 

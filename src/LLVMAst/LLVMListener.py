@@ -171,7 +171,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#binary.
     def enterBinary(self, ctx: llvmParser.BinaryContext):
         self.add(LLVMBinaryOperation(operation=ctx.op.text))
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#binary.
@@ -258,7 +258,11 @@ class LLVMListener(ParseTreeListener):
             while text[len(text) - 1 - ptr] == '*':
                 ptr += 1
 
-            typeText = ctx.getText()[:-ptr]
+            typeText = ctx.getText() # in case ptr = 0
+
+            if ptr:
+                typeText = typeText[:-ptr]
+
             self.add(LLVMType(typeText, ptr))
             self.type_ctr -= 1
         pass

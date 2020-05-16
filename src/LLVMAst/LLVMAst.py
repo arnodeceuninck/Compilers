@@ -381,7 +381,7 @@ class LLVMType(LLVMAst):
         self.ptr = ptr
 
     def __str__(self):
-        return self.type
+        return self.type + "*"*self.ptr
 
 
 class LLVMStringType(LLVMAst):
