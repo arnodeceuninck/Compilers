@@ -353,8 +353,10 @@ def create_printf_arguments(ast, cut_string):
             new_argument.type = "String"
         else:
             if not idx:
+                var_ctr = 1
                 idx += 1
-            new_argument = ast.children[0].children[idx]
+            new_argument = ast.children[0].children[var_ctr]
+            var_ctr += 1
         new_argument.parent = ast
         arguments.append(new_argument)
 

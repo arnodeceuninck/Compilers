@@ -166,7 +166,7 @@ def mips_binary(mips_ast):
     elif isinstance(mips_ast, LLVMCompareOperation):
         mips_compare(mips_ast)
     else:
-        raise Exception("Unknown Operation")
+        raise Exception("Unknown Operation: {}".format(mips_ast.operation))
 
 
 def mips_b_add(mips_ast):
