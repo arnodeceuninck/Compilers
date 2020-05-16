@@ -253,7 +253,13 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#normal_type.
     def enterNormal_type(self, ctx: llvmParser.Normal_typeContext):
         if self.type_ctr:
-            self.add(LLVMType(ctx.getText()))
+            ptr = 0
+            text = ctx.getText()
+            while text[len(text) - 1 - ptr] == '*':
+                ptr += 1
+
+            typeText = ctx.getText()[:-ptr]
+            self.add(LLVMType(typeText, ptr))
             self.type_ctr -= 1
         pass
 
