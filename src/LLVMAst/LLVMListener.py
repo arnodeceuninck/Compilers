@@ -120,19 +120,19 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#store.
     def enterStore(self, ctx: llvmParser.StoreContext):
         self.add(LLVMStore())
-        self.type_ctr += 1 # Expecting store type
+        # self.type_ctr += 1 # Expecting store type
         pass
 
     # Exit a parse tree produced by llvmParser#store.
     def exitStore(self, ctx: llvmParser.StoreContext):
-        v1 = self.trees.pop()
-        v2 = self.trees.pop()
-        type = self.trees.pop()
-        op = self.trees.pop()
-        op.type = type
-        self.add(op)
-        self.add(v2)
-        self.add(v1)
+        # v1 = self.trees.pop()
+        # v2 = self.trees.pop()
+        # type = self.trees.pop()
+        # op = self.trees.pop()
+        # op.type = type
+        # self.add(op)
+        # self.add(v2)
+        # self.add(v1)
         self.simplify(2)
         pass
 
@@ -171,19 +171,19 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#binary.
     def enterBinary(self, ctx: llvmParser.BinaryContext):
         self.add(LLVMBinaryOperation(operation=ctx.op.text))
-        self.type_ctr += 1  # Expecting type
+        # self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#binary.
     def exitBinary(self, ctx: llvmParser.BinaryContext):
-        v1 = self.trees.pop()
-        v2 = self.trees.pop()
-        type = self.trees.pop()
-        op = self.trees.pop()
-        op.optype = type
-        self.add(op)
-        self.add(v2)
-        self.add(v1)
+        # v1 = self.trees.pop()
+        # v2 = self.trees.pop()
+        # type = self.trees.pop()
+        # op = self.trees.pop()
+        # op.optype = type
+        # self.add(op)
+        # self.add(v2)
+        # self.add(v1)
         self.simplify(2)
         pass
 
@@ -227,6 +227,8 @@ class LLVMListener(ParseTreeListener):
         type = self.trees.pop()
         op = self.trees.pop()
         op.type = type
+        if ctx.var:
+            v1.type = type
         self.add(op)
         if ctx.var:
             self.add(v1)
@@ -389,21 +391,21 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#conditional_branch.
     def enterConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
         self.add(LLVMConditionalBranch())
-        self.type_ctr += 1 # Expecting type
+        # self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#conditional_branch.
     def exitConditional_branch(self, ctx: llvmParser.Conditional_branchContext):
-        v1 = self.trees.pop()
-        v2 = self.trees.pop()
-        v3 = self.trees.pop()
-        type = self.trees.pop()
-        op = self.trees.pop()
-        op.optype = type
-        self.add(op)
-        self.add(v3)
-        self.add(v2)
-        self.add(v1)
+        # v1 = self.trees.pop()
+        # v2 = self.trees.pop()
+        # v3 = self.trees.pop()
+        # type = self.trees.pop()
+        # op = self.trees.pop()
+        # op.optype = type
+        # self.add(op)
+        # self.add(v3)
+        # self.add(v2)
+        # self.add(v1)
         self.simplify(3)
         pass
 
@@ -454,7 +456,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#extension.
     def enterExtension(self, ctx: llvmParser.ExtensionContext):
         self.add(LLVMExtension(ctx.op.text))
-        self.type_ctr += 2 # Expecting type from and to
+        self.type_ctr += 1 # Expecting type from and to
         pass
 
     # Exit a parse tree produced by llvmParser#extension.
@@ -472,19 +474,19 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#compare.
     def enterCompare(self, ctx: llvmParser.CompareContext):
-        self.type_ctr += 1 # Expecting type
+        # self.type_ctr += 1 # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#compare.
     def exitCompare(self, ctx: llvmParser.CompareContext):
-        v1 = self.trees.pop()
-        v2 = self.trees.pop()
-        type = self.trees.pop()
-        op = self.trees.pop()
-        op.optype = type
-        self.add(op)
-        self.add(v2)
-        self.add(v1)
+        # v1 = self.trees.pop()
+        # v2 = self.trees.pop()
+        # type = self.trees.pop()
+        # op = self.trees.pop()
+        # op.optype = type
+        # self.add(op)
+        # self.add(v2)
+        # self.add(v1)
         self.simplify(2)
         pass
 

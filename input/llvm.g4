@@ -24,24 +24,24 @@ label: name=VAR_NAME ':';
 
 branch: conditional_branch | normal_branch;
 
-conditional_branch: 'br' optype=type_ variable ', label' iftrue=variable ', label' iffalse=variable;
+conditional_branch: 'br' typed_variable ', label' iftrue=variable ', label' iffalse=variable;
 normal_branch: 'br' 'label' variable;
 
-store: 'store' optype=type_ variable ',' type_ variable (', align' align=INT_ID)?; // same todo as with load
+store: 'store' typed_variable ',' typed_variable (', align' align=INT_ID)?; // same todo as with load
 
-load: 'load' optype=type_ ',' type_ variable (', align' align=INT_ID)?; // TODO: is align required in tree? probably it is for arrays
+load: 'load' optype=type_ ',' typed_variable (', align' align=INT_ID)?; // TODO: is align required in tree? probably it is for arrays
 
 assignment: variable '=' rvalue;
 
 rvalue: alocation | function_call | print_str | load | expression | extension | ptr_index;
 
-extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui' | 'uitofp') type_from=type_ variable 'to' type_to=type_;
+extension: op=('fpext' | 'trunc' | 'sitofp' | 'sext' | 'zext' | 'fptosi' | 'fptoui' | 'fpext' | 'fptoui' | 'uitofp') variable_from=typed_variable 'to' type_to=type_;
 
 expression: binary | compare;
 compare: float_compare | int_compare;
-float_compare: 'fcmp' op=CMP_ID optype=type_ value  ',' value;
-int_compare: 'icmp' op=CMP_ID optype=type_ value  ',' value;
-binary: op=OP_ID optype=type_ value  ',' value;
+float_compare: 'fcmp' op=CMP_ID typed_variable  ',' value;
+int_compare: 'icmp' op=CMP_ID optype=typed_variable  ',' value;
+binary: op=OP_ID optype=typed_variable  ',' value;
 
 alocation: ('alloca' | global_='global') optype=type_ ('undef')? ', align' align_index=INT_ID;
 
@@ -66,7 +66,7 @@ print_str: 'private unnamed_addr constant [' c_count=INT_ID ' x i8] c' var=STR_I
 
 declaration: 'declare ' rettype=type_ '@' fname=VAR_NAME '(' argument_list ')'; // TODO: arglist and real name
 
-ptr_index: 'getelementptr inbounds' a_type=array_type ',' array_type'*' variable ', i64 0, i64' index=value;
+ptr_index: 'getelementptr inbounds' a_type=array_type ',' typed_variable ', i64 0, i64' index=value;
 
 OP_ID: ('add' | 'sub' | 'fadd' | 'fsub' | 'mul' | 'fmul' | 'fsub' | 'fdiv' | 'sdiv' | 'frem' | 'srem');
 CMP_ID: ('sgt' | 'slt' | 'sle' | 'sge' | 'ne' | 'one' | 'olt' | 'ogt' | 'ole' | 'sle' | 'oge' | 'sge' | 'oeq' | 'eq');
