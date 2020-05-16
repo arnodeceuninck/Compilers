@@ -400,12 +400,17 @@ def goto(label: str):
 
 # Variable should be mips_formated, e.g. %1
 def mips_load(mips_ast):
-    # TODO support pointer values
-    # We know that the child will be a variable so we need to load that value
+
     mips_code(mips_ast.children[0])
-    # Then we need to put that value stored in $t0 into $s0
-    # so that we can store it in the variable that demands the load
-    mips.output += "\tmove $s0, $t0\n"
+    # mips.output += "\tla $t0, {var}\n".format(var=mips_ast.children[0].name)
+    if mips_ast.type.ptr:
+        mips.output += "\tlw $s0, 0($t0)\n"
+    # # We know that the child will be a variable so we need to load that value
+    # mips_code(mips_ast.children[0])
+    # # Then we need to put that value stored in $t0 into $s0
+    # # so that we can store it in the variable that demands the load
+    else:
+        mips.output += "\tmove $s0, $t0\n"
     pass
 
 
