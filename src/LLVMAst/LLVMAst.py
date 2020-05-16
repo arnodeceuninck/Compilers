@@ -145,9 +145,10 @@ class LLVMAssignment(LLVMAst):
 
 
 class LLVMVariable(LLVMAst):
-    def __init__(self, name):
+    def __init__(self, name, const=False):
         super().__init__(name)
         self.name = name
+        self.const = const
         self.type = None  # Currently only set with use argument
 
     def __str__(self):
@@ -161,6 +162,20 @@ class LLVMConst(LLVMAst):
     def __init__(self, value):
         super().__init__(value)
         self.constval = value
+
+
+class LLVMConstChar(LLVMConst):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return "char {val}".format(val=self.constval)
+
+    def get_str_value(self):
+        return self.constval
+
+    def get_mips_type(self):
+        return ".byte"
 
 
 class LLVMConstInt(LLVMConst):
@@ -181,7 +196,7 @@ class LLVMConstInt(LLVMConst):
 
 
 class LLVMConstFloat(LLVMConst):
-    def __init__(self, value):
+    def __init__(self, value, const=False):
         super().__init__(value)
 
     def __str__(self):
@@ -377,5 +392,6 @@ class LLVMArrayType(LLVMType):
 
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)
+
 
 from src.symbolTable import *

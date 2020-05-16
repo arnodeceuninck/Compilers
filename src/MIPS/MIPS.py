@@ -220,10 +220,8 @@ def build_start_stackframe(symbol_table: SymbolTable):
     for i, v in enumerate(symbol_table.elements):
         # Add -4 to the frame offset because we advance 1 variable
         frame_offset += -4
-        # Load the variable used into register t0
-        # But first calculate its offset in the gp
-        var_offset = symbol_table.get_index_offset(v)
-        stackframe_string += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+        # load the variable into register $t0
+        stackframe_string += "\tlw $t0, {var_label}\n".format(var_label=str(v))
         # store this variable into the stack
         stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
 
@@ -242,10 +240,8 @@ def build_end_stackframe(symbol_table: SymbolTable):
         # load this variable from the stack
         stackframe_string += "\tlw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
 
-        # store the variable into register the gp because it was the previous one
-        # But first calculate its offset in the gp
-        var_offset = symbol_table.get_index_offset(v)
-        stackframe_string += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+        # store the variable into label
+        stackframe_string += "\tsw $t0, {var_label}\n".format(var_label=str(v))
 
         # Add 4 to the frame offset because we advance 1 variable
         frame_offset += 4
@@ -343,7 +339,7 @@ def global_mips(mips_ast):
         var_name = child.children[0].name
         var_value = child.children[1].get_str_value()
         var_type = child.children[1].get_mips_type()
-        mips.output += "\t" + var_name + ": " + var_type + " " + var_value + "\n"
+        mips.output += "\t" + var_name + ": " + var_type + " " + str(var_value) + "\n"
 
 
 def mips_assign(mips_ast):
