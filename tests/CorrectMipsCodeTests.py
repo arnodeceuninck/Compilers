@@ -1,7 +1,7 @@
 import unittest
 
 from src.Node.AST_utils import *
-from src.LLVMAst.LLVMAst_utils import compile_llvm
+from src.LLVMAst.LLVMAst_utils import compile_llvm, LLVMAst, SymbolTable
 from src.ErrorListener import *
 import inspect
 import unittest
@@ -24,6 +24,8 @@ class CorrectMipsCodeTests(unittest.TestCase):
         test_name = function_name.split('_')[1]
 
         AST.reset()
+        # LLVMAst.reset()
+        SymbolTable.reset()
 
         input_file: str = "CompilersBenchmark/CorrectCode/" + test_name + ".c"
         temp_file: str = "tests/output/CorrectCodeOutput.ll"

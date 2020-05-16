@@ -13,7 +13,7 @@ class mips:
 
 def mips_code(mips_ast):
 
-    mips.output += "\t# {comment}\n".format(comment=mips_ast.comments() )
+    mips.output += "\t# {comment}\n".format(comment=mips_ast.comments())
 
     # generate the global mips along with the variables using it, like the constant floats
     if not mips_ast.parent:

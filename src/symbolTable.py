@@ -12,6 +12,11 @@ class SymbolTable:
     dot_output = ""
     total_table = dict()
 
+    @staticmethod
+    def reset():
+        SymbolTable.dot_output = ""
+        SymbolTable.total_table = dict()
+
     def __init__(self, id):
         self.elements = dict()
         self.parent = None  # The next symbol table to use

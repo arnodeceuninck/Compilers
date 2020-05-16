@@ -56,7 +56,7 @@ return_: 'ret' rettype=type_ (var=variable)?; // variable is optional in case of
 variable: ('%' | '@') var=(VAR_NAME | INT_ID); // %0 for arguments gives a lot of errors if i don't add int id
 
 type_: normal_type | array=array_type;
-normal_type: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | double='i64' | '...') (ptr='*')?; // ... for printf
+normal_type: (int_='i32'|float_='float'|char_='i8'|bool_='i1'|void_='void' | double_='double' | double='i64' | '...') (ptr='*')*; // ... for printf
 array_type: '[' max_count=INT_ID ' x ' element_type=normal_type ']';
 
 function_call: 'call' rettype=type_ ('(' argument_list ')')? '@' fname=VAR_NAME '(' use_arg_list ')';

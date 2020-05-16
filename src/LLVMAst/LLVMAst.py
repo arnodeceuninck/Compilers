@@ -11,6 +11,11 @@ class LLVMAst:
     _id = 0
     offset_dct = {}
 
+    @staticmethod
+    def reset():
+        LLVMAst._id = 0
+        LLVMAst.offset_dct = {}
+
     def __init__(self, value):
         self.value = value
         self.children = []

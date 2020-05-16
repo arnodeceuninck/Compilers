@@ -584,6 +584,9 @@ def compile_llvm(input_file, output_file, debug_dot=False):
     walker.walk(customListener, tree)
     javaForLife = customListener.trees[0]
 
+    if javaForLife.id_ == 1566:
+        print("Debug")
+
     if debug_dot:
         dot(javaForLife, "output/llvm_debug_tree.dot")
 
