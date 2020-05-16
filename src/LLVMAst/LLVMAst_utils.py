@@ -251,7 +251,7 @@ def make_float_memory(ast):
 
 
 def remove_null(string_list: list) -> list:
-    if not isinstance(string_list[len(string_list) - 1], str):
+    if not string_list or not isinstance(string_list[len(string_list) - 1], str):
         return string_list
     # Remove the last 3 null terminating characters
     string_list[len(string_list) - 1] = string_list[len(string_list) - 1][:-3]
@@ -366,23 +366,23 @@ def split_printf_arguments(ast: LLVMAst, cut_string):
     ast.children = printf_arguments
 
 
-def search_string_ast(string, ast):
+def search_string_ast(string_id, ast):
     root = get_root(ast)
     for child in root.children:
         if not isinstance(child, LLVMAssignment):
             continue
         elif not isinstance(child.children[1], LLVMPrintStr):
             continue
-        elif child.children[1].printvar != string:
+        elif child.children[0].name != string_id:
             continue
-        return child.children[1]
+        return child.children[0]
     return None
 
 
-def remove_original_string(string, ast):
+def remove_original_string(string_id, ast):
     root = get_root(ast)
 
-    string_ast = search_string_ast(string, ast)
+    string_ast = search_string_ast(string_id, ast)
     node_to_remove = string_ast.parent
     del root.children[root.children.index(node_to_remove)]
 
@@ -400,7 +400,7 @@ def create_printf(ast):
     # Make correct children out of the printf statement on the global scope
     make_printf_global(cut_string, ast)
     split_printf_arguments(ast, cut_string)
-    remove_original_string(string, ast)
+    remove_original_string(string_id, ast)
 
 
 def get_llvm_node_type(root, type) -> list:
