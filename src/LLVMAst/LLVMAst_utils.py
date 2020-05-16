@@ -263,10 +263,22 @@ def cut_format_string(string: str) -> list:
     element = ""
     idx = 0
     string = str(string[1:-1])
+    # WARNING: When adding something here, also add it in AST.py
+    translations = {"\\0A": "\\n", "\\08": "\\b", "\\1B": "\\e", "\\07": "\\a", "\\0C": "\\f", "\\0D": "\\r",
+                    "\\09": "\\t", "\\0B": "\\v", "\\5C": "\\\\", "\\27": "\\'", "\\22": "\\\"", "\\3F": "\\?"}
     while idx < len(string):
+        if string[idx] == "\\":
+            # Should always be 2 chars after a backslash
+            escaped = string[idx] + string[idx+1] + string[idx+2]
+            to = translations.get(escaped)
+            if to:
+                string1 = string[:idx]
+                string2 = string[idx + 3:]
+                string = string1 + to + string2
+
         # We check for a format tag, because if there is then we need to split the string
         if string[idx] == '%':
-            if string[idx - 1] == "\\":
+            if string[idx - 1] == "\\":  # Huh? I'm confused, why doesn't this crash with the string "%"?
                 idx += 1
                 continue
             if len(element):
