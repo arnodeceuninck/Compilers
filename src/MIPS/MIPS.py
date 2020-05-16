@@ -80,14 +80,21 @@ def mips_type_function(mips_ast):
 
 
 def mips_store(mips_ast):
-    # TODO pointervalues
-    # Load the variable to store into register $t0
-    var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[0]))
-    mips.output += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+    # New code
+    mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
+    mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
 
-    # Store this variable then on the location of the variable where the value needs to be stored
-    var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
-    mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+
+    # Old code
+    # # TODO pointervalues
+    # # Load the variable to store into register $t0
+    # # var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[0]))
+    # # mips.output += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+    #
+    #
+    # # Store this variable then on the location of the variable where the value needs to be stored
+    # var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
+    # mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
 
 
 def mips_label(mips_ast):
@@ -221,7 +228,10 @@ def build_start_stackframe(symbol_table: SymbolTable):
         # Add -4 to the frame offset because we advance 1 variable
         frame_offset += -4
         # load the variable into register $t0
+        # old
         stackframe_string += "\tlw $t0, {var_label}\n".format(var_label=str(v))
+        # new
+        # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
         # store this variable into the stack
         stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
 
@@ -348,7 +358,8 @@ def mips_assign(mips_ast):
 
     # TODO support floats
     # Store this value into the variable
-    mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
+    # mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
+    mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
 
 
 def mips_operation_sequence(mips_ast):
