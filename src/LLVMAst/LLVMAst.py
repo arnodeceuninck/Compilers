@@ -343,11 +343,10 @@ class LLVMLabel(LLVMAst):
 class LLVMExtension(LLVMOperation):
     def __init__(self, op):
         super().__init__(op)
-        self.from_type = None
-        self.to_type = None
+        self.type_to = None
 
     def __str__(self):
-        return "{op} {from_} to {to_}".format(op=self.operation, from_=self.from_type, to_=self.to_type)
+        return "{op} {from_} to {to_}".format(op=self.operation, from_=self[0].type, to_=self.type_to)
 
 
 class LLVMBranch(LLVMAst):

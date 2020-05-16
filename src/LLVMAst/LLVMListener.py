@@ -463,9 +463,7 @@ class LLVMListener(ParseTreeListener):
     def exitExtension(self, ctx: llvmParser.ExtensionContext):
         type_to = self.trees.pop()
         v2 = self.trees.pop()
-        type_from = self.trees.pop()
         op = self.trees.pop()
-        op.type_from = type_from
         op.type_to = type_to
         self.add(op)
         self.add(v2)
@@ -512,7 +510,7 @@ class LLVMListener(ParseTreeListener):
     def enterPtr_index(self, ctx: llvmParser.Ptr_indexContext):
         # index = ctx.index.text # Child will contain index
         self.add(LLVMArrayIndex())
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#ptr_index.
