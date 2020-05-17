@@ -568,8 +568,8 @@ def add_type_to_var(ast):
     total_table = symbol_table.total_table
     type = total_table[ast.value].type
     if isinstance(type, LLVMType):
-        return
-    if type.lower() == "string" and not ast.type:
+        ast.type = type
+    elif type.lower() == "string" and not ast.type:
         ast.type = LLVMStringType(0)
     elif type.lower() == "string" and ast.type:
         pass
@@ -640,8 +640,8 @@ def compile_llvm(input_file, output_file, debug_dot=False):
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
 
-    # generate_mips_code(javaForLife)
+    generate_mips_code(javaForLife)
 
-    # mips().to_file(output_file)
+    mips().to_file(output_file)
     # print(mips.output)
     return javaForLife

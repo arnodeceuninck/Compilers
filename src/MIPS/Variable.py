@@ -14,7 +14,7 @@ def mips_variable(ast):
 
 
 def mips_load(mips_ast, idx, var_label):
-    mips.output += "\tlw $s0, {var}\n".format(var=mips_ast[0].name)
+    mips.output += "\tlw $s0, {var}\n".format(var=mips_ast.name)
     if mips_ast.type.ptr:
         mips.output += "\t lw $s0, 0($s0)\n"
     if mips_ast.type == "float":

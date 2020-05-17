@@ -71,7 +71,7 @@ def get_mips_type(mips_ast):
 def mips_type_operation(mips_ast):
     if isinstance(mips_ast, LLVMExtension):
         return ""
-    return mips_ast.optype.type
+    return mips_ast[0].type.type
 
 
 def mips_type_function(mips_ast):
