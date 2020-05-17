@@ -585,11 +585,11 @@ def make_llvm_ast(ast):
     ast.symbol_table.merge()
 
     # We need to move all the variable assignments to the global scope so we can use this
-    move_global(ast)
+    # move_global(ast)
     # Put all the global assignments in front of the root children
-    ast.traverse(reorder_root_children)
+    # ast.traverse(reorder_root_children)
     # Make all the types to LLVMType in order to have a great consistency over the entire codebase
-    ast.traverse(make_correct_llvm_type)
+    # ast.traverse(make_correct_llvm_type)
     # Add a type to all the variable based on the symbol_table
     # ast.traverse(add_type_to_var)
 
