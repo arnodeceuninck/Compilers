@@ -81,20 +81,23 @@ def mips_type_function(mips_ast):
     elif mips_ast.return_type == "void":
         return 'void'
 
+def symbol_table_type(name, ast):
+    while ast.parent:
+        ast = ast.parent
+    element = ast.symbol_table.total_table[name]
+    if element:
+        return element
+    else:
+        raise Exception("Type not found")
 
 def mips_store(mips_ast):
     # New code
-    if mips_ast[1].type.ptr:
-        # mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
-        # mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
-        # mips.output += "\tsw $t0, 0($t1)\n"
-        # return
+    if symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
         # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
-        mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
+        mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
         mips.output += "\tsw $t0, 0($t1)\n".format(var=mips_ast[1].name)
     else:
-        print("I think this code is unreachable (and I can live with that)")
         mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
 
@@ -373,9 +376,7 @@ def mips_assign(mips_ast):
     # TODO support floats
     # Store this value into the variable
     # mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
-    mips.output += "\tla $t1, {var}\n".format(var=mips_ast[0].name)
-    mips.output += "\tsw $s0, 0($t1)\n"
-    return
+
     mips.output += "\tsw $s0, {var}\n".format(var=mips_ast[0].name)
 
 

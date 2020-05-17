@@ -14,6 +14,8 @@ scanCall = "\tcall i32 (i8*, ...) @__isoc99_scanf({scan_arg})\n"
 
 
 def llvm_code(ast):
+    if isinstance(ast.parent, StatementSequence):
+        llvm.output += "\n"
     llvm.output += ast.comments()
 
     if isinstance(ast, StatementSequence):

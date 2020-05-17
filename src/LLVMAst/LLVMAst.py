@@ -186,7 +186,7 @@ class LLVMConstChar(LLVMConst):
         return ".byte"
 
     def get_type(self):
-        return "i8"
+        return LLVMType("i8")
 
 
 class LLVMConstInt(LLVMConst):
@@ -203,7 +203,7 @@ class LLVMConstInt(LLVMConst):
         return ".word"
 
     def get_type(self):
-        return "i32"
+        return LLVMType("i32")
 
 
 class LLVMConstFloat(LLVMConst):
@@ -220,7 +220,7 @@ class LLVMConstFloat(LLVMConst):
         return ".float"
 
     def get_type(self):
-        return "float"
+        return LLVMType("float")
 
 
 class LLVMStore(LLVMAst):
@@ -254,7 +254,7 @@ class LLVMPrintStr(LLVMAst):
         return ".asciiz"
 
     def get_type(self):
-        return "string"
+        return LLVMStringType(self.ccount)
 
     def get_str_value(self):
         return "\"" + self.printvar + "\""
@@ -392,10 +392,10 @@ class LLVMType(LLVMAst):
         return self.type + "*" * self.ptr
 
 
-class LLVMIntType(LLVMType):
-    def __init__(self, length):
-        super().__init__("String")
-        self.length = int(length)
+# class LLVMIntType(LLVMType):
+#     def __init__(self, length):
+#         super().__init__("String")
+#         self.length = int(length)
 
 
 class LLVMStringType(LLVMType):
