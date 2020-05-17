@@ -13,6 +13,9 @@ class mips:
 
 def mips_code(mips_ast):
 
+    if isinstance(mips_ast.parent, LLVMOperationSequence):
+        mips.output += "\n"
+
     mips.output += "\t# {comment}\n".format(comment=mips_ast.comments())
 
     # generate the global mips along with the variables using it, like the constant floats
@@ -81,11 +84,17 @@ def mips_type_function(mips_ast):
 
 def mips_store(mips_ast):
     # New code
-    if mips_ast[0].type.ptr:
-        mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
+    if mips_ast[1].type.ptr:
+        # mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
+        # mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
+        # mips.output += "\tsw $t0, 0($t1)\n"
+        # return
+        # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
+        mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
-        mips.output += "\tsw $t0, 0($t1)\n"
+        mips.output += "\tsw $t0, 0($t1)\n".format(var=mips_ast[1].name)
     else:
+        print("I think this code is unreachable (and I can live with that)")
         mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
 
@@ -364,7 +373,10 @@ def mips_assign(mips_ast):
     # TODO support floats
     # Store this value into the variable
     # mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
-    mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
+    mips.output += "\tla $t1, {var}\n".format(var=mips_ast[0].name)
+    mips.output += "\tsw $s0, 0($t1)\n"
+    return
+    mips.output += "\tsw $s0, {var}\n".format(var=mips_ast[0].name)
 
 
 def mips_operation_sequence(mips_ast):
@@ -403,9 +415,14 @@ def goto(label: str):
 # Variable should be mips_formated, e.g. %1
 def mips_load(mips_ast):
 
+    mips.output += "\tlw $s0, {var}\n".format(var=mips_ast[0].name)
+    return
+
     mips_code(mips_ast.children[0])
     # mips.output += "\tla $t0, {var}\n".format(var=mips_ast.children[0].name)
     if mips_ast.type.ptr:
+        # pass
+        # mips.output += "\tla $s0, 0($t0)\n"
         mips.output += "\tlw $s0, 0($t0)\n"
     # # We know that the child will be a variable so we need to load that value
     # mips_code(mips_ast.children[0])

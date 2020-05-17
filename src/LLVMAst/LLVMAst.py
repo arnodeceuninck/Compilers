@@ -148,6 +148,9 @@ class LLVMAssignment(LLVMAst):
     def __init__(self):
         super().__init__("=")
 
+    def comments(self):
+        return self[0].comments() + " = " + self[1].comments()
+
 
 class LLVMVariable(LLVMAst):
     def __init__(self, name, const=False):
@@ -280,6 +283,9 @@ class LLVMLoad(LLVMAst):
 
     def __str__(self):
         return "load {type}".format(type=self.type)
+
+    def comments(self):
+        return "load {type}, {var}".format(type=self.type, var=self[0])
 
 
 class LLVMReturn(LLVMAst):
