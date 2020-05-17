@@ -544,6 +544,20 @@ def make_correct_llvm_type(ast):
         ast.type = "i8"
 
 
+def add_type_to_var(ast):
+    if not isinstance(ast, LLVMVariable):
+        return
+    symbol_table = ast.get_symbol_table()
+    total_table = symbol_table.total_table
+    type = total_table[ast.value].type
+    if type.lower() == "string" and not ast.type:
+        ast.type = LLVMStringType(0)
+    elif type.lower() == "string" and ast.type:
+        pass
+    else:
+        ast.type = type
+
+
 # This will perform all the necessary steps to populate the ast
 def make_llvm_ast(ast):
     # We need to remove printf as a function declaration because it causes all kind of issues
@@ -576,6 +590,8 @@ def make_llvm_ast(ast):
     ast.traverse(reorder_root_children)
     # Make all the types to LLVMType in order to have a great consistency over the entire codebase
     ast.traverse(make_correct_llvm_type)
+    # Add a type to all the variable based on the symbol_table
+    # ast.traverse(add_type_to_var)
 
 
 def generate_mips_code(javaForLife):
@@ -605,8 +621,8 @@ def compile_llvm(input_file, output_file, debug_dot=False):
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
 
-    generate_mips_code(javaForLife)
+    # generate_mips_code(javaForLife)
 
-    mips().to_file(output_file)
+    # mips().to_file(output_file)
     # print(mips.output)
     return javaForLife

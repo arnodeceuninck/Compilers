@@ -79,6 +79,13 @@ class LLVMAst:
             position += 1
         return position
 
+    def get_symbol_table(self):
+        parent = self
+        while not isinstance(parent, (LLVMFunction, LLVMCode, LLVMOperationSequence)):
+            parent = parent.parent
+
+        return parent.symbol_table
+
 
 # The root
 class LLVMCode(LLVMAst):

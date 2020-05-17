@@ -8,20 +8,35 @@ def mips_variable(ast):
     # We need to check which side of the operation we are so we can load the variable into the correct register
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
-        code = "\tlw $t0, {var_label}\n"
+        mips_load(ast, 0, ast.name)
     else:
-        code = "\tlw $t1, {var_label}\n"
-
-    # Add the correct index offset to the statement
-    code = code.format(var_label=ast.name)
-
-    # Add the newly generated code to the mips code
-    mips.output += code
+        mips_load(ast, 1, ast.name)
 
 
-def mips_type_variable(ast, ignore_array=False):
-    if isinstance(ast, VInt):
-        return mips_type_v_int(ast, ignore_array)
+def mips_load(mips_ast, idx, var_label):
+    if mips_ast.type == "float":
+        mips_load_float(idx, var_label)
+    elif mips_ast.type == "i32":
+        mips_load_int(idx, var_label)
+    elif mips_ast.type == "i8":
+        mips_load_char(idx, var_label)
+
+
+def mips_load_float(idx, var_label):
+    mips.output += "\tl.s $f{idx}, {var_label}\n".format(idx=idx, var_label=var_label)
+
+
+def mips_load_int(idx, var_label):
+    mips.output += "\tlw $t{idx}, {var_label}\n".format(idx=idx, var_label=var_label)
+
+
+def mips_load_char(idx, var_label):
+    mips.output += "\tlw $t{idx}, {var_label}\n".format(idx=idx, var_label=var_label)
+
+
+def mips_type_variable(ast):
+    if isinstance(ast, LLVMVariable):
+        return ast.type
     elif isinstance(ast, VFloat):
         return mips_type_v_float(ast, ignore_array)
     elif isinstance(ast, VChar):
@@ -47,4 +62,4 @@ def mips_default_variable(ast):
 
 
 from src.MIPS.MIPS import mips, mips_code, variable, get_mips_type
-from src.LLVMAst.LLVMAst import LLVMAssignment, LLVMStringType
+from src.LLVMAst.LLVMAst import *

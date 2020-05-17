@@ -39,24 +39,24 @@ def mips_c_int(ast):
 
 
 def mips_type_constant(ast):
-    if isinstance(ast, CArray):
+    if isinstance(ast, LLVMArrayType):
         return mips_type_c_array(ast)
-    elif isinstance(ast, CInt):
+    elif isinstance(ast, LLVMConstInt):
         return mips_type_c_int(ast)
-    elif isinstance(ast, CFloat):
+    elif isinstance(ast, LLVMConstFloat):
         return mips_type_c_float(ast)
-    elif isinstance(ast, CChar):
+    elif isinstance(ast, LLVMConstChar):
         return mips_type_c_char(ast)
-    elif isinstance(ast, CBool):
-        return mips_type_c_bool(ast)
-    elif isinstance(ast, CString):
+    # elif isinstance(ast, CBool):
+    #     return mips_type_c_bool(ast)
+    elif isinstance(ast, LLVMPrintStr):
         return mips_type_c_string(ast)
     else:
         raise Exception("Unknown Constant")
 
 
 def mips_type_c_string(ast):
-    return ""
+    return "string"
 
 
 def mips_type_c_bool(ast):

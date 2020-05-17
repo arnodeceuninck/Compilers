@@ -56,29 +56,36 @@ def mips_code(mips_ast):
         return ""
 
 
-def get_mips_type(mips_ast, ignore_array=False):
-    if isinstance(mips_ast, Operator):
-        return mips_type_operate(mips_ast)
-    elif isinstance(mips_ast, Function):
+def get_mips_type(mips_ast):
+    if isinstance(mips_ast, LLVMOperation):
+        return mips_type_operation(mips_ast)
+    elif isinstance(mips_ast, LLVMFunction):
         return mips_type_function(mips_ast)
-    elif isinstance(mips_ast, Constant):
+    elif isinstance(mips_ast, LLVMConst):
         return mips_type_constant(mips_ast)
-    elif isinstance(mips_ast, Variable):
-        return mips_type_variable(mips_ast, ignore_array)
+    elif isinstance(mips_ast, LLVMVariable):
+        return mips_type_variable(mips_ast)
     raise Exception("I didn't think the code would get this far")
 
 
+def mips_type_operation(mips_ast):
+    if isinstance(mips_ast, LLVMExtension):
+        return ""
+    return mips_ast.optype.type
+
+
 def mips_type_function(mips_ast):
-    if mips_ast.return_type == "int":
+    if mips_ast.rettype == "int":
         return 'i32'
-    elif mips_ast.return_type == "bool":
+    elif mips_ast.rettype == "bool":
         return 'i1'
-    elif mips_ast.return_type == "float":
+    elif mips_ast.rettype == "float":
         return 'float'
-    elif mips_ast.return_type == "char":
+    elif mips_ast.rettype == "char":
         return 'i8'
-    elif mips_ast.return_type == "void":
+    elif mips_ast.rettype == "void":
         return 'void'
+    return mips_ast.rettype
 
 
 def symbol_table_type(name, ast):
@@ -170,7 +177,7 @@ def mips_binary(mips_ast):
     # Generate mips code for the left and right side of the equation
     mips_code(mips_ast[0])
     mips_code(mips_ast[1])
-    if mips_ast.operation == "add":
+    if mips_ast.operation == "add" or mips_ast.operation == "fadd":
         mips_b_add(mips_ast)
     elif mips_ast.operation == "sub":
         mips_b_sub(mips_ast)
@@ -187,8 +194,10 @@ def mips_binary(mips_ast):
 
 
 def mips_b_add(mips_ast):
-    # TODO support float -> add.s
-    mips.output += "\tadd $s0, $t0, $t1\n"
+    if mips_ast.operation == "fadd":
+        mips.output += "\tadd.s $f2, $f0, $f1\n"
+    else:
+        mips.output += "\tadd $s0, $t0, $t1\n"
 
 
 def mips_b_sub(mips_ast):
@@ -244,13 +253,22 @@ def build_start_stackframe(symbol_table: SymbolTable):
     for i, v in enumerate(symbol_table.elements):
         # Add -4 to the frame offset because we advance 1 variable
         frame_offset += -4
-        # load the variable into register $t0
-        # old
-        stackframe_string += "\tlw $t0, {var_label}\n".format(var_label=str(v))
-        # new
-        # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
-        # store this variable into the stack
-        stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+        if symbol_table.elements[v].type == "float":
+            # load the variable into register $f0
+            # old
+            stackframe_string += "\tl.s $f0, {var_label}\n".format(var_label=str(v))
+            # new
+            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
+            # store this variable into the stack
+            stackframe_string += "\ts.s $f0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+        else:
+            # load the variable into register $t0
+            # old
+            stackframe_string += "\tlw $t0, {var_label}\n".format(var_label=str(v))
+            # new
+            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
+            # store this variable into the stack
+            stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
 
     stackframe_string += "\n"
     return stackframe_string
@@ -294,6 +312,10 @@ def mips_print_string(mips_ast):
 
 def mips_print_float(mips_ast):
     mips_call_code = 2
+    mips.output += "\n"
+    mips.output += "\tl.s $f0, {string_label}\n".format(string_label=mips_ast.value)
+    mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
+    mips.output += "\tsyscall\n"
 
 
 def mips_print_int(mips_ast):
@@ -375,9 +397,10 @@ def mips_assign(mips_ast):
 
     # TODO support floats
     # Store this value into the variable
-    # mips.output += "\tsw $s0, {index_offset}($gp)\n".format(index_offset=str(mips_ast[0].get_index_offset()))
-
-    mips.output += "\tsw $s0, {var}\n".format(var=mips_ast[0].name)
+    if get_mips_type(mips_ast[1]) == "float":
+        pass
+    else:
+        mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
 
 
 def mips_operation_sequence(mips_ast):

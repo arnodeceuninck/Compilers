@@ -195,4 +195,5 @@ class SymbolTable:
         for i, v in enumerate(self.elements):
             print(i)
 
+
 from src.LLVMAst.LLVMAst import LLVMArrayType
