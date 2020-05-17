@@ -13,15 +13,14 @@ def mips_variable(ast):
         mips_load(ast, 1, ast.name)
 
 
-def mips_load(mips_ast, idx, var_label):
-    mips.output += "\tlw $s0, {var}\n".format(var=mips_ast.name)
+def mips_load(mips_ast, idx=0, var_label=""):
     if mips_ast.type.ptr:
-        mips.output += "\t lw $s0, 0($s0)\n"
-    if mips_ast.type == "float":
+        mips.output += "\tlw $s0, 0($s0)\n"
+    if str(mips_ast.type) == "float" or str(mips_ast.type) == "double":
         mips_load_float(idx, var_label)
-    elif mips_ast.type == "i32":
+    elif str(mips_ast.type) == "i32":
         mips_load_int(idx, var_label)
-    elif mips_ast.type == "i8":
+    elif str(mips_ast.type) == "i8":
         mips_load_char(idx, var_label)
 
 

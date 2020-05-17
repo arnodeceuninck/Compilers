@@ -51,7 +51,7 @@ def mips_code(mips_ast):
     elif isinstance(mips_ast, LLVMBranch):
         mips_branch(mips_ast)
     elif isinstance(mips_ast, LLVMLoad):
-        mips_load(mips_ast)
+        mips_load(mips_ast, var_label=mips_ast[0].value)
     else:
         return ""
 
@@ -65,12 +65,18 @@ def get_mips_type(mips_ast):
         return mips_type_constant(mips_ast)
     elif isinstance(mips_ast, LLVMVariable):
         return mips_type_variable(mips_ast)
+    elif isinstance(mips_ast, LLVMLoad):
+        return mips_type_load(mips_ast)
     raise Exception("I didn't think the code would get this far")
+
+
+def mips_type_load(mips_ast):
+    return mips_ast.type.type
 
 
 def mips_type_operation(mips_ast):
     if isinstance(mips_ast, LLVMExtension):
-        return ""
+        return mips_ast.type_to.type
     return mips_ast[0].type.type
 
 
@@ -96,6 +102,13 @@ def symbol_table_type(name, ast):
         return element
     else:
         raise Exception("Type not found")
+
+
+def mips_extension(mips_ast):
+    print("WARNING: LLVMExtension to MIPS code not yet supported, moving instead")
+    mips_code(mips_ast[0])
+    # mips.output += "\tadd $s0, $t0, 0\n"
+    return
 
 
 def mips_store(mips_ast):
@@ -162,10 +175,7 @@ def mips_return(mips_ast):
 
 def mips_operator(mips_ast):
     if isinstance(mips_ast, LLVMExtension):
-        print("WARNING: LLVMExtension to MIPS code not yet supported, moving instead")
-        mips_code(mips_ast[0])
-        mips.output += "\tadd $s0, $t0, 0\n"
-        return
+        mips_extension(mips_ast)
     elif isinstance(mips_ast, LLVMBinaryOperation):
         mips_binary(mips_ast)
 
@@ -179,13 +189,13 @@ def mips_binary(mips_ast):
     mips_code(mips_ast[1])
     if mips_ast.operation == "add" or mips_ast.operation == "fadd":
         mips_b_add(mips_ast)
-    elif mips_ast.operation == "sub":
+    elif mips_ast.operation == "sub" or mips_ast.operation == "fsub":
         mips_b_sub(mips_ast)
-    elif mips_ast.operation == "sdiv":
+    elif mips_ast.operation == "sdiv" or mips_ast.operation == "fdiv":
         mips_b_div(mips_ast)
-    elif mips_ast.operation == "mul":
+    elif mips_ast.operation == "mul" or mips_ast.operation == "fmul":
         mips_b_mul(mips_ast)
-    elif mips_ast.operation == "srem":
+    elif mips_ast.operation == "srem" or mips_ast.operation == "frem":
         mips_b_rem(mips_ast)
     elif isinstance(mips_ast, LLVMCompareOperation):
         mips_compare(mips_ast)
@@ -202,19 +212,26 @@ def mips_b_add(mips_ast):
 
 def mips_b_sub(mips_ast):
     # TODO support float -> sub.s
-    mips.output += "\tsub $s0, $t0, $t1\n"
+    if mips_ast.operation == "fsub":
+        mips.output += "\tsub.s $f2, $f0, $f1\n"
+    else:
+        mips.output += "\tsub $s0, $t0, $t1\n"
 
 
 def mips_b_div(mips_ast):
     # TODO support float -> sub.s
-    mips.output += "\tdiv $t0, $t1\n"
-    mips.output += "\tmflo $s0\n"
+    if mips_ast.operation == "fdiv":
+        mips.output += "\tdiv.s $f2, $f0, $f1\n"
+    else:
+        mips.output += "\tdiv $t0, $t1\n"
+        mips.output += "\tmflo $s0\n"
 
 
 def mips_b_mul(mips_ast):
-    # TODO support float -> mult.s
-    mips.output += "\tmult $t0, $t1\n"
-    mips.output += "\tmflo $s0\n"
+    if mips_ast.operation == "fmul":
+        mips.output += "\tmul.s $f2, $f0, $f1\n"
+    else:
+        mips.output += "\tmul $s0, $t0, $t1\n"
 
 
 def mips_b_rem(mips_ast):
@@ -313,7 +330,7 @@ def mips_print_string(mips_ast):
 def mips_print_float(mips_ast):
     mips_call_code = 2
     mips.output += "\n"
-    mips.output += "\tl.s $f0, {string_label}\n".format(string_label=mips_ast.value)
+    mips.output += "\tl.s $f12, {string_label}\n".format(string_label=mips_ast.value)
     mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
     mips.output += "\tsyscall\n"
 
@@ -335,7 +352,10 @@ def mips_print_int(mips_ast):
 
 def mips_print_char(mips_ast):
     mips_call_code = 11
-    pass
+    # mips.output += "\n"
+    # mips.output += "\tmove $a0, {var_save_location}\n".format(var_save_location=var_save_location)
+    # mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
+    # mips.output += "\tsyscall\n"
 
 
 def mips_print(mips_ast):
@@ -346,7 +366,7 @@ def mips_print(mips_ast):
         mips_print_string(mips_ast)
     elif var_type == "int" or str(var_type) == "i32":
         mips_print_int(mips_ast)
-    elif var_type == "float":
+    elif var_type == "float" or str(var_type) == "double":
         mips_print_float(mips_ast)
     elif var_type == "char" or str(var_type) == "i8":
         mips_print_char(mips_ast)
@@ -397,8 +417,11 @@ def mips_assign(mips_ast):
 
     # TODO support floats
     # Store this value into the variable
-    if get_mips_type(mips_ast[1]) == "float":
-        pass
+    if get_mips_type(mips_ast[1]) == "float" or get_mips_type(mips_ast[1]) == "double":
+        if isinstance(mips_ast[1], LLVMOperation):
+            mips.output += "\ts.s $f2, {var}".format(var=mips_ast[0].name)
+        else:
+            mips.output += "\ts.s $f0, {var}".format(var=mips_ast[0].name)
     else:
         mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
 
