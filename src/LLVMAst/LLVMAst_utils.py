@@ -39,7 +39,7 @@ def connect_symbol_table(ast):
 # An error checking functions to check whether all symbols are already in the symbol table
 # (or insert them when declaring)
 def assignment(ast):
-    # Return if we encounter a variable, argument list, allocate or load
+    # Return if we do not encounter a variable, argument list, allocate or load
     if not isinstance(ast, (LLVMArgumentList, LLVMAllocate, LLVMLoad, LLVMVariable)):
         return
 
@@ -81,8 +81,10 @@ def assignment(ast):
 
     # 4. If the parent is an assign and its right child is an operation then we need to define
     # the type of the left child
-    elif isinstance(ast, LLVMVariable) and isinstance(ast.parent, LLVMAssignment) and isinstance(ast.parent[1],
-                                                                                                 LLVMOperation):
+    elif isinstance(ast, LLVMVariable) \
+            and isinstance(ast.parent, LLVMAssignment) \
+            and isinstance(ast.parent[1], LLVMOperation) \
+            and not isinstance(ast.parent[1], LLVMExtension):
         defined_var = ast.parent[1][0]
         symbol_table = ast.parent.parent.symbol_table
         location = ast.value
@@ -156,6 +158,21 @@ def assignment(ast):
 
         symbol_table = ast.parent.parent.symbol_table
         type = ast.parent[1].get_type()
+        location = ast.value
+
+        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+        try:
+            symbol_table.insert(location, type)
+        except:
+            pass
+
+    # 9. If the type is a fpext then use the correct type to assign
+    elif isinstance(ast, LLVMVariable) and \
+            isinstance(ast.parent, LLVMAssignment) and \
+            isinstance(ast.parent[1], LLVMExtension):
+
+        symbol_table = ast.parent.parent.symbol_table
+        type = ast.parent[1].type_to
         location = ast.value
 
         # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
@@ -517,7 +534,7 @@ def move_global(root: LLVMCode):
         except:
             type = total_table[key].type
             if isinstance(type, LLVMType):
-                type = LLVMType
+                type = type.type
             # If the variable is a string then it already is defined globally
             if type == "string":
                 continue
@@ -550,6 +567,8 @@ def add_type_to_var(ast):
     symbol_table = ast.get_symbol_table()
     total_table = symbol_table.total_table
     type = total_table[ast.value].type
+    if isinstance(type, LLVMType):
+        return
     if type.lower() == "string" and not ast.type:
         ast.type = LLVMStringType(0)
     elif type.lower() == "string" and ast.type:
@@ -585,13 +604,13 @@ def make_llvm_ast(ast):
     ast.symbol_table.merge()
 
     # We need to move all the variable assignments to the global scope so we can use this
-    # move_global(ast)
+    move_global(ast)
     # Put all the global assignments in front of the root children
-    # ast.traverse(reorder_root_children)
+    ast.traverse(reorder_root_children)
     # Make all the types to LLVMType in order to have a great consistency over the entire codebase
-    # ast.traverse(make_correct_llvm_type)
+    ast.traverse(make_correct_llvm_type)
     # Add a type to all the variable based on the symbol_table
-    # ast.traverse(add_type_to_var)
+    ast.traverse(add_type_to_var)
 
 
 def generate_mips_code(javaForLife):
