@@ -150,7 +150,7 @@ def mips_normal_branch(mips_ast):
 
 
 def mips_conditional_branch(mips_ast):
-    # TODO: is the variable from mips_ast[0] loaded into $s0?
+    # TODO: is the variable from mips_ast[0] loaded into $s0? support float
     # Jump to the false label if the var is zero
     mips.output += "\tbeqz {var}, {label}\n".format(var="$s0", label=mips_ast[2].name)
     # If not false, it must be true
@@ -423,7 +423,10 @@ def mips_assign(mips_ast):
         else:
             mips.output += "\ts.s $f0, {var}".format(var=mips_ast[0].name)
     else:
-        mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
+        if isinstance(mips_ast[1], LLVMOperation):
+            mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
+        else:
+            mips.output += "\tsw $t0, {var}".format(var=mips_ast[0].name)
 
 
 def mips_operation_sequence(mips_ast):

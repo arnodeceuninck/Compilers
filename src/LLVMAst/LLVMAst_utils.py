@@ -566,6 +566,9 @@ def add_type_to_var(ast):
         return
     symbol_table = ast.get_symbol_table()
     total_table = symbol_table.total_table
+    if not (ast.value in total_table):
+        ast.type = "j"
+        return
     type = total_table[ast.value].type
     if isinstance(type, LLVMType):
         ast.type = type
