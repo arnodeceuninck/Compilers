@@ -320,13 +320,13 @@ def mips_print(mips_ast):
     location = mips_ast.value
     var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
     mips_code(mips_ast)
-    if var_type == "string":
+    if isinstance(var_type, LLVMStringType):
         mips_print_string(mips_ast)
     elif var_type == "int" or str(var_type) == "i32":
         mips_print_int(mips_ast)
     elif var_type == "float":
         mips_print_float(mips_ast)
-    elif var_type == "char":
+    elif var_type == "char" or str(var_type) == "i8":
         mips_print_char(mips_ast)
 
 
