@@ -215,3 +215,36 @@ None
 - All array files
 - invalidUnaryOperation.c
 
+###MIPS tests
+- [ ] binaryOperations1.c
+- [x] binaryOperations2.c
+- [x] breakAndContinue.c
+- [ ] comparisons1.c
+- [ ] comparisons2.c
+- [ ] dereferenceAssignment.c
+- [x] fibonacciRecursive.c
+- [ ] floatToIntConversion.c
+- [x] for.c
+- [ ] forwardDeclaration.c
+- [x] if.c
+- [x] ifElse.c
+- [ ] intToFloatConversion.c
+- [ ] modulo.c
+- [ ] pointerArgument.c
+- [x] prime.c
+- [x] printf1.c
+- [x] printf2.c
+- [ ] printf3.c
+- [ ] scanf1.c (passes because manual input required)
+- [ ] scanf2.c (passes because manual input required)
+- [ ] scoping.c
+- [ ] unaryOperations.c
+- [ ] variables1.c
+- [ ] variables2.c
+- [ ] variables3.c
+- [x] variables4.c
+- [x] variables5.c
+- [x] variables6.c
+- [ ] variables7.c
+- [ ] variables8.c
+- [x] while.c

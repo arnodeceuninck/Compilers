@@ -12,7 +12,6 @@ class mips:
 
 
 def mips_code(mips_ast):
-
     if isinstance(mips_ast.parent, LLVMOperationSequence):
         mips.output += "\n"
 
@@ -81,6 +80,7 @@ def mips_type_function(mips_ast):
     elif mips_ast.return_type == "void":
         return 'void'
 
+
 def symbol_table_type(name, ast):
     while ast.parent:
         ast = ast.parent
@@ -90,9 +90,10 @@ def symbol_table_type(name, ast):
     else:
         raise Exception("Type not found")
 
+
 def mips_store(mips_ast):
     # New code
-    if symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
+    if mips_ast[0].type.ptr:  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
         # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
         mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
@@ -100,7 +101,6 @@ def mips_store(mips_ast):
     else:
         mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
-
 
     # Old code
     # # TODO pointervalues
@@ -415,23 +415,10 @@ def goto(label: str):
 
 # Variable should be mips_formated, e.g. %1
 def mips_load(mips_ast):
-
     mips.output += "\tlw $s0, {var}\n".format(var=mips_ast[0].name)
-    return
-
-    mips_code(mips_ast.children[0])
-    # mips.output += "\tla $t0, {var}\n".format(var=mips_ast.children[0].name)
     if mips_ast.type.ptr:
-        # pass
-        # mips.output += "\tla $s0, 0($t0)\n"
-        mips.output += "\tlw $s0, 0($t0)\n"
-    # # We know that the child will be a variable so we need to load that value
-    # mips_code(mips_ast.children[0])
-    # # Then we need to put that value stored in $t0 into $s0
-    # # so that we can store it in the variable that demands the load
-    else:
-        mips.output += "\tmove $s0, $t0\n"
-    pass
+        mips.output += "\t lw $s0, 0($s0)\n"
+    return
 
 
 def index_load(mips_ast, result, index):
