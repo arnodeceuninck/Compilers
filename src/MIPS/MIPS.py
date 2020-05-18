@@ -36,10 +36,10 @@ def mips_code(mips_ast):
         mips_assign(mips_ast)
     elif isinstance(mips_ast, LLVMOperation):
         mips_operator(mips_ast)
-    elif isinstance(mips_ast, LLVMFunction):
-        mips_function(mips_ast)
     elif isinstance(mips_ast, LLVMFunctionUse):
         mips_function_use(mips_ast)
+    elif isinstance(mips_ast, LLVMFunction):
+        mips_function(mips_ast)
     elif isinstance(mips_ast, LLVMArgumentList):
         mips_arguments(mips_ast)
     elif isinstance(mips_ast, LLVMConst):
@@ -390,9 +390,6 @@ def mips_function_use(mips_ast):
         for child in mips_ast.children:
             mips_print(child)
         return
-    # not a function call
-    if not isinstance(mips_ast.parent, LLVMOperationSequence):
-        return
     # If it is a function call then we need to take all the variables out of them
     # and store them in the arguments of the function
     # TODO fix this for arrays and check if characters work too
@@ -400,7 +397,7 @@ def mips_function_use(mips_ast):
         mips.output += "\tlw $s0, {var_name}\n".format(var_name=mips_ast[0].children[idx].value)
         mips.output += "\tsw $s0, {var_name}\n".format(var_name=get_function_argument(mips_ast.name, idx))
 
-    mips.output += "\tjal {f_name}".format(f_name=mips_ast.name)
+    mips.output += "\tjal {f_name}\n".format(f_name=mips_ast.name)
 
 
 def mips_function(mips_ast):
@@ -437,7 +434,10 @@ def mips_assign(mips_ast):
     # Generate the mips code for the right side
     mips_code(mips_ast[1])
 
-    # TODO support floats
+    # If we encounter a function
+    if isinstance(mips_ast[1], LLVMFunctionUse):
+        mips.output += "\tsw $v0, {var}".format(var=mips_ast[0].name)
+        return
     # Store this value into the variable
     if get_mips_type(mips_ast[1]) == "float" or get_mips_type(mips_ast[1]) == "double":
         if isinstance(mips_ast[1], LLVMOperation):
