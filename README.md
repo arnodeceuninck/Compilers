@@ -235,7 +235,7 @@ None
 - [x] printf1.c
 - [x] printf2.c
 - [ ] printf3.c
-- [ ] scanf1.c (passes because manual input required)
+- [x] scanf1.c
 - [ ] scanf2.c (passes because manual input required)
 - [ ] scoping.c
 - [ ] unaryOperations.c
