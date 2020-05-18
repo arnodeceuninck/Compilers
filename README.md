@@ -221,7 +221,7 @@ None
 - [x] breakAndContinue.c
 - [ ] comparisons1.c
 - [ ] comparisons2.c
-- [ ] dereferenceAssignment.c
+- [x] dereferenceAssignment.c
 - [x] fibonacciRecursive.c
 - [ ] floatToIntConversion.c
 - [x] for.c
@@ -229,7 +229,7 @@ None
 - [x] if.c
 - [x] ifElse.c
 - [ ] intToFloatConversion.c
-- [ ] modulo.c
+- [x] modulo.c
 - [ ] pointerArgument.c
 - [x] prime.c
 - [x] printf1.c
