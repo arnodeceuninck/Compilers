@@ -172,6 +172,10 @@ class LLVMVariable(LLVMAst):
         else:
             return self.name
 
+    # Marks the type as original in order to be able to delete it later on
+    def original(self):
+        self.type = "original"
+
 
 class LLVMConst(LLVMAst):
     def __init__(self, value):

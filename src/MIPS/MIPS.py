@@ -11,6 +11,10 @@ class mips:
         text_file.close()
 
 
+def get_function_argument(f_name, idx):
+    return "." + f_name + "." + str(idx)
+
+
 def mips_code(mips_ast):
     if isinstance(mips_ast.parent, LLVMOperationSequence):
         mips.output += "\n"
@@ -67,7 +71,16 @@ def get_mips_type(mips_ast):
         return mips_type_variable(mips_ast)
     elif isinstance(mips_ast, LLVMLoad):
         return mips_type_load(mips_ast)
+    elif isinstance(mips_ast, LLVMArgument):
+        return mips_type_argument(mips_ast)
+    elif isinstance(mips_ast, LLVMFunctionUse):
+        return mips_type_function(mips_ast)
     raise Exception("I didn't think the code would get this far")
+
+
+def mips_type_argument(mips_ast):
+    print()
+    pass
 
 
 def mips_type_load(mips_ast):
@@ -91,7 +104,7 @@ def mips_type_function(mips_ast):
         return 'i8'
     elif mips_ast.rettype == "void":
         return 'void'
-    return mips_ast.rettype
+    return str(mips_ast.rettype)
 
 
 def symbol_table_type(name, ast):
@@ -309,9 +322,9 @@ def build_end_stackframe(symbol_table: SymbolTable):
         frame_offset += 4
 
     # We retrieve the return address from the stack
-    stackframe_string += "\tsw $ra, -4($fp)\n"
+    stackframe_string += "\tlw $ra, -4($fp)\n"
     # Then we change the stackpointers location to the one before the previous function
-    stackframe_string += "\tmove $fp, $sp\n"
+    stackframe_string += "\tmove $sp, $fp\n"
     # We need to load the old framepointer on to the stack
     stackframe_string += "\tlw $fp, 0($sp)\n"
     # Lastly we return to the caller of this function
@@ -376,9 +389,18 @@ def mips_function_use(mips_ast):
     if mips_ast.name == "printf" and not isinstance(mips_ast.children[0], LLVMUseArgumentList):
         for child in mips_ast.children:
             mips_print(child)
-    # Function call
-    if isinstance(mips_ast.parent, LLVMOperationSequence):
-        return ""
+        return
+    # not a function call
+    if not isinstance(mips_ast.parent, LLVMOperationSequence):
+        return
+    # If it is a function call then we need to take all the variables out of them
+    # and store them in the arguments of the function
+    # TODO fix this for arrays and check if characters work too
+    for idx in range(len(mips_ast[0].children)):
+        mips.output += "\tlw $s0, {var_name}\n".format(var_name=mips_ast[0].children[idx].value)
+        mips.output += "\tsw $s0, {var_name}\n".format(var_name=get_function_argument(mips_ast.name, idx))
+
+    mips.output += "\tjal {f_name}".format(f_name=mips_ast.name)
 
 
 def mips_function(mips_ast):

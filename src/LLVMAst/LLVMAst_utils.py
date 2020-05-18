@@ -44,16 +44,14 @@ def assignment(ast):
         return
 
     # Add symbol to symbol table
-    # 1. if the current ast node is an argument list we need to add variables with 0-... to the symbol table of the function
+    # 1. if we encounter an argument list then we need to add all the variables to it
     if isinstance(ast, LLVMArgumentList):
-        if ast.children and isinstance(ast[0], LLVMUseArgumentList):
-            return
-        # Iterate over all the children to add all the arguments to the function scope
-        for i in range(len(ast.children)):
-            location = str(i)
-            type = ast.children[i]
+        for arg_idx in range(len(ast.children)):
+            type = ast.children[arg_idx].type
+            location = get_function_argument(ast.parent.name, arg_idx)
+
             try:
-                ast.parent.parent.symbol_table.insert(location, type)
+                ast.parent.symbol_table.insert(location, type)
             except:
                 pass
 
@@ -360,6 +358,7 @@ def make_printf_global(cut_string: list, ast: LLVMAst):
 
 def create_printf_arguments(ast, cut_string):
     arguments = list()
+    var_ctr = 1
     for idx in range(len(cut_string)):
         if isinstance(cut_string[idx], str):
             string_id = make_string_id(str(ast.id()), str(idx))
@@ -367,7 +366,6 @@ def create_printf_arguments(ast, cut_string):
             new_argument.type = "String"
         else:
             if not idx:
-                var_ctr = 1
                 idx += 1
             new_argument = ast.children[0].children[var_ctr]
             var_ctr += 1
@@ -395,11 +393,15 @@ def search_string_ast(string_id, ast):
     return None
 
 
-def remove_original_string(string_id, ast):
+def remove_original_string(ast):
+    if not isinstance(ast, LLVMVariable):
+        return
+    if not ast.type != "original":
+        return
+
     root = get_root(ast)
 
-    string_ast = search_string_ast(string_id, ast)
-    node_to_remove = string_ast.parent
+    node_to_remove = ast.parent
     del root.children[root.children.index(node_to_remove)]
 
 
@@ -416,7 +418,13 @@ def create_printf(ast):
     # Make correct children out of the printf statement on the global scope
     make_printf_global(cut_string, ast)
     split_printf_arguments(ast, cut_string)
-    remove_original_string(string_id, ast)
+    mark_original_string(string_id, ast)
+
+
+def mark_original_string(string_id, ast):
+    string_ast = search_string_ast(string_id, ast)
+    # Mark the string as original
+    string_ast.original()
 
 
 def get_llvm_node_type(root, type) -> list:
@@ -570,7 +578,9 @@ def add_type_to_var(ast):
         ast.type = "j"
         return
     type = total_table[ast.value].type
-    if isinstance(type, LLVMType):
+    if isinstance(type, LLVMArgument):
+        pass
+    elif isinstance(type, LLVMType):
         ast.type = type
     elif type.lower() == "string" and not ast.type:
         ast.type = LLVMStringType(0)
@@ -578,6 +588,22 @@ def add_type_to_var(ast):
         pass
     else:
         ast.type = type
+
+
+def convert_argument(ast):
+    if not isinstance(ast, LLVMVariable):
+        return
+    try:
+        arg_nr = str(int(ast.name))
+        f_name = ast.parent.parent.parent.name
+        ast.name = ".{f_name}.{arg_nr}".format(f_name=f_name, arg_nr=arg_nr)
+        ast.value = ast.name
+    except:
+        return
+
+
+def get_function_argument(f_name, idx):
+    return "." + f_name + "." + str(idx)
 
 
 # This will perform all the necessary steps to populate the ast
@@ -588,12 +614,16 @@ def make_llvm_ast(ast):
     ast.traverse(make_float_memory)
     # Cut the printf statement into pieces in order to be compilable in llvm
     ast.traverse(create_printf)
+    # TODO Remove all the original printstrings
+    # ast.traverse(remove_original_string)
     # Clean up all the strings such that they have a non " and non \00 appearance
     ast.traverse(rewrite_printstr)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
     # Make all the types to LLVMType in order to have a great consistency over the entire codebase
     ast.traverse(make_correct_llvm_type)
+    # This function is needed to convert all the arguments to custom unique arguments per function
+    ast.traverse(convert_argument)
 
     #### SYMBOL TABLE GENERATION ####
     # Makes a tree of the symbol tables
