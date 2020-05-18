@@ -316,7 +316,7 @@ class Binary(Operator):
         return "Binary Operator: {value}".format(value=self.value)
 
     def comments(self, comment_out=True):
-        comment = self[0].comments(comment_out=False) + self.value + \
+        comment = self[0].comments(comment_out=False) + ";" + self.value + \
                   self[1].comments(comment_out=False)
         return self.comment_out(comment, comment_out)
 
@@ -372,7 +372,7 @@ class Function(AST):
             # Add the value of the child
             function_arguments += str(child.value)
         if isinstance(self.parent, Binary) and self.parent.children[0] == self:
-            return "; {function_name}({function_arguments})".format(function_name=self.value,
+            return "; {function_name}({function_arguments})\n".format(function_name=self.value,
                                                                     function_arguments=function_arguments)
         else:
             return "; {function_name}({function_arguments})\n".format(function_name=self.value,
@@ -384,7 +384,7 @@ class Function(AST):
             return "declare {return_type} @{name}({arg_list})\n"
         elif self.function_type == "use":  # We call a function
             return "\tcall {return_type} @{name}({arg_list})\n"
-        return "define {return_type} @{name}({arg_list})"
+        return "define {return_type} @{name}({arg_list})\n"
 
     def to_llvm_string(self, string) -> str:
         i = 0
