@@ -190,10 +190,18 @@ def remove_allocate(ast):
     # Get the position of the allocate
     index = ast.get_position(1)
     # Delete this child
-    del operation_sequence.children[index]
+    del operation_sequence.children[index] # This is so f*cking dangerous, removing something while iterating over it
+
+    # Find the top of the tree
+    top = ast.parent.parent
+    while top.parent:
+        top = top.parent
 
     # Remove the link with the operation sequence by setting the parent node to None
     ast.parent.parent = None
+
+    # Start removing again (because we delete a node while iterating)
+    top.traverse(remove_allocate)
 
 
 def remove_printf_declaration(ast):
@@ -621,7 +629,8 @@ def make_llvm_ast(ast):
     # Clean up all the strings such that they have a non " and non \00 appearance
     ast.traverse(rewrite_printstr)
     # Put all the global assignments in front of the root children
-    ast.traverse(reorder_root_children)
+    # ast.traverse(reorder_root_children)
+    reorder_root_children(ast)
     # # Make all the types to LLVMType in order to have a great consistency over the entire codebase
     # ast.traverse(make_correct_llvm_type)
     # This function is needed to convert all the arguments to custom unique arguments per function
@@ -641,7 +650,8 @@ def make_llvm_ast(ast):
     # We need to move all the variable assignments to the global scope so we can use this
     move_global(ast)
     # Put all the global assignments in front of the root children
-    ast.traverse(reorder_root_children)
+    # ast.traverse(reorder_root_children)
+    reorder_root_children(ast)
     # # Make all the types to LLVMType in order to have a great consistency over the entire codebase
     # ast.traverse(make_correct_llvm_type)
     # Add a type to all the variable based on the symbol_table

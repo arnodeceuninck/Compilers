@@ -274,12 +274,6 @@ class LLVMPrintStr(LLVMAst):
         return "\"" + self.printvar + "\""
 
 
-class LLVMPrint(LLVMAst):
-    def __init__(self, ccount):
-        super().__init__("LLVM Print")
-        self.ccount = ccount
-
-
 class LLVMDeclare(LLVMAst):
     def __init__(self, fname):
         super().__init__(fname)

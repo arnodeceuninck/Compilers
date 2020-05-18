@@ -387,11 +387,39 @@ def mips_print(mips_ast):
     elif var_type == "char" or str(var_type) == "i8":
         mips_print_char(mips_ast)
 
+def mips_scan(mips_ast):
+    location = mips_ast.name
+    var_type = mips_ast.type.type
+    if isinstance(var_type, LLVMStringType):
+        # src: https://stackoverflow.com/questions/7969565/mips-how-to-store-user-input-string
+        mips.output += "\tli $v0, 8 # Take in input\t# take in in\n"
+        mips.output += "\tla $a0, buffer\t# load byte space into address\n"
+        mips.output += "\tli $a1, 20\t# allocate the byte space for string\n"
+        mips.output += "\tmove $t0, $a0\t# save string to t0\n"
+        mips.output += "\tsyscall\n"
+    elif var_type == "int" or str(var_type) == "i32":
+        mips.output += "\tli $v0, 5\n"
+        mips.output += "\tsyscall\n"
+        mips.output += "\tsw $v0, {location}\n".format(location=location)
+    elif var_type == "float" or str(var_type) == "double":
+        mips.output += "\tli $v0, 6\n"
+        mips.output += "\tsyscall\n"
+        mips.output += "\tsw $f0, {location}\n".format(location=location)
+    elif var_type == "char" or str(var_type) == "i8":
+        mips.output += "\tli $v0, 12\n"
+        mips.output += "\tsyscall\n"
+        mips.output += "\tsw $v0, {location}\n".format(location=location)
+
+
 
 def mips_function_use(mips_ast):
     if mips_ast.name == "printf" and not isinstance(mips_ast.children[0], LLVMUseArgumentList):
         for child in mips_ast.children:
             mips_print(child)
+        return
+    if mips_ast.name == "__isoc99_scanf" and not isinstance(mips_ast.children[0], LLVMUseArgumentList):
+        for child in mips_ast.children:
+            mips_scan(child)
         return
     # If it is a function call then we need to take all the variables out of them
     # and store them in the arguments of the function
