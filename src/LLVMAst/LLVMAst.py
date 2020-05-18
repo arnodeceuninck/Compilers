@@ -168,7 +168,7 @@ class LLVMVariable(LLVMAst):
 
     def __str__(self):
         if self.type:
-            return "{} {}".format(self.type, self.name)
+            return "{} {}".format(str(self.type), self.name)
         else:
             return self.name
 
@@ -238,6 +238,9 @@ class LLVMStore(LLVMAst):
     def __init__(self):
         super().__init__("LLVM Store")
         self.type = None
+
+    def comments(self):
+        return "store {var1}, {var2}".format(var1=self[0], var2=self[1])
 
 
 class LLVMAllocate(LLVMAst):

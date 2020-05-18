@@ -572,6 +572,8 @@ def make_correct_llvm_type(ast):
 def add_type_to_var(ast):
     if not isinstance(ast, LLVMVariable):
         return
+    if ast.type:
+        return
     symbol_table = ast.get_symbol_table()
     total_table = symbol_table.total_table
     if not (ast.value in total_table):
@@ -620,8 +622,8 @@ def make_llvm_ast(ast):
     ast.traverse(rewrite_printstr)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
-    # Make all the types to LLVMType in order to have a great consistency over the entire codebase
-    ast.traverse(make_correct_llvm_type)
+    # # Make all the types to LLVMType in order to have a great consistency over the entire codebase
+    # ast.traverse(make_correct_llvm_type)
     # This function is needed to convert all the arguments to custom unique arguments per function
     ast.traverse(convert_argument)
 
@@ -640,8 +642,8 @@ def make_llvm_ast(ast):
     move_global(ast)
     # Put all the global assignments in front of the root children
     ast.traverse(reorder_root_children)
-    # Make all the types to LLVMType in order to have a great consistency over the entire codebase
-    ast.traverse(make_correct_llvm_type)
+    # # Make all the types to LLVMType in order to have a great consistency over the entire codebase
+    # ast.traverse(make_correct_llvm_type)
     # Add a type to all the variable based on the symbol_table
     ast.traverse(add_type_to_var)
 

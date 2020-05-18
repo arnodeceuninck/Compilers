@@ -112,7 +112,7 @@ def symbol_table_type(name, ast):
         ast = ast.parent
     element = ast.symbol_table.total_table[name]
     if element:
-        return element
+        return element.type
     else:
         raise Exception("Type not found")
 
@@ -123,28 +123,27 @@ def mips_extension(mips_ast):
     # mips.output += "\tadd $s0, $t0, 0\n"
     return
 
+def pointer_child(mips_ast, child):
+    if len(mips_ast.children) > child:
+        return symbol_table_type(mips_ast[child].name, mips_ast).ptr
+    else:
+        return 0
 
 def mips_store(mips_ast):
-    # New code
-    if mips_ast[0].type.ptr:  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
+    label = mips_ast[1].name
+    mips.output += "\tla $t1, {var}\n".format(var=label)
+    # if pointer_first_child(mips_ast)
+    #     mips.output += "\tla $t1, {name}\n".format(name=label)
+    to = "0($t1)"
+
+    # We want to store a pointer, so get the pointer of the variable first
+    if mips_ast[0].type.ptr and not pointer_child(mips_ast, 1):  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
         # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
         mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
-        mips.output += "\tla $t1, {var}\n".format(var=mips_ast[1].name)
-        mips.output += "\tsw $t0, 0($t1)\n".format(var=mips_ast[1].name)
+        mips.output += "\tsw $t0, {var}\n".format(var=to)
     else:
         mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
-        mips.output += "\tsw $t0, {var}\n".format(var=mips_ast[1].name)
-
-    # Old code
-    # # TODO pointervalues
-    # # Load the variable to store into register $t0
-    # # var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[0]))
-    # # mips.output += "\tlw $t0, {offset}($gp)\n".format(offset=str(var_offset))
-    #
-    #
-    # # Store this variable then on the location of the variable where the value needs to be stored
-    # var_offset = mips_ast.parent.symbol_table.get_index_offset(str(mips_ast[1]))
-    # mips.output += "\tsw $t0, {offset}($gp)\n".format(offset=str(var_offset))
+        mips.output += "\tsw $t0, {var}\n".format(var=to)
 
 
 def mips_label(mips_ast):
@@ -433,22 +432,23 @@ def global_mips(mips_ast):
 def mips_assign(mips_ast):
     # Generate the mips code for the right side
     mips_code(mips_ast[1])
+    label = mips_ast[0].name
 
     # If we encounter a function
     if isinstance(mips_ast[1], LLVMFunctionUse):
-        mips.output += "\tsw $v0, {var}".format(var=mips_ast[0].name)
+        mips.output += "\tsw $v0, {var}".format(var=label)
         return
     # Store this value into the variable
     if get_mips_type(mips_ast[1]) == "float" or get_mips_type(mips_ast[1]) == "double":
         if isinstance(mips_ast[1], LLVMOperation):
-            mips.output += "\ts.s $f2, {var}".format(var=mips_ast[0].name)
+            mips.output += "\ts.s $f2, {var}\n".format(var=label)
         else:
-            mips.output += "\ts.s $f0, {var}".format(var=mips_ast[0].name)
+            mips.output += "\ts.s $f0, {var}\n".format(var=label)
     else:
         if isinstance(mips_ast[1], LLVMOperation):
-            mips.output += "\tsw $s0, {var}".format(var=mips_ast[0].name)
+            mips.output += "\tsw $s0, {var}\n".format(var=label)
         else:
-            mips.output += "\tsw $t0, {var}".format(var=mips_ast[0].name)
+            mips.output += "\tsw $t0, {var}\n".format(var=label)
 
 
 def mips_operation_sequence(mips_ast):

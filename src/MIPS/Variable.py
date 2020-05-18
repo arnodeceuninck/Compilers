@@ -14,14 +14,34 @@ def mips_variable(ast):
 
 
 def mips_load(mips_ast, idx=0, var_label=""):
+    # Gets complicated because of our mips variable structure:
+    # e.g. int x, is an i32, but gets stored in memory, so is actually an i32*,
+    # This makes that an i32* can be two things:
+    # A storage location for a number or a storage location for a pointer
+
+    # If we want to load a pointer
     if mips_ast.type.ptr:
-        mips.output += "\tlw $s0, 0($s0)\n"
-    if str(mips_ast.type) == "float" or str(mips_ast.type) == "double":
-        mips_load_float(idx, var_label)
-    elif str(mips_ast.type) == "i32":
-        mips_load_int(idx, var_label)
-    elif str(mips_ast.type) == "i8":
-        mips_load_char(idx, var_label)
+        # And the first child contains a pointer, you can just load the word
+        if pointer_child(mips_ast, 1):
+            mips.output += "\tlw $s0, {var}\n".format(var=var_label)
+        # Else you have to load the address
+        else:
+            mips.output += "\tla $s0, {var}\n".format(var=var_label)
+            # mips.output += "\tlw $s0, 0($s0)\n"
+
+    # If we don't want to load a pointer (but the value itself)
+    else:
+        # If it is a storage location for the pointer, load the pointer first
+        if pointer_child(mips_ast, 1):
+            mips.output += "\tlw $s0, {var}\n".format(var=var_label)
+            var_label = "0($s0)"
+
+        if str(mips_ast.type) == "float" or str(mips_ast.type) == "double":
+            mips_load_float(idx, var_label)
+        elif str(mips_ast.type) == "i32":
+            mips_load_int(idx, var_label)
+        elif str(mips_ast.type) == "i8":
+            mips_load_char(idx, var_label)
 
 
 def mips_load_float(idx, var_label):
@@ -63,5 +83,5 @@ def mips_default_variable(ast):
     return ""
 
 
-from src.MIPS.MIPS import mips, mips_code, variable, get_mips_type
+from src.MIPS.MIPS import mips, mips_code, variable, get_mips_type, symbol_table_type, pointer_child
 from src.LLVMAst.LLVMAst import *

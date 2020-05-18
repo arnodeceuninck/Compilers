@@ -7,6 +7,12 @@ from src.LLVM.LLVM import to_LLVM
 
 
 def main(argv):
+    # # We now convert this llvm to mips by using the previously generated llvm code
+    # llvmForLife = compile_llvm("output/compiled.ll", "output/compiled.asm", debug_dot=True)
+    # dot(llvmForLife, "output/llvm_tree.dot")
+    # print("Done")
+    # return
+
     # try:
     javaForLife = compile(argv[1])
     if javaForLife:
