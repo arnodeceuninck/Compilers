@@ -22,8 +22,8 @@ def mips_load(mips_ast, idx=0, var_label=""):
     # If we want to load a pointer
     if mips_ast.type.ptr:
         # And the first child contains a pointer, you can just load the word
-        if pointer_child(mips_ast, 1):
-            mips.output += "\tlw $s0, {var}\n".format(var=var_label)
+        if pointer_child(mips_ast, 0):
+            mips.output += "\tlw $t0, {var}\n".format(var=var_label)
         # Else you have to load the address
         else:
             mips.output += "\tla $s0, {var}\n".format(var=var_label)
@@ -32,7 +32,7 @@ def mips_load(mips_ast, idx=0, var_label=""):
     # If we don't want to load a pointer (but the value itself)
     else:
         # If it is a storage location for the pointer, load the pointer first
-        if pointer_child(mips_ast, 1):
+        if pointer_child(mips_ast, 0):
             mips.output += "\tlw $s0, {var}\n".format(var=var_label)
             var_label = "0($s0)"
 

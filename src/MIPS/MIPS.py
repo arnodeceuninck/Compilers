@@ -131,13 +131,17 @@ def pointer_child(mips_ast, child):
 
 def mips_store(mips_ast):
     label = mips_ast[1].name
-    mips.output += "\tla $t1, {var}\n".format(var=label)
-    # if pointer_first_child(mips_ast)
-    #     mips.output += "\tla $t1, {name}\n".format(name=label)
+
+    # If the type is a pointer, and we want to store it in the pointer
+    if pointer_child(mips_ast, 1) and mips_ast[1].type.ptr and not mips_ast[0].type.ptr:
+        mips.output += "\tlw $t1, {name}\n".format(name=label)
+    else:
+        mips.output += "\tla $t1, {var}\n".format(var=label)
+
     to = "0($t1)"
 
     # We want to store a pointer, so get the pointer of the variable first
-    if mips_ast[0].type.ptr and not pointer_child(mips_ast, 1):  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
+    if mips_ast[0].type.ptr and not pointer_child(mips_ast, 0):  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
         # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
         mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=to)
