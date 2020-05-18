@@ -225,7 +225,7 @@ None
 - [x] fibonacciRecursive.c
 - [ ] floatToIntConversion.c
 - [x] for.c
-- [ ] forwardDeclaration.c
+- [x] forwardDeclaration.c
 - [x] if.c
 - [x] ifElse.c
 - [ ] intToFloatConversion.c
