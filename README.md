@@ -216,6 +216,7 @@ None
 - invalidUnaryOperation.c
 
 ###MIPS tests
+Passing: 19 of 32 tests (actually 18, because of scanf2)
 - [ ] binaryOperations1.c
 - [x] binaryOperations2.c
 - [x] breakAndContinue.c
@@ -237,7 +238,7 @@ None
 - [ ] printf3.c
 - [x] scanf1.c
 - [ ] scanf2.c (passes because manual input required)
-- [ ] scoping.c
+- [x] scoping.c
 - [ ] unaryOperations.c
 - [ ] variables1.c
 - [ ] variables2.c

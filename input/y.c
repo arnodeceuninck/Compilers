@@ -1,13 +1,5 @@
-
-#include <stdio.h>
-
-char f(char c) {
-	return c;
-}
-
-// Recursive fibonnaci
 int main(){
-	char f = f('c');
-	printf("%c", f);
+//    int x;
+	int x[2];
 	return 0;
 }

@@ -407,6 +407,10 @@ class LLVMType(LLVMAst):
     def __str__(self):
         return self.type + "*" * self.ptr
 
+    def get_size(self):
+        sizes = {"i32": 4, "float": 8, "i8": 1, "i1": 1}
+        return sizes[self.type]
+
 
 # class LLVMIntType(LLVMType):
 #     def __init__(self, length):
@@ -429,5 +433,10 @@ class LLVMArrayType(LLVMType):
     def __str__(self):
         return "[{} x {}]".format(self.size, self.type)
 
+    def get_str_value(self):
+        return self.size * self.type.get_size()
+
+    def get_mips_type(self):
+        return ".space"
 
 from src.symbolTable import *

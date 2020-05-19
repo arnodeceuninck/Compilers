@@ -507,6 +507,9 @@ def get_const_node(type, value):
         const = LLVMConstFloat(value)
     elif type == "char" or type == "i8":
         const = LLVMConstChar(value)
+    elif isinstance(type, LLVMArrayType):
+        const = LLVMArrayType(type.size)
+        const.type = type.type
 
     return const
 
@@ -517,7 +520,7 @@ def create_assignment(variable, var_name) -> LLVMAssignment:
     _assignment.id()
 
     type = variable.type
-    if isinstance(type, LLVMType):
+    if isinstance(type, LLVMType) and not isinstance(type, LLVMArrayType):
         type = type.type
 
     # create the children
