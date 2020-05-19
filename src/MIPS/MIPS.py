@@ -370,10 +370,10 @@ def mips_print_int(mips_ast):
 
 def mips_print_char(mips_ast):
     mips_call_code = 11
-    # mips.output += "\n"
-    # mips.output += "\tmove $a0, {var_save_location}\n".format(var_save_location=var_save_location)
-    # mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
-    # mips.output += "\tsyscall\n"
+    mips.output += "\n"
+    mips.output += "\tlw $a0, {var_name}\n".format(var_name=mips_ast.name)
+    mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
+    mips.output += "\tsyscall\n"
 
 
 def mips_print(mips_ast):

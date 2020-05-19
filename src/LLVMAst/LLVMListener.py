@@ -197,7 +197,11 @@ class LLVMListener(ParseTreeListener):
 
     # Enter a parse tree produced by llvmParser#const_int.
     def enterConst_int(self, ctx: llvmParser.Const_intContext):
-        self.add(LLVMConstInt(ctx.getText()))
+        # If we have a character in the parent ctx then we need to add a const char instead of a const int
+        if "i8" in ctx.parentCtx.parentCtx.getText():
+            self.add(LLVMConstChar(ctx.getText()))
+        else:
+            self.add(LLVMConstInt(ctx.getText()))
         pass
 
     # Exit a parse tree produced by llvmParser#const_int.

@@ -188,10 +188,10 @@ class LLVMConstChar(LLVMConst):
         super().__init__(value)
 
     def __str__(self):
-        return "char {val}".format(val=self.constval)
+        return "i8 '{val}'".format(val=self.constval)
 
     def get_str_value(self):
-        return self.constval
+        return "'" + self.constval + "'"
 
     def get_mips_type(self):
         return ".byte"
@@ -262,7 +262,7 @@ class LLVMPrintStr(LLVMAst):
         self.ccount = ccount
 
     def __str__(self):
-        return "Printstr {var}".format(var=self.printvar)
+        return "Printstr \"{var}\"".format(var=self.printvar)
 
     def get_mips_type(self):
         return ".asciiz"

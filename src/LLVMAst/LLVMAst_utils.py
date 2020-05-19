@@ -78,7 +78,7 @@ def assignment(ast):
             pass
 
     # 4. If the parent is an assign and its right child is an operation then we need to define
-    # the type of the left child
+    # the type of the operation
     elif isinstance(ast, LLVMVariable) \
             and isinstance(ast.parent, LLVMAssignment) \
             and isinstance(ast.parent[1], LLVMOperation) \
@@ -86,7 +86,7 @@ def assignment(ast):
         defined_var = ast.parent[1][0]
         symbol_table = ast.parent.parent.symbol_table
         location = ast.value
-        type = None
+        type = ast.parent[1]
         # If we find that this so called variable is a constant then we need to seek the type
         if isinstance(defined_var, LLVMConst):
             type = defined_var.get_type()
@@ -313,7 +313,7 @@ def cut_format_string(string: str) -> list:
                 variable.type = "string"
                 string_list.append(variable)
             elif string[idx + 1] == "c":
-                pass
+                string_list.append(LLVMConstChar("c"))
 
             idx += 2
             continue

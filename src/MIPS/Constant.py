@@ -3,6 +3,8 @@ def mips_constant(ast):
         mips_c_float(ast)
     elif isinstance(ast, LLVMConstInt):
         mips_c_int(ast)
+    elif isinstance(ast, LLVMConstChar):
+        mips_c_char(ast)
     else:
         mips_default_constant(ast)
 
@@ -27,6 +29,18 @@ def mips_c_float(ast):
 
 
 def mips_c_int(ast):
+    # We need to check which side of the operation we are so we can load the variable into the correct register
+    # Check if we are the left side of the parent
+    if ast.parent[0] == ast:
+        code = "\tli $t0, {load_value}\n".format(load_value=str(ast.value))
+    else:
+        code = "\tli $t1, {load_value}\n".format(load_value=str(ast.value))
+
+    # Add the newly generated code to the mips code
+    mips.output += code
+
+
+def mips_c_char(ast):
     # We need to check which side of the operation we are so we can load the variable into the correct register
     # Check if we are the left side of the parent
     if ast.parent[0] == ast:
@@ -91,10 +105,6 @@ def mips_default_constant(ast):
 
 def mips_c_array(ast):
     raise Exception("Constant Array not (yet?) supported")
-
-
-def mips_c_char(ast):
-    return ""
 
 
 def mips_c_string(ast):
