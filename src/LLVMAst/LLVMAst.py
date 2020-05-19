@@ -254,6 +254,14 @@ class LLVMAllocate(LLVMAst):
         return "{allo_type} {type} {align}".format(allo_type="Global" if self.global_ else "Alocate", type=self.type,
                                                    align=self.align)
 
+    def get_default_val(self):
+        if str(self.type) == "float" or str(self.type) == "double":
+            return 0.0
+        elif str(self.type) == "i32":
+            return 0
+        elif str(self.type) == "i8":
+            return ' '
+
 
 class LLVMPrintStr(LLVMAst):
     def __init__(self, var, ccount):

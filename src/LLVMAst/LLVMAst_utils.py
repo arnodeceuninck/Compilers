@@ -184,6 +184,15 @@ def remove_allocate(ast):
     # If the current variable is not an allocate then do proceed without doing anything
     if not isinstance(ast, LLVMAllocate):
         return
+    # Do not delete a global scope variable but transform it
+    if isinstance(ast.parent.parent, LLVMCode):
+        # Create a new node
+        new_node = get_const_node(str(ast.type), ast.get_default_val())
+        new_node.parent = ast.parent
+        new_node.parent.children.append(new_node)
+        # Delete the old node
+        del ast.parent.children[1]
+        return
 
     # Store the operation sequence in order to use it to remove the allocate out of the tree
     operation_sequence = ast.parent.parent
