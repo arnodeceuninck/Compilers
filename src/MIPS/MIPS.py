@@ -123,11 +123,13 @@ def mips_extension(mips_ast):
     # mips.output += "\tadd $s0, $t0, 0\n"
     return
 
+
 def pointer_child(mips_ast, child):
     if len(mips_ast.children) > child:
         return symbol_table_type(mips_ast[child].name, mips_ast).ptr
     else:
         return 0
+
 
 def mips_store(mips_ast):
     label = mips_ast[1].name
@@ -141,10 +143,14 @@ def mips_store(mips_ast):
     to = "0($t1)"
 
     # We want to store a pointer, so get the pointer of the variable first
-    if mips_ast[0].type.ptr and not pointer_child(mips_ast, 0):  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
+    if mips_ast[0].type.ptr and not pointer_child(mips_ast,
+                                                  0):  # symbol_table_type(mips_ast[0].name, mips_ast).type.ptr:
         # Eerste is een pointer, dus we willen de waarde waarnaar dit element verwijst steken in het 2e
         mips.output += "\tla $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=to)
+    elif str(mips_ast[0].type) == "i8":
+        mips.output += "\tlb $t0, {var}\n".format(var=mips_ast[0].name)
+        mips.output += "\tsb $t0, {var}\n".format(var=to)
     else:
         mips.output += "\tlw $t0, {var}\n".format(var=mips_ast[0].name)
         mips.output += "\tsw $t0, {var}\n".format(var=to)
@@ -296,6 +302,14 @@ def build_start_stackframe(symbol_table: SymbolTable):
             # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
             # store this variable into the stack
             stackframe_string += "\ts.s $f0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+        elif str(symbol_table.elements[v].type) == "i8":
+            # load the variable into register $t0
+            # old
+            stackframe_string += "\tlb $t0, {var_label}\n".format(var_label=str(v))
+            # new
+            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
+            # store this variable into the stack
+            stackframe_string += "\tsb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
         else:
             # load the variable into register $t0
             # old
@@ -317,9 +331,14 @@ def build_end_stackframe(symbol_table: SymbolTable):
 
     # We need to iterate over all the elements of the current symbol table in order to save all their values
     for i, v in enumerate(symbol_table.elements):
+        if str(symbol_table[v].type) == "i8":
+            # load this variable from the stack
+            stackframe_string += "\tlb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+            # store the variable into label
+            stackframe_string += "\tsb $t0, {var_label}\n".format(var_label=str(v))
+            continue
         # load this variable from the stack
         stackframe_string += "\tlw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-
         # store the variable into label
         stackframe_string += "\tsw $t0, {var_label}\n".format(var_label=str(v))
 
@@ -371,7 +390,7 @@ def mips_print_int(mips_ast):
 def mips_print_char(mips_ast):
     mips_call_code = 11
     mips.output += "\n"
-    mips.output += "\tlw $a0, {var_name}\n".format(var_name=mips_ast.name)
+    mips.output += "\tlb $a0, {var_name}\n".format(var_name=mips_ast.name)
     mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
     mips.output += "\tsyscall\n"
 
@@ -388,6 +407,7 @@ def mips_print(mips_ast):
         mips_print_float(mips_ast)
     elif var_type == "char" or str(var_type) == "i8":
         mips_print_char(mips_ast)
+
 
 def mips_scan(mips_ast):
     location = mips_ast.name
@@ -413,7 +433,6 @@ def mips_scan(mips_ast):
         mips.output += "\tsw $v0, {location}\n".format(location=location)
 
 
-
 def mips_function_use(mips_ast):
     if mips_ast.name == "printf" and not isinstance(mips_ast.children[0], LLVMUseArgumentList):
         for child in mips_ast.children:
@@ -427,6 +446,10 @@ def mips_function_use(mips_ast):
     # and store them in the arguments of the function
     # TODO fix this for arrays and check if characters work too
     for idx in range(len(mips_ast[0].children)):
+        if str(mips_ast[0].children[idx].type) == "i8":
+            mips.output += "\tlb $s0, {var_name}\n".format(var_name=mips_ast[0].children[idx].value)
+            mips.output += "\tsb $s0, {var_name}\n".format(var_name=get_function_argument(mips_ast.name, idx))
+            continue
         mips.output += "\tlw $s0, {var_name}\n".format(var_name=mips_ast[0].children[idx].value)
         mips.output += "\tsw $s0, {var_name}\n".format(var_name=get_function_argument(mips_ast.name, idx))
 
@@ -482,6 +505,11 @@ def mips_assign(mips_ast):
             mips.output += "\ts.s $f2, {var}\n".format(var=label)
         else:
             mips.output += "\ts.s $f0, {var}\n".format(var=label)
+    elif get_mips_type(mips_ast[1]) == "i8":
+        if isinstance(mips_ast[1], LLVMOperation):
+            mips.output += "\tsb $s0, {var}\n".format(var=label)
+        else:
+            mips.output += "\tsb $t0, {var}\n".format(var=label)
     else:
         if isinstance(mips_ast[1], LLVMOperation):
             mips.output += "\tsw $s0, {var}\n".format(var=label)

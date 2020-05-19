@@ -53,7 +53,7 @@ def mips_load_int(idx, var_label):
 
 
 def mips_load_char(idx, var_label):
-    mips.output += "\tlw $t{idx}, {var_label}\n".format(idx=idx, var_label=var_label)
+    mips.output += "\tlb $t{idx}, {var_label}\n".format(idx=idx, var_label=var_label)
 
 
 def mips_type_variable(ast):

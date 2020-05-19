@@ -1,13 +1,13 @@
 
 #include <stdio.h>
 
-float f() {
-	return 1.0;
+char f(char c) {
+	return c;
 }
 
 // Recursive fibonnaci
 int main(){
-	float n = f() + f();
-	printf("%f", n);
+	char f = f('c');
+	printf("%c", f);
 	return 0;
 }
