@@ -175,15 +175,17 @@ def mips_conditional_branch(mips_ast):
 
 def mips_return(mips_ast):
     # If we do not return void then jump to the end and go to the stackframe part in mips
-    if mips_ast.type.type == "void":
+    if str(mips_ast.type) == "void":
         mips.output += "\tj exit.{f_name}\n".format(f_name=mips_ast.parent.parent.value)
         return
 
     # Load the variable in $t0 or $f0 depending on the type
     mips_code(mips_ast[0])
     # TODO fix that all the types become int and float
-    if type != "float":
+    if str(mips_ast.type) != "float":
         mips.output += "\tmove $v0, $t0\n"
+    else:
+        mips.output += "\tmov.s $f12, $f0\n"
 
     # Go to the stackframe part
     mips.output += "\tj exit.{f_name}\n".format(f_name=mips_ast.parent.parent.value)
@@ -468,7 +470,11 @@ def mips_assign(mips_ast):
 
     # If we encounter a function
     if isinstance(mips_ast[1], LLVMFunctionUse):
-        mips.output += "\tsw $v0, {var}".format(var=label)
+        # TODO add more types
+        if str(mips_ast[0].type) == "float":
+            mips.output += "\ts.s $f12, {var}".format(var=mips_ast[0].name)
+        else:
+            mips.output += "\tsw $v0, {var}".format(var=mips_ast[0].name)
         return
     # Store this value into the variable
     if get_mips_type(mips_ast[1]) == "float" or get_mips_type(mips_ast[1]) == "double":
