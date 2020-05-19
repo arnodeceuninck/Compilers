@@ -199,6 +199,20 @@ class LLVMConstChar(LLVMConst):
     def get_type(self):
         return LLVMType("i8")
 
+class LLVMConstArray(LLVMConst):
+    def __init__(self, size, type):
+        super().__init__("[No value for array]")
+        self.size = int(size)
+        self.type = type
+
+    def __str__(self):
+        return "Empty Array [{} x {}]".format(self.size, self.type)
+
+    def get_str_value(self):
+        return self.size * self.type.get_size()
+
+    def get_mips_type(self):
+        return ".space"
 
 class LLVMConstInt(LLVMConst):
     def __init__(self, value):

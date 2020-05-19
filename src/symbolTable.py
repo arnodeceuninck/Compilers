@@ -84,6 +84,8 @@ class SymbolTable:
         True
 
     def insert(self, location, type, position=-1):
+        assert type is not None
+
         if location not in self.elements:
             self.elements[location] = SymbolTableElement(type, position)
         else:

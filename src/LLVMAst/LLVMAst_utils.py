@@ -46,36 +46,16 @@ def assignment(ast):
     # Add symbol to symbol table
     # 1. if we encounter an argument list then we need to add all the variables to it
     if isinstance(ast, LLVMArgumentList):
-        for arg_idx in range(len(ast.children)):
-            type = ast.children[arg_idx].type
-            location = get_function_argument(ast.parent.name, arg_idx)
-
-            try:
-                ast.parent.symbol_table.insert(location, type)
-            except:
-                pass
+        add_arguments_to_symbol_table(ast)
 
     # 2. If the ast is an allocate, then we know that the right child of the parent will contain the type and its
     # left child the variable
     elif isinstance(ast, LLVMAllocate):
-        variable = ast.parent[0]
-        location = variable.value
-        type = ast.type
-
-        try:
-            ast.parent.parent.symbol_table.insert(location, type)
-        except:
-            pass
+        add_left_side_of_assignment_to_symbol_table(ast)
 
     # 3. If the ast is a load then we know that we have the child as variable and the current node has the type
     elif isinstance(ast, LLVMLoad):
-        variable = ast.children[0]
-        location = variable.value
-        type = ast.type
-        try:
-            ast.parent.parent.symbol_table.insert(location, type)
-        except:
-            pass
+        add_child_variable_to_symbol_table(ast)
 
     # 4. If the parent is an assign and its right child is an operation then we need to define
     # the type of the operation
@@ -83,99 +63,147 @@ def assignment(ast):
             and isinstance(ast.parent, LLVMAssignment) \
             and isinstance(ast.parent[1], LLVMOperation) \
             and not isinstance(ast.parent[1], LLVMExtension):
-        defined_var = ast.parent[1][0]
-        symbol_table = ast.parent.parent.symbol_table
-        location = ast.value
-        type = ast.parent[1]
-        # If we find that this so called variable is a constant then we need to seek the type
-        if isinstance(defined_var, LLVMConst):
-            type = defined_var.get_type()
-        # Else if it is a variable then we need to get the type of the LLVMVariable from the table
-        elif isinstance(defined_var, LLVMVariable):
-            # Seek the variable in the symbol table
-            symbol_table_element = symbol_table[defined_var.value]
-            # Retrieve its type
-            type = symbol_table_element.type
-
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
-        try:
-            symbol_table.insert(location, type)
-        except:
-            pass
+        add_operation_assignment_to_symbol_table(ast)
 
     # 5. if the operation is a store then we need to check if the current variable is on the
     # left handside or the righthandside in order to determine if we need to define it or not
     elif isinstance(ast, LLVMVariable) and isinstance(ast.parent, LLVMStore) and ast.parent[0] != ast:
-        defined_var = ast.parent[0]
-        symbol_table = ast.parent.parent.symbol_table
-        try:
-            symbol_table_element = symbol_table[defined_var.value]
-        except:
-            return
-        type = symbol_table_element.type
-        location = ast.value
-
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
-        try:
-            symbol_table.insert(location, type)
-        except:
-            pass
+        llvm_store_to_symbol_table(ast)
 
     # 6. If the right child of a parent is a load then we know what type the left child will be
     elif isinstance(ast, LLVMVariable) and \
             isinstance(ast.parent, LLVMAssignment) and \
             isinstance(ast.parent[1], LLVMLoad):
-        symbol_table = ast.parent.parent.symbol_table
-        type = ast.parent[1].type
-        location = ast.value
-
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
-        try:
-            symbol_table.insert(location, type)
-        except:
-            pass
+        add_llvm_load_to_symbol_table(ast)
 
     # 7. If the right hand side is a function call then we need to take the return value and set it
     elif isinstance(ast, LLVMVariable) and \
             isinstance(ast.parent, LLVMAssignment) and \
             isinstance(ast.parent[1], LLVMFunctionUse):
-        symbol_table = ast.parent.parent.symbol_table
-        type = ast.parent[1].rettype
-        location = ast.value
-
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
-        try:
-            symbol_table.insert(location, type)
-        except:
-            pass
+        add_function_call_assignment_to_symbol_table(ast)
 
     # 8. If we are in the global scope no operation is used for directly assigning constant values to variables
     elif isinstance(ast, LLVMVariable) and \
             isinstance(ast.parent, LLVMAssignment) and \
             (isinstance(ast.parent[1], LLVMConst) or isinstance(ast.parent[1], LLVMPrintStr)):
-
-        symbol_table = ast.parent.parent.symbol_table
-        type = ast.parent[1].get_type()
-        location = ast.value
-
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
-        try:
-            symbol_table.insert(location, type)
-        except:
-            pass
+        add_global_scobe_var_to_symbol_table(ast)
 
     # 9. If the type is a fpext then use the correct type to assign
     elif isinstance(ast, LLVMVariable) and \
             isinstance(ast.parent, LLVMAssignment) and \
             isinstance(ast.parent[1], LLVMExtension):
+        add_fpext_to_symbol_table(ast)
 
-        symbol_table = ast.parent.parent.symbol_table
-        type = ast.parent[1].type_to
-        location = ast.value
 
-        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+def add_fpext_to_symbol_table(ast):
+    symbol_table = ast.parent.parent.symbol_table
+    type = ast.parent[1].type_to
+    location = ast.value
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_global_scobe_var_to_symbol_table(ast):
+    symbol_table = ast.parent.parent.symbol_table
+    type = ast.parent[1].get_type()
+    location = ast.value
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_function_call_assignment_to_symbol_table(ast):
+    symbol_table = ast.parent.parent.symbol_table
+    type = ast.parent[1].rettype
+    location = ast.value
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_llvm_load_to_symbol_table(ast):
+    symbol_table = ast.parent.parent.symbol_table
+    type = ast.parent[1].type
+    location = ast.value
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def llvm_store_to_symbol_table(ast):
+    defined_var = ast.parent[0]
+    symbol_table = ast.parent.parent.symbol_table
+    try:
+        symbol_table_element = symbol_table[defined_var.value]
+    except:
+        # pass
+        return
+    type = symbol_table_element.type
+    location = ast.value
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_operation_assignment_to_symbol_table(ast):
+    defined_var = ast.parent[1][0]
+    symbol_table = ast.parent.parent.symbol_table
+    location = ast.value
+    type = ast.parent[1]
+    # If we find that this so called variable is a constant then we need to seek the type
+    if isinstance(defined_var, LLVMConst):
+        type = defined_var.get_type()
+    # Else if it is a variable then we need to get the type of the LLVMVariable from the table
+    elif isinstance(defined_var, LLVMVariable):
+        # Seek the variable in the symbol table
+        symbol_table_element = symbol_table[defined_var.value]
+        # Retrieve its type
+        type = symbol_table_element.type
+    # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+    try:
+        symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_child_variable_to_symbol_table(ast):
+    variable = ast.children[0]
+    location = variable.value
+    type = ast.type
+    try:
+        ast.parent.parent.symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_left_side_of_assignment_to_symbol_table(ast):
+    variable = ast.parent[0]
+    location = variable.value
+    type = ast.type
+    try:
+        ast.parent.parent.symbol_table.insert(location, type)
+    except:
+        pass
+
+
+def add_arguments_to_symbol_table(ast):
+    for arg_idx in range(len(ast.children)):
+        type = ast.children[arg_idx].type
+        location = get_function_argument(ast.parent.name, arg_idx)
+
         try:
-            symbol_table.insert(location, type)
+            ast.parent.symbol_table.insert(location, type)
         except:
             pass
 
@@ -187,11 +215,12 @@ def remove_allocate(ast):
     # Do not delete a global scope variable but transform it
     if isinstance(ast.parent.parent, LLVMCode):
         # Create a new node
-        new_node = get_const_node(str(ast.type), ast.get_default_val())
+        new_node = get_const_node(ast.type, ast.get_default_val())
         new_node.parent = ast.parent
         new_node.parent.children.append(new_node)
         # Delete the old node
         del ast.parent.children[1]
+        # TODO: is it safe to delete while iterating over it (even though you're transforming it)?
         return
 
     # Store the operation sequence in order to use it to remove the allocate out of the tree
@@ -223,7 +252,7 @@ def remove_printf_declaration(ast):
     # Remove the parents link to its child
     index = ast.get_position(0)
     # Set the link of this child to none in order to remove it
-    del ast.parent.children[index]
+    del ast.parent.children[index] # TODO: WARNING: Again deleting while iterating over it
     # Then its parent so it can be deleted by python itself
     ast.parent = None
 
@@ -485,12 +514,16 @@ def rewrite_printstr(ast):
 
 
 def get_const_val(type):
-    if type == "int" or type == "i32":
+    if isinstance(type, LLVMArrayType):
+        return None
+    elif type.type == "i32":
         return 0
-    elif type == "float" or type == "double":
+    elif type.type == "double":
         return 0.0
-    elif type == "char" or type == "i8":
+    elif type.type == "i8":
         return ' '
+    else:
+        raise Exception("Type not found")
 
 
 def get_var_node(type, name):
@@ -500,16 +533,20 @@ def get_var_node(type, name):
 
 
 def get_const_node(type, value):
+    assert isinstance(type, LLVMType)
     const = None
-    if type == "i32" or type == "int":
-        const = LLVMConstInt(value)
-    elif type == "double" or type == "float":
-        const = LLVMConstFloat(value)
-    elif type == "char" or type == "i8":
-        const = LLVMConstChar(value)
-    elif isinstance(type, LLVMArrayType):
-        const = LLVMArrayType(type.size)
+    if isinstance(type, LLVMArrayType):
+        const = LLVMConstArray(type.size, type.type)
         const.type = type.type
+    elif type.type == "i32":
+        const = LLVMConstInt(value)
+    elif type.type == "double" or type.type == "float":
+        const = LLVMConstFloat(value)
+    elif type.type == "i8":
+        const = LLVMConstChar(value)
+    else:
+        raise Exception("Type not found")
+
 
     return const
 
@@ -520,11 +557,11 @@ def create_assignment(variable, var_name) -> LLVMAssignment:
     _assignment.id()
 
     type = variable.type
-    if isinstance(type, LLVMType) and not isinstance(type, LLVMArrayType):
-        type = type.type
+    assert isinstance(type, LLVMType)
 
     # create the children
     variable_child = get_var_node(type, var_name)
+
     variable_child.id()
     const_val = get_const_val(type)
     const_child = get_const_node(type, const_val)
@@ -561,13 +598,15 @@ def move_global(root: LLVMCode):
             is_global = global_symbol_table[key]
         except:
             type = total_table[key].type
-            if isinstance(type, LLVMType):
-                type = type.type
+
+            assert isinstance(type, LLVMType)
+
             # If the variable is a string then it already is defined globally
-            if type == "string":
+            if isinstance(type, LLVMStringType):
                 continue
 
-            if type == "float" or type == "double":
+
+            if type.type in ("float", "double"):
                 if seek_constant(root, key):
                     continue
 
@@ -597,19 +636,16 @@ def add_type_to_var(ast):
     symbol_table = ast.get_symbol_table()
     total_table = symbol_table.total_table
     if not (ast.value in total_table):
-        ast.type = "j"
+        ast.type = "j" # TODO: What is this? Please don't use strings as types, but only llvm types
         return
     type = total_table[ast.value].type
     if isinstance(type, LLVMArgument):
         pass
     elif isinstance(type, LLVMType):
         ast.type = type
-    elif type.lower() == "string" and not ast.type:
-        ast.type = LLVMStringType(0)
-    elif type.lower() == "string" and ast.type:
-        pass
     else:
-        ast.type = type
+        # Any type must be an LLVMType or Arno will get angery
+        raise Exception("Dafuq have you done to get at this exception?")
 
 
 def convert_argument(ast):
