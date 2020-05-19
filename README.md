@@ -217,7 +217,7 @@ None
 
 ###MIPS tests
 Passing: 19 of 32 tests (actually 18, because of scanf2)
-- [ ] binaryOperations1.c
+- [x] binaryOperations1.c
 - [x] binaryOperations2.c
 - [x] breakAndContinue.c
 - [ ] comparisons1.c
@@ -231,17 +231,17 @@ Passing: 19 of 32 tests (actually 18, because of scanf2)
 - [x] ifElse.c
 - [ ] intToFloatConversion.c
 - [x] modulo.c
-- [ ] pointerArgument.c
+- [x] pointerArgument.c
 - [x] prime.c
 - [x] printf1.c
 - [x] printf2.c
-- [ ] printf3.c
+- [x] printf3.c
 - [x] scanf1.c
 - [ ] scanf2.c (passes because manual input required)
 - [x] scoping.c
 - [x] unaryOperations.c
-- [ ] variables1.c
-- [ ] variables2.c
+- [x] variables1.c
+- [x] variables2.c
 - [x] variables3.c
 - [x] variables4.c
 - [x] variables5.c

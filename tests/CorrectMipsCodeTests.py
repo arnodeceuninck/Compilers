@@ -14,6 +14,43 @@ class CorrectMipsCodeTests(unittest.TestCase):
         # src: https://stackoverflow.com/questions/42512016/how-to-compare-two-files-as-part-of-unittest-while-getting-useful-output-in-cas
         file1 = open(file1)
         file2 = open(file2)
+
+        # This function is written to ignore the extra zero's added behind a decimal point
+        # Ahh yess, love the O(n^2)
+        i = -1
+        j = -1
+        for line1 in file1:
+            i += 1
+            for line2 in file2:
+                j += 1
+                if i != j:
+                    continue
+                if line1 == line2:
+                    continue
+                if not "." in line1 and not "." in line2: # zero check is only for decimals
+                    print(line1)
+                    print(line2)
+                    self.assertTrue(False)
+                ii = -1
+                ji = -1
+                while ii < len(line1)-1 and ji < len(line2)-1:
+                    ii += 1
+                    ji += 1
+                    if line1[ii] == line2[ji]:
+                        continue
+                    if line1[ii] == "0":
+                        ji -= 1
+                    elif line2[ji] == "0":
+                        ii -= 1
+                    else:
+                        print(line1)
+                        print(line2)
+                        self.assertTrue(False)
+            j = -1
+        i = -1
+
+        self.assertEqual(i, j)
+
         self.assertListEqual(list(file1), list(file2))
         file1.close()
         file2.close()

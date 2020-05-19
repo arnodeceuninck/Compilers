@@ -38,7 +38,7 @@ def mips_load(mips_ast, idx=0, var_label=""):
 
         if str(mips_ast.type) == "float" or str(mips_ast.type) == "double":
             mips_load_float(idx, var_label)
-        elif str(mips_ast.type) in ("i32", "i64"): # i64 because of array indices
+        elif str(mips_ast.type) in ("i32", "i64", "i1"): # i64 because of array indices; i1 because i had to put it somewhere
             mips_load_int(idx, var_label)
         elif str(mips_ast.type) == "i8":
             mips_load_char(idx, var_label)

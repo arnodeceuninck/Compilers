@@ -106,6 +106,7 @@ def assignment(ast):
         except:
             pass
 
+
 def add_fpext_to_symbol_table(ast):
     symbol_table = ast.parent.parent.symbol_table
     type = ast.parent[1].type_to
@@ -239,7 +240,7 @@ def remove_allocate(ast):
     # Get the position of the allocate
     index = ast.get_position(1)
     # Delete this child
-    del operation_sequence.children[index] # This is so f*cking dangerous, removing something while iterating over it
+    del operation_sequence.children[index]  # This is so f*cking dangerous, removing something while iterating over it
 
     # Find the top of the tree
     top = ast.parent.parent
@@ -263,7 +264,7 @@ def remove_printf_declaration(ast):
     # Remove the parents link to its child
     index = ast.get_position(0)
     # Set the link of this child to none in order to remove it
-    del ast.parent.children[index] # TODO: WARNING: Again deleting while iterating over it
+    del ast.parent.children[index]  # TODO: WARNING: Again deleting while iterating over it
     # Then its parent so it can be deleted by python itself
     ast.parent = None
 
@@ -332,19 +333,7 @@ def cut_format_string(string: str) -> list:
     element = ""
     idx = 0
     string = str(string[1:-1])
-    # WARNING: When adding something here, also add it in AST.py
-    translations = {"\\0A": "\\n", "\\08": "\\b", "\\1B": "\\e", "\\07": "\\a", "\\0C": "\\f", "\\0D": "\\r",
-                    "\\09": "\\t", "\\0B": "\\v", "\\5C": "\\\\", "\\27": "\\'", "\\22": "\\\"", "\\3F": "\\?"}
     while idx < len(string):
-        if string[idx] == "\\":
-            # Should always be 2 chars after a backslash
-            escaped = string[idx] + string[idx + 1] + string[idx + 2]
-            to = translations.get(escaped)
-            if to:
-                string1 = string[:idx]
-                string2 = string[idx + 3:]
-                string = string1 + to + string2
-
         # We check for a format tag, because if there is then we need to split the string
         if string[idx] == '%':
             if string[idx - 1] == "\\":  # Huh? I'm confused, why doesn't this crash with the string "%"?
@@ -513,6 +502,22 @@ def make_print_string(string):
         string = string[1:-1]
     if string[-3:] == "\\00":
         string = string[:-3]
+
+    # WARNING: When adding something here, also add it in AST.py
+    translations = {"\\0A": "\\n", "\\08": "\\b", "\\1B": "\\e", "\\07": "\\a", "\\0C": "\\f", "\\0D": "\\r",
+                    "\\09": "\\t", "\\0B": "\\v", "\\5C": "\\\\", "\\27": "\\'", "\\22": "\\\"", "\\3F": "\\?"}
+    idx = 0
+    while idx < len(string):
+        if string[idx] == "\\" and len(string) > idx + 2:
+            # Should always be 2 chars after a backslash
+            escaped = string[idx] + string[idx + 1] + string[idx + 2]
+            to = translations.get(escaped)
+            if to:
+                string1 = string[:idx]
+                string2 = string[idx + 3:]
+                string = string1 + to + string2
+                idx += len(to)
+        idx += 1
     return string
 
 
@@ -529,7 +534,7 @@ def get_const_val(type):
         return None
     elif type.type == "i32":
         return 0
-    elif type.type in ("double", "i64"):
+    elif type.type in ("double", "i64", "float"):
         return 0.0
     elif type.type == "i8":
         return ' '
@@ -557,7 +562,6 @@ def get_const_node(type, value):
         const = LLVMConstChar(value)
     else:
         raise Exception("Type not found")
-
 
     return const
 
@@ -616,7 +620,6 @@ def move_global(root: LLVMCode):
             if isinstance(type, LLVMStringType):
                 continue
 
-
             if type.type in ("float", "double"):
                 if seek_constant(root, key):
                     continue
@@ -647,7 +650,7 @@ def add_type_to_var(ast):
     symbol_table = ast.get_symbol_table()
     total_table = symbol_table.total_table
     if not (ast.value in total_table):
-        ast.type = "j" # TODO: What is this? Please don't use strings as types, but only llvm types
+        ast.type = "j"  # TODO: What is this? Please don't use strings as types, but only llvm types
         return
     type = total_table[ast.value].type
     if isinstance(type, LLVMArgument):
