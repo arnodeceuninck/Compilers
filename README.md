@@ -239,13 +239,13 @@ Passing: 19 of 32 tests (actually 18, because of scanf2)
 - [x] scanf1.c
 - [ ] scanf2.c (passes because manual input required)
 - [x] scoping.c
-- [ ] unaryOperations.c
+- [x] unaryOperations.c
 - [ ] variables1.c
 - [ ] variables2.c
-- [ ] variables3.c
+- [x] variables3.c
 - [x] variables4.c
 - [x] variables5.c
 - [x] variables6.c
-- [ ] variables7.c
-- [ ] variables8.c
+- [x] variables7.c
+- [x] variables8.c
 - [x] while.c
