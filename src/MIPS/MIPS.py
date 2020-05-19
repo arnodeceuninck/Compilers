@@ -56,8 +56,31 @@ def mips_code(mips_ast):
         mips_branch(mips_ast)
     elif isinstance(mips_ast, LLVMLoad):
         mips_load(mips_ast, var_label=mips_ast[0].value)
-    else:
+    elif isinstance(mips_ast, LLVMArrayIndex):
+        mips_array_index(mips_ast)
+    elif isinstance(mips_ast, (LLVMOperationSequence, LLVMCode)):
         return ""
+    else:
+        raise Exception("Type not supported")
+
+
+def mips_array_index(mips_ast):
+    assert isinstance(mips_ast, LLVMArrayIndex)
+
+    mips.output += "\tla $s0, {var}\n".format(var=mips_ast[0].name)
+
+    if isinstance(mips_ast[1], LLVMConstInt):
+        mips.output += "\tla $t0, {index}($s0)\n".format(index=mips_ast.get_offset())
+    elif isinstance(mips_ast[1], LLVMVariable):
+        mips_code(mips_ast[1])  # loads in $t1 (because variable is not on the left side of assignment
+        size = mips_ast.type.type.get_size()
+        mips.output += "\tli $t0, {val}\n".format(val=size)
+        mips.output += "\tmul $t1, $t0, $t1\n"
+        mips.output += "\tadd $t1, $t1, $s0\n"
+        mips.output += "\tla $t0, 0($t1)\n"
+        pass
+    else:
+        raise Exception("Type not found :-/")
 
 
 def get_mips_type(mips_ast):
@@ -75,8 +98,12 @@ def get_mips_type(mips_ast):
         return mips_type_argument(mips_ast)
     elif isinstance(mips_ast, LLVMFunctionUse):
         return mips_type_function(mips_ast)
+    elif isinstance(mips_ast, LLVMArrayIndex):
+        return mips_type_array_index(mips_ast)
     raise Exception("I didn't think the code would get this far")
 
+def mips_type_array_index(mips_ast):
+    return mips_ast.type.type # This throws away the information about pointers :-(
 
 def mips_type_argument(mips_ast):
     print()
@@ -310,6 +337,13 @@ def build_start_stackframe(symbol_table: SymbolTable):
             # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
             # store this variable into the stack
             stackframe_string += "\tsb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+        elif isinstance(symbol_table.elements[v].type, LLVMArrayType):
+            # TODO: this is not the way to do it, but I have no idea how to do it otherwise
+            stackframe_string += "\tla $t0, {var_label}\n".format(var_label=str(v))
+            # stackframe_string += "\tlw $t0, 0($t0)\n" # Why doesn't this work
+            stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+            array = symbol_table.elements[v].type
+            frame_offset += -array.size * 4 + 4 # + 4 to undo the -4
         else:
             # load the variable into register $t0
             # old
@@ -324,6 +358,8 @@ def build_start_stackframe(symbol_table: SymbolTable):
 
 
 def build_end_stackframe(symbol_table: SymbolTable):
+    # TODO: Must anything with Arrays happen?
+
     stackframe_string = ""
 
     # The frame offset will be the size of the stored variable amount we need to start 4 offset lower
@@ -336,6 +372,14 @@ def build_end_stackframe(symbol_table: SymbolTable):
             stackframe_string += "\tlb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
             # store the variable into label
             stackframe_string += "\tsb $t0, {var_label}\n".format(var_label=str(v))
+            # TODO: is it normal that nothing goes of the frame offset here?
+            continue
+        elif isinstance(symbol_table[v].type, LLVMArrayType):
+            # TODO: maybe don't push a random address on the stack? Nahh, nobody cares
+            stackframe_string += "\tla $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
+            stackframe_string += "\tsw $t0, {var_label}\n".format(var_label=str(v))
+            array = symbol_table[v].type
+            frame_offset += array.size * 4
             continue
         # load this variable from the stack
         stackframe_string += "\tlw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)

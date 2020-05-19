@@ -94,6 +94,17 @@ def assignment(ast):
             isinstance(ast.parent[1], LLVMExtension):
         add_fpext_to_symbol_table(ast)
 
+    elif isinstance(ast, LLVMVariable) and \
+            isinstance(ast.parent, LLVMAssignment) and \
+            isinstance(ast.parent[1], LLVMArrayIndex):
+        symbol_table = ast.parent.parent.symbol_table
+        type = ast.parent[1].get_type()
+        location = ast.value
+        # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
+        try:
+            symbol_table.insert(location, type)
+        except:
+            pass
 
 def add_fpext_to_symbol_table(ast):
     symbol_table = ast.parent.parent.symbol_table
@@ -518,7 +529,7 @@ def get_const_val(type):
         return None
     elif type.type == "i32":
         return 0
-    elif type.type == "double":
+    elif type.type in ("double", "i64"):
         return 0.0
     elif type.type == "i8":
         return ' '
@@ -540,7 +551,7 @@ def get_const_node(type, value):
         const.type = type.type
     elif type.type == "i32":
         const = LLVMConstInt(value)
-    elif type.type == "double" or type.type == "float":
+    elif type.type in ("double", "float", "i64"):
         const = LLVMConstFloat(value)
     elif type.type == "i8":
         const = LLVMConstChar(value)

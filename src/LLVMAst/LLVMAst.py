@@ -212,7 +212,8 @@ class LLVMConstArray(LLVMConst):
         return self.size * self.type.get_size()
 
     def get_mips_type(self):
-        return ".space"
+        # TODO: Check align
+        return "\t.align 4\n\t\t\t.space"
 
 class LLVMConstInt(LLVMConst):
     def __init__(self, value):
@@ -407,8 +408,18 @@ class LLVMArrayIndex(LLVMAst):
         self.type = None
         # self.index = index # in child
 
+    def get_offset(self):
+        index = int(self[1].constval)
+        offset = index * self.type.type.get_size()  # index times the size of the subtype
+        return offset
+
     def __str__(self):
         return "Index {}".format(self.type)
+
+    def get_type(self):
+        subtype = self.type.type
+        subtype.ptr += 1
+        return subtype
 
 
 # TODO: use these classes as type in the other classes
@@ -422,7 +433,7 @@ class LLVMType(LLVMAst):
         return self.type + "*" * self.ptr
 
     def get_size(self):
-        sizes = {"i32": 4, "float": 8, "i8": 1, "i1": 1}
+        sizes = {"i32": 4, "float": 8, "i8": 4, "i1": 4} # i8 and i1 must be 4, because that's the minimal align size
         return sizes[self.type]
 
 
@@ -451,6 +462,7 @@ class LLVMArrayType(LLVMType):
         return self.size * self.type.get_size()
 
     def get_mips_type(self):
-        return ".space"
+        # TODO: Check align
+        return ".align 4\n\t.space"
 
 from src.symbolTable import *
