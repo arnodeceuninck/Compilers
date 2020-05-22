@@ -354,6 +354,7 @@ def cut_format_string(string: str) -> list:
             elif string[idx + 1] == "c":
                 string_list.append(LLVMConstChar("c"))
             elif string[idx + 1].isdigit() and string[idx + 2] == "s":
+                idx += 1  # Because we have one extra char
                 variable = LLVMVariable("s")
                 string_list.append(variable)
 

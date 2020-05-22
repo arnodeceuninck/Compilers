@@ -107,7 +107,9 @@ class VChar(Variable):
     def get_format_type(self):
         return "c"
 
-    def get_align(self):
+    def get_align(self, ignore_array=False):
+        if self.array and not ignore_array:
+            return 4 if self.array_number < 4 else 16
         return 8 if self.ptr else 1
 
     def convert_template(self, type):
@@ -139,7 +141,9 @@ class VFloat(Variable):
     def get_format_type(self):
         return "f"
 
-    def get_align(self):
+    def get_align(self, ignore_array=False):
+        if self.array and not ignore_array:
+            return 4 if self.array_number < 4 else 16
         return 8 if self.ptr else 4
 
     def get_neutral(self) -> str:

@@ -161,7 +161,7 @@ def convertVar(ast):
         ast_new = VFloat(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = ast.array
+        ast_new.array = element.array
         ast_new.array_number = ast.array_number
         ast_new.array_size = element.array_number
         ast_new.declaration = ast.declaration
@@ -170,7 +170,7 @@ def convertVar(ast):
         ast_new = VChar(ast.value)
         ast_new.const = element.const
         ast_new.ptr = element.ptr
-        ast_new.array = ast.array
+        ast_new.array = element.array
         ast_new.array_number = ast.array_number
         ast_new.array_size = element.array_number
         ast_new.declaration = ast.declaration
