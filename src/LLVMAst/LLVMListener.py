@@ -370,18 +370,18 @@ class LLVMListener(ParseTreeListener):
     def exitPrint_str(self, ctx: llvmParser.Print_strContext):
         pass
 
-    # Enter a parse tree produced by llvmParser#string_argument.
-    def enterString_argument(self, ctx: llvmParser.String_argumentContext):
-        self.add(LLVMStringType(ctx.c_count.text))
-        pass
-
-    # Exit a parse tree produced by llvmParser#string_argument.
-    def exitString_argument(self, ctx: llvmParser.String_argumentContext):
-        v1 = self.trees.pop()
-        type = self.trees.pop()
-        v1.type = type
-        self.add(v1)
-        pass
+    # # Enter a parse tree produced by llvmParser#string_argument.
+    # def enterString_argument(self, ctx: llvmParser.String_argumentContext):
+    #     self.add(LLVMStringType(ctx.c_count.text))
+    #     pass
+    #
+    # # Exit a parse tree produced by llvmParser#string_argument.
+    # def exitString_argument(self, ctx: llvmParser.String_argumentContext):
+    #     v1 = self.trees.pop()
+    #     type = self.trees.pop()
+    #     v1.type = type
+    #     self.add(v1)
+    #     pass
 
     # Enter a parse tree produced by llvmParser#label.
     def enterLabel(self, ctx: llvmParser.LabelContext):

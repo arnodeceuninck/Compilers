@@ -66,6 +66,7 @@ def mips_code(mips_ast):
 
 def mips_array_index(mips_ast):
     assert isinstance(mips_ast, LLVMArrayIndex)
+    assert isinstance(mips_ast[0].type, LLVMArrayType)
 
     mips.output += "\tla $s0, {var}\n".format(var=mips_ast[0].name)
 
@@ -78,6 +79,10 @@ def mips_array_index(mips_ast):
         mips.output += "\tmul $t1, $t0, $t1\n"
         mips.output += "\tadd $t1, $t1, $s0\n"
         mips.output += "\tla $t0, 0($t1)\n"
+        pass
+    elif isinstance(mips_ast[1], LLVMConstChar):
+        mips_ast.children[1].constval = int(str(mips_ast.children[1].constval))
+        mips.output += "\tla $t0, {index}($s0)\n".format(index=mips_ast.get_offset())
         pass
     else:
         raise Exception("Type not found :-/")
@@ -102,8 +107,10 @@ def get_mips_type(mips_ast):
         return mips_type_array_index(mips_ast)
     raise Exception("I didn't think the code would get this far")
 
+
 def mips_type_array_index(mips_ast):
-    return mips_ast.type.type # This throws away the information about pointers :-(
+    return mips_ast.type.type  # This throws away the information about pointers :-(
+
 
 def mips_type_argument(mips_ast):
     print()
@@ -343,7 +350,7 @@ def build_start_stackframe(symbol_table: SymbolTable):
             # stackframe_string += "\tlw $t0, 0($t0)\n" # Why doesn't this work
             stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
             array = symbol_table.elements[v].type
-            frame_offset += -array.size * 4 + 4 # + 4 to undo the -4
+            frame_offset += -array.size * 4 + 4  # + 4 to undo the -4
         else:
             # load the variable into register $t0
             # old
@@ -403,7 +410,12 @@ def build_end_stackframe(symbol_table: SymbolTable):
 def mips_print_string(mips_ast):
     mips_call_code = 4
     mips.output += "\n"
-    mips.output += "\tla $a0, {string_label}\n".format(string_label=mips_ast.value)
+    label = None
+    if mips_ast.value == "Pointer index":
+        label = mips_ast[0].value
+    else:
+        label = mips_ast.value
+    mips.output += "\tla $a0, {string_label}\n".format(string_label=label)
     mips.output += "\tli $v0, {op_code}\n".format(op_code=mips_call_code)
     mips.output += "\tsyscall\n"
 
@@ -440,7 +452,11 @@ def mips_print_char(mips_ast):
 
 
 def mips_print(mips_ast):
-    location = mips_ast.value
+    if isinstance(mips_ast, LLVMArrayIndex):
+        # In case of array
+        location = mips_ast[0].name
+    else:
+        location = mips_ast.value
     var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
     mips_code(mips_ast)
     if isinstance(var_type, LLVMStringType):
@@ -455,26 +471,29 @@ def mips_print(mips_ast):
 
 def mips_scan(mips_ast):
     location = mips_ast.name
-    var_type = mips_ast.type.type
-    if isinstance(var_type, LLVMStringType):
+    if str(mips_ast.type) == "i8*":
+        type = symbol_table_type(location, mips_ast)
         # src: https://stackoverflow.com/questions/7969565/mips-how-to-store-user-input-string
-        mips.output += "\tli $v0, 8 # Take in input\t# take in in\n"
-        mips.output += "\tla $a0, buffer\t# load byte space into address\n"
-        mips.output += "\tli $a1, 20\t# allocate the byte space for string\n"
+        mips.output += "\tli $v0, 8\t# Take in input\n"
+        mips.output += "\tla $a0, {buffer}\t# load byte space into address\n".format(buffer=location)
+        mips.output += "\tli $a1, {bytes}\t# allocate the byte space for string\n".format(bytes=type.size)
         mips.output += "\tmove $t0, $a0\t# save string to t0\n"
         mips.output += "\tsyscall\n"
-    elif var_type == "int" or str(var_type) == "i32":
-        mips.output += "\tli $v0, 5\n"
-        mips.output += "\tsyscall\n"
-        mips.output += "\tsw $v0, {location}\n".format(location=location)
-    elif var_type == "float" or str(var_type) == "double":
-        mips.output += "\tli $v0, 6\n"
-        mips.output += "\tsyscall\n"
-        mips.output += "\tsw $f0, {location}\n".format(location=location)
-    elif var_type == "char" or str(var_type) == "i8":
-        mips.output += "\tli $v0, 12\n"
-        mips.output += "\tsyscall\n"
-        mips.output += "\tsw $v0, {location}\n".format(location=location)
+    elif isinstance(mips_ast, LLVMVariable):
+        # For some reason was the string not of my string class
+        var_type = mips_ast.type.type
+        if var_type == "int" or str(var_type) == "i32":
+            mips.output += "\tli $v0, 5\n"
+            mips.output += "\tsyscall\n"
+            mips.output += "\tsw $v0, {location}\n".format(location=location)
+        elif var_type == "float" or str(var_type) == "double":
+            mips.output += "\tli $v0, 6\n"
+            mips.output += "\tsyscall\n"
+            mips.output += "\tsw $f0, {location}\n".format(location=location)
+        elif var_type == "char" or str(var_type) == "i8":
+            mips.output += "\tli $v0, 12\n"
+            mips.output += "\tsyscall\n"
+            mips.output += "\tsw $v0, {location}\n".format(location=location)
 
 
 def mips_function_use(mips_ast):

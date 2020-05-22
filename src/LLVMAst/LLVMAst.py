@@ -410,7 +410,10 @@ class LLVMArrayIndex(LLVMAst):
 
     def get_offset(self):
         index = int(self[1].constval)
-        offset = index * self.type.type.get_size()  # index times the size of the subtype
+        if isinstance(self.type, LLVMArrayType):
+            offset = index * self.type.type.get_size()
+        else:
+            offset = index * self.type.get_size()  # index times the size of the subtype
         return offset
 
     def __str__(self):
@@ -433,6 +436,8 @@ class LLVMType(LLVMAst):
         return self.type + "*" * self.ptr
 
     def get_size(self):
+        if isinstance(self.type, LLVMArrayType):
+            return self.type.get_size()
         sizes = {"i32": 4, "float": 8, "i8": 4, "i1": 4} # i8 and i1 must be 4, because that's the minimal align size
         return sizes[self.type]
 
@@ -464,5 +469,8 @@ class LLVMArrayType(LLVMType):
     def get_mips_type(self):
         # TODO: Check align
         return ".align 4\n\t.space"
+
+    def get_size(self):
+        return self.size * self.type.get_size()
 
 from src.symbolTable import *

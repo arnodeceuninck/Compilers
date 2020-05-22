@@ -352,6 +352,9 @@ def cut_format_string(string: str) -> list:
                 string_list.append(variable)
             elif string[idx + 1] == "c":
                 string_list.append(LLVMConstChar("c"))
+            elif string[idx + 1].isdigit() and string[idx + 2] == "s":
+                variable = LLVMVariable("s")
+                string_list.append(variable)
 
             idx += 2
             continue
@@ -457,7 +460,7 @@ def create_printf(ast):
     elif ast.name not in ["printf", "__isoc99_scanf"]:
         return
 
-    string_id = ast.children[0].children[0].name
+    string_id = ast[0][0][0].name # Children path: Argument list, Array Index, LLVMVariable
     string = search_string(string_id, ast)
     cut_string = cut_format_string(string)
 
@@ -746,6 +749,9 @@ def compile_llvm(input_file, output_file, debug_dot=False):
 
     # Make the llvm ast complete
     make_llvm_ast(javaForLife)
+
+    if debug_dot:
+        dot(javaForLife, "output/llvm_debug_tree_edited.dot")
 
     generate_mips_code(javaForLife)
 

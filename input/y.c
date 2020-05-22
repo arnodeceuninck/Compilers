@@ -1,7 +1,10 @@
 #include <stdio.h>
+// TODO: test has been changed because ++ and -- not supported
+// This should print the numbers 9 - 14
 int main(){
-	int x[2];
-	x[1] = 712398; // Fun Fact: This converts in ADECE in hexadecimal
-	printf("%d", x[1]);
-	return 1;
+	int a[4];
+	a[1] = 12;
+	a[1] = a[1] - 1;
+	printf("%d; ", a[1]);
+    return 1;
 }

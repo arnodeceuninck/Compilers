@@ -68,7 +68,7 @@ class VInt(Variable):
         type = "int" + ("*"*self.ptr)
         if self.array and not isinstance(self.parent, Assign):
             type += "*"
-        return type  # TODO: arrays should also include a '*', but this lets 3 tests fail
+        return type
 
     def get_format_type(self):
         return "d"
@@ -96,8 +96,8 @@ class VChar(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        type = "char" + ("*"*self.ptr)
-        if self.array:
+        type = "char" + ("*" * self.ptr)
+        if self.array and not isinstance(self.parent, Assign):
             type += "*"
         return type
 
@@ -128,8 +128,8 @@ class VFloat(Variable):
         Variable.__init__(self, value)
 
     def get_type(self):
-        type = "float" + ("*"*self.ptr)
-        if self.array:
+        type = "float" + ("*" * self.ptr)
+        if self.array and not isinstance(self.parent, Assign):
             type += "*"
         return type
 
