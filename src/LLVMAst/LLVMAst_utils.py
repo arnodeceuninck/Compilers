@@ -99,6 +99,7 @@ def assignment(ast):
             isinstance(ast.parent[1], LLVMArrayIndex):
         symbol_table = ast.parent.parent.symbol_table
         type = ast.parent[1].get_type()
+        # type.ptr -= 1 # Fixed the problem with storing chars in arrays, but gave a lot of other problems instead
         location = ast.value
         # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
         try:

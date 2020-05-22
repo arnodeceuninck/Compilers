@@ -546,6 +546,9 @@ def global_mips(mips_ast):
         var_name = child.children[0].name
         var_value = child.children[1].get_str_value()
         var_type = child.children[1].get_mips_type()
+        if isinstance(child[0].type, LLVMType) and child[0].type.ptr:
+            var_value = 0
+            var_type = ".word"
         mips.output += "\t" + var_name + ": " + var_type + " " + str(var_value) + "\n"
 
 
@@ -568,7 +571,7 @@ def mips_assign(mips_ast):
             mips.output += "\ts.s $f2, {var}\n".format(var=label)
         else:
             mips.output += "\ts.s $f0, {var}\n".format(var=label)
-    elif get_mips_type(mips_ast[1]) == "i8":
+    elif str(get_mips_type(mips_ast[1])) == "i8":
         if isinstance(mips_ast[1], LLVMOperation):
             mips.output += "\tsb $s0, {var}\n".format(var=label)
         else:
