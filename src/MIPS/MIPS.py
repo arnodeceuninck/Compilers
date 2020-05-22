@@ -413,6 +413,15 @@ def mips_print_string(mips_ast):
     label = None
     if mips_ast.value == "Pointer index":
         label = mips_ast[0].value
+    elif isinstance(symbol_table_type(mips_ast.value, mips_ast), LLVMArrayType):
+        array = symbol_table_type(mips_ast.value, mips_ast)
+        label = mips_ast.value
+        mips.output += "\tla $t0, {string_label}\n".format(string_label=label)
+        mips.output += "\tli $v0, {op_code}\n".format(op_code=11)
+        for i in range(array.size):
+            mips.output += "\tlw $a0, {index}($t0)\n".format(index=i*4)
+            mips.output += "\tsyscall\n"
+        return
     else:
         label = mips_ast.value
     mips.output += "\tla $a0, {string_label}\n".format(string_label=label)
@@ -459,7 +468,7 @@ def mips_print(mips_ast):
         location = mips_ast.value
     var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
     mips_code(mips_ast)
-    if isinstance(var_type, LLVMStringType):
+    if isinstance(var_type, LLVMStringType) or str(mips_ast.type) == "i8*":
         mips_print_string(mips_ast)
     elif var_type == "int" or str(var_type) == "i32":
         mips_print_int(mips_ast)
@@ -467,6 +476,8 @@ def mips_print(mips_ast):
         mips_print_float(mips_ast)
     elif var_type == "char" or str(var_type) == "i8":
         mips_print_char(mips_ast)
+    else:
+        raise Exception("Type not supported")
 
 
 def mips_scan(mips_ast):
