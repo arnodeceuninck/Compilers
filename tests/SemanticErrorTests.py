@@ -15,7 +15,8 @@ class SemanticErrorTests(unittest.TestCase):
         AST.reset()
 
         input_file: str = "CompilersBenchmark/SemanticErrors/" + test_name + ".c"
-        output_file: str = "tests/output/SemanticErrorOutput.ll"  # Required because some errors only get raised when compiling
+        # Required because some errors only get raised when compiling
+        output_file: str = "tests/output/SemanticErrorOutput.ll"
 
         errored = False
         try:
@@ -66,21 +67,22 @@ class SemanticErrorTests(unittest.TestCase):
     def test_dereferenceTypeMismatch1(self):
         # Not allowed because of the grammar
         self.help_test(SyntaxCompilerError,
-                       "[ERROR] Oh no!! You've used the wrong syntax at line 2, column 5: no viable alternative at input '*5'")
+                       "[ERROR] Oh no!! You've used the wrong syntax at line 2, column 5: "
+                       "no viable alternative at input '*5'")
 
     def test_dereferenceTypeMismatch2(self):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
 
-    def test_functionCallArgumentMismatch1(self):
+    def test_functionCallargumentMismatch1(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
-    def test_functionCallArgumentMismatch2(self):
+    def test_functionCallargumentMismatch2(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
-    def test_functionCallArgumentMismatch3(self):
+    def test_functionCallargumentMismatch3(self):
         self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 1 instead")
 
-    def test_functionCallArgumentMismatch4(self):
+    def test_functionCallargumentMismatch4(self):
         self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 3 instead")
 
     def test_functionRedefinition1(self):
@@ -108,7 +110,8 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'char' and 'int'")
 
     def test_incompatibleTypes6(self):
-        self.help_test(IncompatibleFunctionType, "[ERROR] Function printf with type 'string' is incompatible with 'int'")
+        self.help_test(IncompatibleFunctionType, "[ERROR] Function printf with type 'string' "
+                                                 "is incompatible with 'int'")
 
     def test_incompatibleTypes7(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
