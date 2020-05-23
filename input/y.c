@@ -1,6 +1,6 @@
+void f(int a, int b){}
+
 int main(){
-    int x;
-    //variable redefinition
-    int x;
+    f(1);
     return 0;
 }

@@ -74,10 +74,10 @@ class SemanticErrorTests(unittest.TestCase):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
 
     def test_functionCallargumentMismatch1(self):
-        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
+        self.help_test(CallAmountMismatchError, "[ERROR] Function f expects 2 operators but gets 1 instead")
 
     def test_functionCallargumentMismatch2(self):
-        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
+        self.help_test(CallAmountMismatchError, "[ERROR] Function f expects 1 operators but gets 2 instead")
 
     def test_functionCallargumentMismatch3(self):
         self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 1 instead")

@@ -4,7 +4,7 @@ from src.ErrorListener import RerefError, CompilerError, ConstError, Incompatibl
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
     FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError, \
-    VariableRedefinitionError
+    VariableRedefinitionError, CallAmountMismatchError
 from src.Node.AST import Function, has_symbol_table, Include
 from src.CustomListener import CustomListener
 from src.Node.Variable import *
@@ -442,6 +442,11 @@ def check_function(ast):
                 matched_function = True
         # If the function is not defined yet the throw an undefined error
         if not matched_function:
+            # We need to check if the function already has been defined
+            for function in AST.functions:
+                if function.value == ast.value and function.function_type == "definition":
+                    if len(function[0].children) != len(ast[0].children):
+                        raise CallAmountMismatchError(ast.value, len(function[0].children), len(ast[0].children))
             raise FunctionUndefinedError(ast.value)
     elif function_type == "definition":
         # We need to check if the Function definition only has 1 parent and is defined in the global scope
