@@ -484,7 +484,7 @@ def mips_print_string(mips_ast):
         mips.output += "\tli $v0, {op_code}\n".format(op_code=11)
         size = determine_array_size(label, mips_ast)
         for i in range(size): # TODO: determine size: range(array.size):
-            mips.output += "\tlw $a0, {index}($t0)\n".format(index=i * 4)
+            mips.output += "\tlb $a0, {index}($t0)\n".format(index=i)
             mips.output += "\tsyscall\n"
         return
     else:
