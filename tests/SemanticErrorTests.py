@@ -1,6 +1,6 @@
-from tests.test import *
-from src.ErrorListener import *
 from src.LLVM.LLVM import to_LLVM
+from src.ErrorListener import *
+from src.Node.AST_utils import *
 import inspect
 import unittest
 
@@ -65,7 +65,8 @@ class SemanticErrorTests(unittest.TestCase):
 
     def test_dereferenceTypeMismatch1(self):
         # Not allowed because of the grammar
-        self.help_test(SyntaxCompilerError, "[ERROR] Oh no!! You've used the wrong syntax at line 2, column 5: no viable alternative at input '*5'")
+        self.help_test(SyntaxCompilerError,
+                       "[ERROR] Oh no!! You've used the wrong syntax at line 2, column 5: no viable alternative at input '*5'")
 
     def test_dereferenceTypeMismatch2(self):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
@@ -106,6 +107,7 @@ class SemanticErrorTests(unittest.TestCase):
     def test_incompatibleTypes5(self):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'char' and 'int'")
 
+    # TODO fix this test
     def test_incompatibleTypes6(self):
         self.help_test(RerefError, "")
 
@@ -119,6 +121,7 @@ class SemanticErrorTests(unittest.TestCase):
     def test_invalidLoopControlStatement(self):
         self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'continue' used is out of scope")
 
+    # TODO this test should fail
     def test_invalidUnaryOperation(self):
         # Unsupported '++'
         self.help_test(RerefError, "")
@@ -126,12 +129,15 @@ class SemanticErrorTests(unittest.TestCase):
     def test_mainNotFound(self):
         self.help_test(MainNotFoundError, "[ERROR] Main not found")
 
+    # TODO fix error message to be redifined
     def test_parameterRedefinition1(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
+    # TODO fix error message to be redifined
     def test_parameterRedefinition2(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
+    # TODO fix error message to be redifined
     def test_parameterRedefinition3(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
 
@@ -156,23 +162,30 @@ class SemanticErrorTests(unittest.TestCase):
     def test_undeclaredVariable3(self):
         self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
+    # TODO make defined
     def test_variableRedefinition1(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
+    # TODO make defined
     def test_variableRedefinition2(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
+    # TODO make defined
     def test_variableRedefinition3(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
+    # TODO make defined
     def test_variableRedefinition4(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
+    # TODO make defined
     def test_variableRedefinition5(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
 
+    # TODO make defined
     def test_variableRedefinition6(self):
         self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+
 
 if __name__ == '__main__':
     unittest.main()

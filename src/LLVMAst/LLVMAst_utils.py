@@ -164,6 +164,9 @@ def llvm_store_to_symbol_table(ast):
     location = ast.value
     # In order to avoid redeclaration errors of variables we put a try catch block arround this piece of code
     try:
+        # If the variable is a global one then do not insert this value in the symbol table
+        if '.' not in location:
+            return
         symbol_table.insert(location, type)
     except:
         pass
@@ -195,6 +198,9 @@ def add_child_variable_to_symbol_table(ast):
     location = variable.value
     type = ast.type
     try:
+        # If the variable is a global one then do not insert this value in the symbol table
+        if '.' not in location:
+            return
         ast.parent.parent.symbol_table.insert(location, type)
     except:
         pass
