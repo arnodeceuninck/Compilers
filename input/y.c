@@ -1,7 +1,18 @@
 #include <stdio.h>
+
+int x = 10;
+
+// Should print the numbers 10 20 30 40
+
 int main(){
-	int x[2];
-	x[1] = 712398; // Fun Fact: This converts in ADECE in hexadecimal
-	printf("%d", x[1]);
+	printf("%d;", x);
+	int x = 20;
+	printf("%d;", x);
+    x = 30;
+	if (1){
+		printf("%d;", x);
+		int x = 40;
+		printf("%d;", x);
+	}
 	return 1;
 }
