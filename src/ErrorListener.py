@@ -65,6 +65,18 @@ class IncompatibleTypesError(CompilerError):
         return "[ERROR] Type " + self.ltype + " is incompatible with " + self.rtype
 
 
+class IncompatibleFunctionType(CompilerError):
+    def __init__(self, ltype, rtype, function_name):
+        super().__init__()
+        self.ltype = ltype
+        self.rtype = rtype
+        self.function_name = function_name
+
+    def __str__(self):
+        return "[ERROR] Function " + self.function_name + "with type '" + self.ltype + "' is incompatible with '" + \
+               self.rtype + "'"
+
+
 class UnknownOperationError(CompilerError):
     def __init__(self, operation, ltype, rtype=None):
         super().__init__()
