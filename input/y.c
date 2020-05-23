@@ -8,6 +8,10 @@ int main(){
     a[2] = 'l';
     a[3] = 'l';
     a[4] = 'o';
-    int var = 2;
-    printf("%s World!", a);
+    printf("%s World!\n", a);
+
+    printf("Enter a 5-character string:");
+	scanf("%5s", &a);
+	printf("%s", a);
+	return 1;
 }
