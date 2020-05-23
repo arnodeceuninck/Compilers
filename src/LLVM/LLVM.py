@@ -458,6 +458,82 @@ def to_LLVM(ast, filename):
     outputFile.close()
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+# Returns the format tags of the ast in a list
+def get_format_tags(string):
+    _format_tags = list()
+    idx = 0
+    while idx < len(string):
+        # We check for a format tag, because if there is then we need to split the string
+        if string[idx] == '%':
+            if string[idx - 1] == "\\":  # Huh? I'm confused, why doesn't this crash with the string "%"?
+                idx += 1
+                continue
+            new_idx = idx + 1
+            new_string = string[idx]
+            while is_number(string[new_idx]):
+                new_string += string[new_idx]
+                new_idx += 1
+                idx += 1
+            idx += 2
+            _format_tags.append(new_string + string[new_idx])
+            continue
+        idx += 1
+
+    return _format_tags
+
+
+def get_tag_type(tag: str):
+    if tag == "%d":
+        return "int"
+    if tag == "%c":
+        return "char"
+    if tag == "%f":
+        return "float"
+    if tag == "%s":
+        return "string"
+    pass
+
+
+# Returns true when a tag and its argument align
+def check_equal_tag_argument(tag: str, argument, function_name):
+    # The first and last character of a tag will always form a valid tag from which a type can be deduced
+    tag_type = get_tag_type(tag[0] + tag[-1])
+    print(isinstance(argument, VChar) and argument.array)
+    if tag == "%d" and (not isinstance(argument, VInt) or not isinstance(argument, CInt)):
+        raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
+    elif tag == "%f" and (not isinstance(argument, VFloat) or not isinstance(argument, CFloat)):
+        raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
+    elif tag == "%c" and (not isinstance(argument, VChar) or not isinstance(argument, CChar)):
+        raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
+    elif tag == "%s" and (not isinstance(argument, CString) and not (isinstance(argument, VChar) and argument.array)):
+        raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
+    elif len(tag) <= 2:
+        return
+
+    # If the argument is not an array then we to raise an error because we cannot scan without an array multiple values
+    if not isinstance(argument, Variable):
+        raise IncompatibleFunctionType("array[{tag_type}]".format(tag_type=tag_type), argument.get_type(),
+                                       function_name)
+
+    number = int(tag[1:-1])
+    if number != argument.array_size:
+        raise IncompatibleFunctionType("array[{tag_type}]".format(tag_type=tag_type), argument.get_type(),
+                                       function_name)
+
+
+def check_format_tags(format_tags, arguments, function_name):
+    for idx in range(len(format_tags)):
+        check_equal_tag_argument(format_tags[idx], arguments[idx], function_name)
+
+
 # This piece of code will create a printf statement if it is necessary
 def get_llvm_print(ast):
     # We need to indicate that we are printing so we need to set the ast value of print to true
@@ -472,8 +548,10 @@ def get_llvm_print(ast):
     # Error part
     format_count = ast.get_format_count(custom_string)
     child_count = len(ast[0].children) - 1
+    format_tags = get_format_tags(ast[0].children[0].value)
     if format_count != child_count:
         raise CallAmountMismatchError(ast.value, format_count, child_count)
+    check_format_tags(format_tags, ast[0].children[1:], "printf")
     # PART 1
 
     custom_string = ast.to_llvm_string(custom_string)
@@ -703,8 +781,8 @@ def llvm_argument(ast):
         return argument
 
 
-from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, Assign, \
-    VFloat, CString
+from src.Node.AST import AST, StatementSequence, If, For, While, Operator, Function, Arguments, Include, Binary, \
+    Assign, VFloat, CString, VInt, VChar, CFloat, CChar, CInt
 from src.LLVM.Comments import llvm_comments, Comments
 from src.LLVM.Compare import llvm_compare, Compare
 from src.LLVM.Constant import llvm_constant, Constant, llvm_type_constant
@@ -712,4 +790,4 @@ from src.LLVM.Operate import llvm_operate, Operate, llvm_type_operate, llvm_type
 from src.LLVM.ReservedType import llvm_reserved_type, ReservedType
 from src.LLVM.Unary import llvm_unary, Unary, UReref, UDeref, llvm_type_unary
 from src.LLVM.Variable import llvm_variable, Variable, llvm_type_variable
-from src.ErrorListener import CallAmountMismatchError
+from src.ErrorListener import CallAmountMismatchError, IncompatibleFunctionType

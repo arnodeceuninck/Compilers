@@ -8,5 +8,6 @@ int main(){
     a[2] = 'l';
     a[3] = 'l';
     a[4] = 'o';
-    printf("%s World!", &a);
+    int var = 2;
+    printf("%s World!", a);
 }
