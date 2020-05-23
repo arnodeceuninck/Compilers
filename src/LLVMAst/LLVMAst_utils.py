@@ -737,7 +737,8 @@ def generate_mips_code(javaForLife):
     # We just need to add the exit in llvm
     mips.output += "exit:\n"
     mips.output += "\tjal main\n"
-    mips.output += "\tli $v0, 10\n"
+    mips.output += "\tmove $a0, $v0\n"
+    mips.output += "\tli $v0, 17\n"
     mips.output += "\tsyscall\n"
 
 
