@@ -506,7 +506,6 @@ def get_tag_type(tag: str):
 def check_equal_tag_argument(tag: str, argument, function_name):
     # The first and last character of a tag will always form a valid tag from which a type can be deduced
     tag_type = get_tag_type(tag[0] + tag[-1])
-    print(isinstance(argument, VChar) and argument.array)
     if tag == "%d" and argument.get_type() != 'int':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
     elif tag == "%f" and argument.get_type() != 'float':
@@ -518,8 +517,12 @@ def check_equal_tag_argument(tag: str, argument, function_name):
     elif len(tag) <= 2:
         return
 
+    if isinstance(argument, UDeref):
+        argument = argument.children[0]
+    elif isinstance(argument, Variable) and argument.ptr:
+        pass
     # If the argument is not an array then we to raise an error because we cannot scan without an array multiple values
-    if not isinstance(argument, Variable):
+    else:
         raise IncompatibleFunctionType("array[{tag_type}]".format(tag_type=tag_type), argument.get_type(),
                                        function_name)
 
@@ -643,8 +646,11 @@ def get_llvm_scan(ast):
     # Error part
     format_count = ast.get_format_count(custom_string)
     child_count = len(ast[0].children) - 1
+    format_tags = get_format_tags(ast[0].children[0].value)
     if format_count != child_count:
         raise OperatorAmountMismatchError(ast.value, format_count, child_count)
+    check_format_tags(format_tags, ast[0].children[1:], "scanf")
+
     # PART 1
     # Get the string value
     custom_string = ast[0][0].value

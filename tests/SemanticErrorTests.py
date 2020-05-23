@@ -109,7 +109,7 @@ class SemanticErrorTests(unittest.TestCase):
 
     # TODO fix this test
     def test_incompatibleTypes6(self):
-        self.help_test(IncompatibleFunctionType, "[ERROR] Function printfwith type 'string' is incompatible with 'int'")
+        self.help_test(IncompatibleFunctionType, "[ERROR] Function printf with type 'string' is incompatible with 'int'")
 
     def test_incompatibleTypes7(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
