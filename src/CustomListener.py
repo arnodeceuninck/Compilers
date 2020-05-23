@@ -206,6 +206,7 @@ class CustomListener(ParseTreeListener):
         variable.ptr = variable_use.ptr
 
         if variable_use.array:
+            variable.array_indexed = True
             variable.array = variable_use.array
             variable.array_number = variable_use.array_number
 

@@ -152,6 +152,7 @@ def convertVar(ast):
         ast_new.ptr = element.ptr
         ast_new.array = element.array
         ast_new.array_number = ast.array_number
+        ast_new.array_indexed = ast.array_indexed
         ast_new.array_size = element.array_number
         if isinstance(element.parent, ArrayIndex):
             ast_new.array_number = element.parent.index
@@ -164,6 +165,7 @@ def convertVar(ast):
         ast_new.array = element.array
         ast_new.array_number = ast.array_number
         ast_new.array_size = element.array_number
+        ast_new.array_indexed = ast.array_indexed
         ast_new.declaration = ast.declaration
         ast.parent.replace_child(ast, ast_new)
     elif type == 'char':
@@ -171,6 +173,7 @@ def convertVar(ast):
         ast_new.const = element.const
         ast_new.ptr = element.ptr
         ast_new.array = element.array
+        ast_new.array_indexed = ast.array_indexed
         ast_new.array_number = ast.array_number
         ast_new.array_size = element.array_number
         ast_new.declaration = ast.declaration

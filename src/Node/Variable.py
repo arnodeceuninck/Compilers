@@ -14,6 +14,7 @@ class Variable(AST):
         self.reref = 0
 
         self.array = False
+        self.array_indexed = False
         self.array_number = 0  # The index or the size in case of declaration
         self.array_size = 0  # The size of the array
 
