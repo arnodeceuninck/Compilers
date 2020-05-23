@@ -515,7 +515,7 @@ def mips_print(mips_ast):
         location = mips_ast.value
     var_type = mips_ast.parent.parent.symbol_table.total_table[location].type
     mips_code(mips_ast)
-    if isinstance(var_type, LLVMStringType) or str(mips_ast.type) == "i8*":
+    if isinstance(var_type, LLVMStringType) or str(mips_ast.type) == "i8*" or isinstance(mips_ast.type, LLVMArrayType):
         mips_print_string(mips_ast)
     elif var_type == "int" or str(var_type) == "i32":
         mips_print_int(mips_ast)

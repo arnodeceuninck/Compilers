@@ -20,7 +20,7 @@ def mips_load(mips_ast, idx=0, var_label=""):
     # A storage location for a number or a storage location for a pointer
 
     # If we want to load a pointer
-    if mips_ast.type.ptr:
+    if mips_ast.type.ptr or isinstance(mips_ast.type, LLVMArrayType):
         # And the first child contains a pointer, you can just load the word
         if pointer_child(mips_ast, 0):
             mips.output += "\tlw $t0, {var}\n".format(var=var_label)
