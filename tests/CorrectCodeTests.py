@@ -113,6 +113,9 @@ class CorrectCodeTests(unittest.TestCase):
     def test_printf3(self):
         self.help_test()
 
+    def test_printf4(self):
+        self.help_test()
+
     def test_scanf1(self):
         return
         self.help_test()
