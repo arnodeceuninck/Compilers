@@ -525,11 +525,21 @@ def get_llvm_print(ast):
             # If we have an array we need to store it in a variable and then load this in another variable
             # because it will be a pointer
             if child.array:
-                var = variable(child, indexed=True, index=child.array_number)
+                temp = ast.get_temp()
+                code = "{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 0\n"
+                code = code.format(array_type=get_llvm_type(child),
+                                   variable=variable(child, store=True),
+                                   result=temp)
 
-                function_arguments += get_llvm_type(child, child.array) + " " + var
-                continue
-            function_arguments += get_llvm_type(child, child.array) + " " + variable(child)
+                llvm.output += code
+                function_arguments += get_llvm_type(child, child.array) + "* " + temp
+            else:
+
+                # var = variable(child) #, indexed=True, index=child.array_number)
+                #
+                # function_arguments += get_llvm_type(child, child.array) + " " + var
+                # continue
+                function_arguments += get_llvm_type(child, child.array) + " " + variable(child)
         else:
             # We know that the llvm code that has been generated has stored the value in the child as a variable
             function_arguments += get_llvm_type(child) + " " + variable(child)
@@ -604,6 +614,8 @@ def get_llvm_scan(ast):
 # Get the variable for the node (and load it from memory if required)
 # Store must be true when you want to store into the variable
 def variable(ast, store: bool = False, indexed: bool = False, index=0):
+    assert isinstance(ast, AST)
+
     # TODO: move this to their own classes (virtual functions)
     if isinstance(ast, UDeref):
         return variable(ast[0], store=True)
@@ -680,7 +692,7 @@ def llvm_load(ast, var: str):
 def index_load(ast, result, index):
     code = "\t{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
     code = code.format(result=result, array_type=get_llvm_type(ast),
-                       variable=variable(ast.variable, store=True), index=index)
+                   variable=variable(ast.variable, store=True), index=index)
     llvm.output += code
 
 
