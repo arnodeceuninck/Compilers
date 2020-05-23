@@ -460,12 +460,12 @@ def mips_print_string(mips_ast):
     label = None
     if mips_ast.value == "Pointer index":
         label = mips_ast[0].value
-    elif isinstance(symbol_table_type(mips_ast.value, mips_ast), LLVMArrayType):
+    elif isinstance(symbol_table_type(mips_ast.value, mips_ast), LLVMArrayType) or str(mips_ast.type) == "i8*":
         array = symbol_table_type(mips_ast.value, mips_ast)
         label = mips_ast.value
-        mips.output += "\tla $t0, {string_label}\n".format(string_label=label)
+        mips.output += "\tlw $t0, {string_label}\n".format(string_label=label)
         mips.output += "\tli $v0, {op_code}\n".format(op_code=11)
-        for i in range(array.size):
+        for i in range(1): # TODO: determine size: range(array.size):
             mips.output += "\tlw $a0, {index}($t0)\n".format(index=i * 4)
             mips.output += "\tsyscall\n"
         return
