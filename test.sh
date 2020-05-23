@@ -1,3 +1,5 @@
-export PYTHONPATH=$PYTHONPATH:gen
-antlr4 -Dlanguage=Python3 -visitor -Xexact-output-dir -o gen input/c.g4
-python3 tests/CorrectCodeTests.py
+mkdir "tests/output"
+#mkdir "output"
+antlr4 -o gen -listener -visitor -Dlanguage=Python3 -lib input input/llvm.g4
+antlr4 -o gen_llvm -listener -visitor -Dlanguage=Python3 -lib input input/c.g4
+python3 -m unittest tests/CorrectCodeTests.py tests/CorrectMipsCodeTests.py tests/SemanticErrorTests.py
