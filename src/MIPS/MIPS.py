@@ -453,6 +453,23 @@ def build_end_stackframe(symbol_table: SymbolTable):
     stackframe_string += "\tjr $ra\n"
     return stackframe_string
 
+class data:
+    RESULT = None
+    LABEL = None
+
+def find_assignment(mips_ast):
+    if not isinstance(mips_ast, LLVMAssignment):
+        return
+    if mips_ast[0].value == data.LABEL:
+        data.RESULT = mips_ast
+
+def determine_array_size(label, mips_ast):
+    while mips_ast.parent:
+        mips_ast = mips_ast.parent
+    data.LABEL = label
+    mips_ast.traverse(find_assignment)
+    return data.RESULT[1].type.size
+
 
 def mips_print_string(mips_ast):
     mips_call_code = 4
@@ -465,7 +482,8 @@ def mips_print_string(mips_ast):
         label = mips_ast.value
         mips.output += "\tlw $t0, {string_label}\n".format(string_label=label)
         mips.output += "\tli $v0, {op_code}\n".format(op_code=11)
-        for i in range(1): # TODO: determine size: range(array.size):
+        size = determine_array_size(label, mips_ast)
+        for i in range(size): # TODO: determine size: range(array.size):
             mips.output += "\tlw $a0, {index}($t0)\n".format(index=i * 4)
             mips.output += "\tsyscall\n"
         return
