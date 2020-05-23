@@ -152,7 +152,7 @@ def symbol_table_type(name, ast):
 
 
 def mips_extension(mips_ast):
-    print("WARNING: LLVMExtension to MIPS code not yet supported, moving instead")
+    # print("WARNING: LLVMExtension to MIPS code not yet supported, moving instead")
     mips_code(mips_ast[0])
     # mips.output += "\tadd $s0, $t0, 0\n"
     return
@@ -529,12 +529,12 @@ def mips_print(mips_ast):
 
 def mips_scan(mips_ast):
     location = mips_ast.name
-    if str(mips_ast.type) == "i8*":
+    if str(mips_ast.type) == "i8*" or isinstance(mips_ast.type, LLVMArrayType):
         type = symbol_table_type(location, mips_ast)
         # src: https://stackoverflow.com/questions/7969565/mips-how-to-store-user-input-string
         mips.output += "\tli $v0, 8\t# Take in input\n"
         mips.output += "\tla $a0, {buffer}\t# load byte space into address\n".format(buffer=location)
-        mips.output += "\tli $a1, {bytes}\t# allocate the byte space for string\n".format(bytes=type.size)
+        mips.output += "\tli $a1, {bytes}\t# allocate the byte space for string\n".format(bytes=type.size+1)
         mips.output += "\tmove $t0, $a0\t# save string to t0\n"
         mips.output += "\tsyscall\n"
     elif isinstance(mips_ast, LLVMVariable):
