@@ -21,6 +21,15 @@ class VariableRedeclarationError(CompilerError):
         return "[ERROR] Variable " + self.variable + " already declared"
 
 
+class VariableRedefinitionError(CompilerError):
+    def __init__(self, variable):
+        super().__init__()
+        self.variable = variable
+
+    def __str__(self):
+        return "[ERROR] Variable " + self.variable + " already defined"
+
+
 class ConstError(CompilerError):
     def __init__(self, variable):
         super().__init__()

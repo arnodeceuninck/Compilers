@@ -1,4 +1,4 @@
-from src.ErrorListener import VariableRedeclarationError, UndeclaredVariableError
+from src.ErrorListener import UndeclaredVariableError, VariableRedefinitionError
 
 
 class SymbolTableElement:
@@ -89,7 +89,7 @@ class SymbolTable:
         if location not in self.elements:
             self.elements[location] = SymbolTableElement(type, position)
         else:
-            raise VariableRedeclarationError(location)
+            raise VariableRedefinitionError(location)
             # print("Variable", location, "already in the symbol table.")
 
     def __str__(self):

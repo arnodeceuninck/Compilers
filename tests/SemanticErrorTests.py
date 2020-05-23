@@ -71,16 +71,16 @@ class SemanticErrorTests(unittest.TestCase):
     def test_dereferenceTypeMismatch2(self):
         self.help_test(DerefError, "[ERROR] trying to take the address of something that's not a variable")
 
-    def test_functionCallargumentMismatch1(self):
+    def test_functionCallArgumentMismatch1(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
-    def test_functionCallargumentMismatch2(self):
+    def test_functionCallArgumentMismatch2(self):
         self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
 
-    def test_functionCallargumentMismatch3(self):
+    def test_functionCallArgumentMismatch3(self):
         self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 1 instead")
 
-    def test_functionCallargumentMismatch4(self):
+    def test_functionCallArgumentMismatch4(self):
         self.help_test(CallAmountMismatchError, "[ERROR] Function printf expects 2 operators but gets 3 instead")
 
     def test_functionRedefinition1(self):
@@ -107,7 +107,6 @@ class SemanticErrorTests(unittest.TestCase):
     def test_incompatibleTypes5(self):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'char' and 'int'")
 
-    # TODO fix this test
     def test_incompatibleTypes6(self):
         self.help_test(IncompatibleFunctionType, "[ERROR] Function printf with type 'string' is incompatible with 'int'")
 
@@ -121,7 +120,7 @@ class SemanticErrorTests(unittest.TestCase):
     def test_invalidLoopControlStatement(self):
         self.help_test(ReservedVariableOutOfScope, "[ERROR] The reserved variable 'continue' used is out of scope")
 
-    # TODO this test should fail
+    # This test should fail
     def test_invalidUnaryOperation(self):
         # Unsupported '++'
         self.help_test(RerefError, "")
@@ -129,17 +128,14 @@ class SemanticErrorTests(unittest.TestCase):
     def test_mainNotFound(self):
         self.help_test(MainNotFoundError, "[ERROR] Main not found")
 
-    # TODO fix error message to be redifined
     def test_parameterRedefinition1(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable a already defined")
 
-    # TODO fix error message to be redifined
     def test_parameterRedefinition2(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable a already defined")
 
-    # TODO fix error message to be redifined
     def test_parameterRedefinition3(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable a already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable a already defined")
 
     def test_pointerOperationError(self):
         self.help_test(UnknownOperationError, "[ERROR] Undified operation '+' between 'int*' and 'int*'")
@@ -162,29 +158,23 @@ class SemanticErrorTests(unittest.TestCase):
     def test_undeclaredVariable3(self):
         self.help_test(UndeclaredVariableError, "[ERROR] Variable x hasn't been declared yet")
 
-    # TODO make defined
     def test_variableRedefinition1(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
-    # TODO make defined
     def test_variableRedefinition2(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
-    # TODO make defined
     def test_variableRedefinition3(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
-    # TODO make defined
     def test_variableRedefinition4(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
-    # TODO make defined
     def test_variableRedefinition5(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
-    # TODO make defined
     def test_variableRedefinition6(self):
-        self.help_test(VariableRedeclarationError, "[ERROR] Variable x already declared")
+        self.help_test(VariableRedefinitionError, "[ERROR] Variable x already defined")
 
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@ from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from src.ErrorListener import RerefError, CompilerError, ConstError, IncompatibleTypesError, CustomErrorListener, \
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
-    FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError
+    FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError, \
+    VariableRedefinitionError
 from src.Node.AST import Function, has_symbol_table, Include
 from src.CustomListener import CustomListener
 from src.Node.Variable import *
