@@ -507,11 +507,11 @@ def check_equal_tag_argument(tag: str, argument, function_name):
     # The first and last character of a tag will always form a valid tag from which a type can be deduced
     tag_type = get_tag_type(tag[0] + tag[-1])
     print(isinstance(argument, VChar) and argument.array)
-    if tag == "%d" and (not isinstance(argument, VInt) or not isinstance(argument, CInt)):
+    if tag == "%d" and argument.get_type() != 'int':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
-    elif tag == "%f" and (not isinstance(argument, VFloat) or not isinstance(argument, CFloat)):
+    elif tag == "%f" and argument.get_type() != 'float':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
-    elif tag == "%c" and (not isinstance(argument, VChar) or not isinstance(argument, CChar)):
+    elif tag == "%c" and argument.get_type() != 'char':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
     elif tag == "%s" and (not isinstance(argument, CString) and not (isinstance(argument, VChar) and argument.array)):
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)

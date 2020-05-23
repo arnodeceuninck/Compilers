@@ -73,7 +73,7 @@ class IncompatibleFunctionType(CompilerError):
         self.function_name = function_name
 
     def __str__(self):
-        return "[ERROR] Function " + self.function_name + "with type '" + self.ltype + "' is incompatible with '" + \
+        return "[ERROR] Function " + self.function_name + " with type '" + self.ltype + "' is incompatible with '" + \
                self.rtype + "'"
 
 
