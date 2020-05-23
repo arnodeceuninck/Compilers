@@ -15,7 +15,7 @@ class CompilerError(BaseException):
 class VariableRedeclarationError(CompilerError):
     def __init__(self, variable):
         super().__init__()
-        self.variable = variable
+        self.variable = variable[:-2]
 
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " already declared"
@@ -24,7 +24,7 @@ class VariableRedeclarationError(CompilerError):
 class VariableRedefinitionError(CompilerError):
     def __init__(self, variable):
         super().__init__()
-        self.variable = variable
+        self.variable = variable[:-2]
 
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " already defined"
@@ -33,7 +33,7 @@ class VariableRedefinitionError(CompilerError):
 class ConstError(CompilerError):
     def __init__(self, variable):
         super().__init__()
-        self.variable = variable
+        self.variable = variable[:-2]
 
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " is const and can't be assigned after declaration"
@@ -58,7 +58,7 @@ class NoArrayError(CompilerError):
 class UndeclaredVariableError(CompilerError):
     def __init__(self, variable):
         super().__init__()
-        self.variable = variable
+        self.variable = variable[:-2]
 
     def __str__(self):
         return "[ERROR] Variable " + self.variable + " hasn't been declared yet"

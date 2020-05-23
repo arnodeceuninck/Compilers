@@ -524,6 +524,13 @@ def check_main(ast: AST):
                 raise ReturnValueError(ast.value, "int")
 
 
+# Adds a .g to every variable for keeping the functions and variables unique
+def change_variable_names(ast: AST):
+    if not isinstance(ast, Variable):
+        return
+    ast.value += ".g"
+
+
 # return an ast tree from an input file
 def compile(input_file: str, catch_error=True):
     input_stream = FileStream(input_file)
@@ -552,6 +559,9 @@ def make_ast(tree, optimize: bool = True):
     javaForLife = customListener.trees[0]
     # Makes a tree of the symbol tables
     javaForLife.traverse(connect_symbol_table)
+    # This function will change all the variable names with an g behind it in order to
+    # keep it compatible in mips hereafter
+    javaForLife.traverse(change_variable_names)
     # The two methods of below should be combined in order to make it one pass and apply error checking
     # Create symbol table
     javaForLife.traverse(assignment)  # Symbol table checks
