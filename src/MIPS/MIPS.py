@@ -102,8 +102,10 @@ def get_mips_type(mips_ast):
         return mips_type_array_index(mips_ast)
     raise Exception("I didn't think the code would get this far")
 
+
 def mips_type_array_index(mips_ast):
-    return mips_ast.type.type # This throws away the information about pointers :-(
+    return mips_ast.type.type  # This throws away the information about pointers :-(
+
 
 def mips_type_argument(mips_ast):
     print()
@@ -299,6 +301,25 @@ def mips_arguments(mips_ast):
     return ""
 
 
+def get_reg_type(mips_ast):
+    if "float" in str(mips_ast) or "double" in str(mips_ast):
+        return "f"
+    else:
+        return "t"
+
+
+def get_load_store_type(mips_ast):
+    if "*" in str(mips_ast) and isinstance(mips_ast, LLVMArrayType):
+        return "a"
+    elif "i8" in str(mips_ast):
+        return "b"
+    elif "i32" in str(mips_ast) or "i64" in str(mips_ast):
+        return "w"
+    elif "float" in str(mips_ast) or "double" in str(mips_ast):
+        return ".s"
+    return ""
+
+
 def build_start_stackframe(symbol_table: SymbolTable):
     stackframe_string = ""
     # We first need to push the old framepointer on to the stack
@@ -321,38 +342,32 @@ def build_start_stackframe(symbol_table: SymbolTable):
     for i, v in enumerate(symbol_table.elements):
         # Add -4 to the frame offset because we advance 1 variable
         frame_offset += -4
-        if symbol_table.elements[v].type == "float":
-            # load the variable into register $f0
-            # old
-            stackframe_string += "\tl.s $f0, {var_label}\n".format(var_label=str(v))
-            # new
-            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
-            # store this variable into the stack
-            stackframe_string += "\ts.s $f0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-        elif str(symbol_table.elements[v].type) == "i8":
-            # load the variable into register $t0
-            # old
-            stackframe_string += "\tlb $t0, {var_label}\n".format(var_label=str(v))
-            # new
-            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
-            # store this variable into the stack
-            stackframe_string += "\tsb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-        elif isinstance(symbol_table.elements[v].type, LLVMArrayType):
-            # TODO: this is not the way to do it, but I have no idea how to do it otherwise
-            stackframe_string += "\tla $t0, {var_label}\n".format(var_label=str(v))
-            # stackframe_string += "\tlw $t0, 0($t0)\n" # Why doesn't this work
-            stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-            array = symbol_table.elements[v].type
-            frame_offset += -array.size * 4 + 4 # + 4 to undo the -4
+        symbol_table_element = symbol_table.elements[v].type
+        load_store = get_load_store_type(symbol_table_element)
+        reg_type = get_reg_type(symbol_table_element)
+        if isinstance(symbol_table.elements[v].type, LLVMArrayType):
+            length = symbol_table_element.size
+            for idx in range(length):
+                stackframe_string += "\tl{load_store_type} ${reg_type}0, {var_label}+{idx}\n".format(
+                    load_store_type=load_store,
+                    reg_type=reg_type,
+                    var_label=str(v),
+                    idx=idx * 4)
+                # stackframe_string += "\tlw $t0, 0($t0)\n" # Why doesn't this work
+                stackframe_string += "\ts{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
+                    load_store_type=load_store,
+                    reg_type=reg_type,
+                    frame_offset=frame_offset)
+                if idx + 1 != length:
+                    frame_offset -= 4  # + 4 to undo the -4
         else:
-            # load the variable into register $t0
-            # old
-            stackframe_string += "\tlw $t0, {var_label}\n".format(var_label=str(v))
-            # new
-            # stackframe_string += "\tlw $t0, {var}\n".format(var=v.name)
-            # store this variable into the stack
-            stackframe_string += "\tsw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-
+            stackframe_string += "\tl{load_store_type} ${reg_type}0, {var_label}\n".format(var_label=str(v),
+                                                                                           load_store_type=load_store,
+                                                                                           reg_type=reg_type)
+            stackframe_string += "\ts{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
+                frame_offset=frame_offset,
+                load_store_type=load_store,
+                reg_type=reg_type)
     stackframe_string += "\n"
     return stackframe_string
 
@@ -365,26 +380,35 @@ def build_end_stackframe(symbol_table: SymbolTable):
     # The frame offset will be the size of the stored variable amount we need to start 4 offset lower
     frame_offset = -symbol_table.get_len() - 4
 
-    # We need to iterate over all the elements of the current symbol table in order to save all their values
-    for i, v in enumerate(symbol_table.elements):
-        if str(symbol_table[v].type) == "i8":
-            # load this variable from the stack
-            stackframe_string += "\tlb $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-            # store the variable into label
-            stackframe_string += "\tsb $t0, {var_label}\n".format(var_label=str(v))
-            # TODO: is it normal that nothing goes of the frame offset here?
+    # We need to iterate over all the elements of the current symbol table in order to save all their values in reverse
+    for i, v in list(reversed(list(enumerate(symbol_table.elements)))):
+        symbol_table_element = symbol_table.elements[v].type
+        load_store = get_load_store_type(symbol_table_element)
+        reg_type = get_reg_type(symbol_table_element)
+        if isinstance(symbol_table.elements[v].type, LLVMArrayType):
+            length = symbol_table_element.size
+            for idx in range(length - 1, 0 - 1, -1):
+                stackframe_string += "\tl{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
+                    load_store_type=load_store,
+                    reg_type=reg_type,
+                    frame_offset=frame_offset)
+                # stackframe_string += "\tlw $t0, 0($t0)\n" # Why doesn't this work
+                stackframe_string += "\ts{load_store_type} ${reg_type}0, {var_label}+{idx}\n".format(
+                    load_store_type=load_store,
+                    reg_type=reg_type,
+                    var_label=str(v),
+                    idx=idx * 4)
+                if idx:
+                    frame_offset += 4  # + 4 to undo the -4
             continue
-        elif isinstance(symbol_table[v].type, LLVMArrayType):
-            # TODO: maybe don't push a random address on the stack? Nahh, nobody cares
-            stackframe_string += "\tla $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-            stackframe_string += "\tsw $t0, {var_label}\n".format(var_label=str(v))
-            array = symbol_table[v].type
-            frame_offset += array.size * 4
-            continue
-        # load this variable from the stack
-        stackframe_string += "\tlw $t0, {frame_offset}($fp)\n".format(frame_offset=frame_offset)
-        # store the variable into label
-        stackframe_string += "\tsw $t0, {var_label}\n".format(var_label=str(v))
+        else:
+            stackframe_string += "\tl{load_store_type} ${reg_type}0, {var_label}\n".format(var_label=str(v),
+                                                                                           load_store_type=load_store,
+                                                                                           reg_type=reg_type)
+            stackframe_string += "\ts{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
+                frame_offset=frame_offset,
+                load_store_type=load_store,
+                reg_type=reg_type)
 
         # Add 4 to the frame offset because we advance 1 variable
         frame_offset += 4

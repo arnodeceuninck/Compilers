@@ -204,6 +204,8 @@ def checkAssigns(ast):
         type_rvalue = ast[1].get_type()
         if type_lvalue == type_rvalue:
             pass
+        elif type_lvalue == "char*" and type_rvalue == "char":
+            pass
         # elif type_lvalue == "float" and type_rvalue == "int":
         #     pass
         else:
