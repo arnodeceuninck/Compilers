@@ -59,4 +59,3 @@ from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
 from src.Node.Operate import Operate, BoolClasses, Constant, Binary
 from src.Node.Unary import Unary
 from src.LLVM.Unary import llvm_type_unary
-# from src.LLVM.LLVM import *

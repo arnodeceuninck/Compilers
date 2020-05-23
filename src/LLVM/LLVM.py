@@ -692,7 +692,7 @@ def llvm_load(ast, var: str):
 def index_load(ast, result, index):
     code = "\t{result} = getelementptr inbounds {array_type}, {array_type}* {variable}, i64 0, i64 {index}\n"
     code = code.format(result=result, array_type=get_llvm_type(ast),
-                   variable=variable(ast.variable, store=True), index=index)
+                       variable=variable(ast.variable, store=True), index=index)
     llvm.output += code
 
 

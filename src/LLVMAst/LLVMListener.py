@@ -13,8 +13,9 @@ def has_children(ctx: ParserRuleContext):
 class LLVMListener(ParseTreeListener):
     def __init__(self):
         self.trees = []  # A stack containing all subtrees
-        self.type_ctr = 0 # Increases when expecting a type, must be uses when a type is twice, e.g. in store, we only want to add one type to the tree
-        self.disable_arg_list = False # Must be disabled on function call (for argument list with printf)
+        self.type_ctr = 0  # Increases when expecting a type, must be uses when a type is twice, e.g. in store, we only want to add one type to the tree
+        self.disable_arg_list = False  # Must be disabled on function call (for argument list with printf)
+
     # Add an AST with given node to the stack
     def add(self, ast):
         self.trees.append(ast)
@@ -49,7 +50,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#function.
     def enterFunction(self, ctx: llvmParser.FunctionContext):
         self.add(LLVMFunction(name=ctx.name.text))
-        self.type_ctr += 1 # Expecting return type
+        self.type_ctr += 1  # Expecting return type
         pass
 
     # Exit a parse tree produced by llvmParser#function.
@@ -71,7 +72,7 @@ class LLVMListener(ParseTreeListener):
     def enterFunction_call(self, ctx: llvmParser.Function_callContext):
         self.disable_arg_list = True
         self.add(LLVMFunctionUse(name=ctx.fname.text))
-        self.type_ctr += 1 # Expecting return type
+        self.type_ctr += 1  # Expecting return type
         pass
 
     # Exit a parse tree produced by llvmParser#function_call.
@@ -157,7 +158,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#alocation.
     def enterAlocation(self, ctx: llvmParser.AlocationContext):
         self.add(LLVMAllocate(ctx.align_index.text, ctx.global_))
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#alocation.
@@ -220,7 +221,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#return_.
     def enterReturn_(self, ctx: llvmParser.Return_Context):
         self.add(LLVMReturn())
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#return_.
@@ -264,7 +265,7 @@ class LLVMListener(ParseTreeListener):
             while text[len(text) - 1 - ptr] == '*':
                 ptr += 1
 
-            typeText = ctx.getText() # in case ptr = 0
+            typeText = ctx.getText()  # in case ptr = 0
 
             if ptr:
                 typeText = typeText[:-ptr]
@@ -318,7 +319,7 @@ class LLVMListener(ParseTreeListener):
         if self.disable_arg_list:
             return
         self.add(LLVMArgument())
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#argument.
@@ -359,7 +360,6 @@ class LLVMListener(ParseTreeListener):
         v1.type = type
         self.add(v1)
         pass
-
 
     # Enter a parse tree produced by llvmParser#print_str.
     def enterPrint_str(self, ctx: llvmParser.Print_strContext):
@@ -426,7 +426,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#declaration.
     def enterDeclaration(self, ctx: llvmParser.DeclarationContext):
         self.add(LLVMDeclare(ctx.fname.text))
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#declaration.
@@ -443,7 +443,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#load.
     def enterLoad(self, ctx: llvmParser.LoadContext):
         self.add(LLVMLoad())
-        self.type_ctr += 1 # Expecting type
+        self.type_ctr += 1  # Expecting type
         pass
 
     # Exit a parse tree produced by llvmParser#load.
@@ -460,7 +460,7 @@ class LLVMListener(ParseTreeListener):
     # Enter a parse tree produced by llvmParser#extension.
     def enterExtension(self, ctx: llvmParser.ExtensionContext):
         self.add(LLVMExtension(ctx.op.text))
-        self.type_ctr += 1 # Expecting type from and to
+        self.type_ctr += 1  # Expecting type from and to
         pass
 
     # Exit a parse tree produced by llvmParser#extension.

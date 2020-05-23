@@ -373,7 +373,7 @@ class Function(AST):
             function_arguments += str(child.value)
         if isinstance(self.parent, Binary) and self.parent.children[0] == self:
             return "; {function_name}({function_arguments})\n".format(function_name=self.value,
-                                                                    function_arguments=function_arguments)
+                                                                      function_arguments=function_arguments)
         else:
             return "; {function_name}({function_arguments})\n".format(function_name=self.value,
                                                                       function_arguments=function_arguments)

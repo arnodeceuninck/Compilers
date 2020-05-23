@@ -25,20 +25,26 @@ def llvm_type_constant(ast):
     else:
         raise Exception("Unknown Constant")
 
+
 def llvm_type_c_string(ast):
     return ""
+
 
 def llvm_type_c_bool(ast):
     return "i1"
 
+
 def llvm_type_c_char(ast):
     return "i8"
+
 
 def llvm_type_c_float(ast):
     return "float"
 
+
 def llvm_type_c_int(ast):
     return "i32"
+
 
 def llvm_type_c_array(ast):
     if len(ast.children) == 0:

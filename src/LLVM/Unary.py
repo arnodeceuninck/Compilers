@@ -1,5 +1,3 @@
-
-
 def llvm_unary(ast):
     if isinstance(ast, UNot):
         llvm_u_not(ast)
@@ -14,6 +12,7 @@ def llvm_unary(ast):
     else:
         llvm_default_unary(ast)
 
+
 def llvm_type_unary(ast):
     if isinstance(ast, ArrayIndex):
         return llvm_type_array_index(ast)
@@ -26,20 +25,24 @@ def llvm_type_unary(ast):
         # raise Exception("I didn't think the code would get this far")
         # return llvm_type_default_operate(ast)
 
+
 def llvm_type_u_reref(ast):
     child_type = get_llvm_type(ast[0])
     if child_type[len(child_type) - 1] != "*":
         raise RerefError()
     return child_type[:-1]
 
+
 def llvm_type_u_deref(ast):
     return get_llvm_type(ast[0]) + "*"
 
+
 def llvm_type_array_index(ast):
-        try:
-            return get_llvm_type(ast[0], ignore_array=True)
-        except:
-            return None
+    try:
+        return get_llvm_type(ast[0], ignore_array=True)
+    except:
+        return None
+
 
 def llvm_default_unary(ast):
     llvm_code(ast[0])
@@ -52,6 +55,7 @@ def llvm_default_unary(ast):
     code = code.format(result=variable(ast), type=type, value=variable(ast[0]))
 
     llvm.output += code
+
 
 # Da klinkt echt als de brakke versie van "No U"
 def llvm_u_not(ast):
@@ -80,6 +84,7 @@ def llvm_u_not(ast):
 
     llvm.output += bool_to_type
 
+
 def llvm_array_index(ast):
     llvm.output += ast.comments()
 
@@ -93,6 +98,7 @@ def llvm_array_index(ast):
                        align=ast.get_align(), temp_index=ast.get_temp(), index_type=get_llvm_type(ast[1]))
 
     llvm.output += code
+
 
 def llvm_print(ast):
     AST.print = True
@@ -115,11 +121,13 @@ def llvm_print(ast):
 
     print_code = printString.format(format_type=format_type, print_type=print_type, value=variable)
     llvm.output += print_code
-    
+
+
 def llvm_u_deref(ast):
     llvm_code(ast[0])
     variable(ast[0])
     pass  # TODO: fix it
+
 
 def llvm_u_reref(ast):
     llvm_code(ast[0])
@@ -131,6 +139,8 @@ def llvm_u_reref(ast):
 
     llvm.output += code
 
+
 from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
-from src.Node.Unary import UNot, ArrayIndex, Unary, Print, UReref, UDeref, BoolClasses, CBool, printString, AST, RerefError
+from src.Node.Unary import UNot, ArrayIndex, Unary, Print, UReref, UDeref, BoolClasses, CBool, printString, AST, \
+    RerefError
 # from src.LLVM.LLVM import *

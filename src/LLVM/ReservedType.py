@@ -1,6 +1,3 @@
-
-
-
 def llvm_reserved_type(ast):
     if isinstance(ast, Break):
         llvm_break(ast)
@@ -62,6 +59,7 @@ def llvm_return(ast):
 
 def llvm_void(ast):
     pass
+
 
 from src.LLVM.LLVM import llvm, llvm_code, variable, goto, get_llvm_type
 from src.Node.ReservedType import ReservedType, Break, Continue, Return, Void, While, For

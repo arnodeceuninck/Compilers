@@ -145,6 +145,7 @@ class CChar(Constant):
         elif type == "bool":  # Bool needs to be treated special because trunc will cut of bytes, and not convert it properly so an not equal to 0 must be used
             return "{result} = icmp ne i8 {value}, 0\n"
 
+
 class CBool(Constant):
     def __init__(self, value=""):
         Constant.__init__(self, value)
@@ -180,5 +181,3 @@ class CString(Constant):
 
     def get_format_type(self):
         return "s"
-
-

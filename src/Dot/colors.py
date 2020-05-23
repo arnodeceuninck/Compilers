@@ -22,5 +22,6 @@ def color(ast):
     else:
         return "#9f9f9f"
 
+
 from src.Node.AST import Operator, Function, Arguments, Include, Comments, Constant, ReservedType, Variable
 from src.LLVMAst.LLVMAst import *

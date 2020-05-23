@@ -468,7 +468,7 @@ def create_printf(ast):
     elif ast.name not in ["printf", "__isoc99_scanf"]:
         return
 
-    string_id = ast[0][0][0].name # Children path: Argument list, Array Index, LLVMVariable
+    string_id = ast[0][0][0].name  # Children path: Argument list, Array Index, LLVMVariable
     string = search_string(string_id, ast)
     cut_string = cut_format_string(string)
 

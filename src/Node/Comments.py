@@ -14,4 +14,3 @@ class SingleLine(Comments):
 class Multiline(Comments):
     def __init__(self, value):
         Comments.__init__(self, value)
-

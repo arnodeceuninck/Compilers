@@ -1,4 +1,3 @@
-
 def llvm_comments(ast):
     if isinstance(ast, SingleLine):
         llvm_single_line(ast)
@@ -19,7 +18,7 @@ def llvm_multi_line(ast):
         code += ";; " + line
     llvm.output += code
 
+
 from src.LLVM.LLVM import llvm_code, llvm
 from src.Node.Comments import Comments, SingleLine, Multiline
 # from src.LLVM.LLVM import *
-

@@ -466,7 +466,7 @@ def mips_print_string(mips_ast):
         mips.output += "\tla $t0, {string_label}\n".format(string_label=label)
         mips.output += "\tli $v0, {op_code}\n".format(op_code=11)
         for i in range(array.size):
-            mips.output += "\tlw $a0, {index}($t0)\n".format(index=i*4)
+            mips.output += "\tlw $a0, {index}($t0)\n".format(index=i * 4)
             mips.output += "\tsyscall\n"
         return
     else:
@@ -534,7 +534,7 @@ def mips_scan(mips_ast):
         # src: https://stackoverflow.com/questions/7969565/mips-how-to-store-user-input-string
         mips.output += "\tli $v0, 8\t# Take in input\n"
         mips.output += "\tla $a0, {buffer}\t# load byte space into address\n".format(buffer=location)
-        mips.output += "\tli $a1, {bytes}\t# allocate the byte space for string\n".format(bytes=type.size+1)
+        mips.output += "\tli $a1, {bytes}\t# allocate the byte space for string\n".format(bytes=type.size + 1)
         mips.output += "\tmove $t0, $a0\t# save string to t0\n"
         mips.output += "\tsyscall\n"
     elif isinstance(mips_ast, LLVMVariable):

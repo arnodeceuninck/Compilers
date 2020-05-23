@@ -27,13 +27,13 @@ class CorrectMipsCodeTests(unittest.TestCase):
                     continue
                 if line1 == line2:
                     continue
-                if not "." in line1 and not "." in line2: # zero check is only for decimals
+                if not "." in line1 and not "." in line2:  # zero check is only for decimals
                     print(line1)
                     print(line2)
                     self.assertTrue(False)
                 ii = -1
                 ji = -1
-                while ii < len(line1)-1 and ji < len(line2)-1:
+                while ii < len(line1) - 1 and ji < len(line2) - 1:
                     ii += 1
                     ji += 1
                     if line1[ii] == line2[ji]:

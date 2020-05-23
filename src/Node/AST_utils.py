@@ -181,6 +181,7 @@ def convertVar(ast):
     else:
         print("[WARNING] Unsupported variable type")
 
+
 def check_supported_operations(ast):
     if isinstance(ast, (Assign, ArrayIndex, UReref, UDeref)):
         return  # Already checked in Check Assigns
@@ -192,6 +193,7 @@ def check_supported_operations(ast):
         supported_types = [("int", "int"), ("float", "float"), ("char", "char")]
         if (ast[0].get_type(), ast[1].get_type()) not in supported_types:
             raise UnknownOperationError(ast.value, ast[0].get_type(), ast[1].get_type())
+
 
 # A function to check whether you're always assigning to the right type and not to a const value
 def checkAssigns(ast):

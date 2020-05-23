@@ -18,4 +18,3 @@ walker.walk(customListener, tree)
 javaForLife = customListener.trees[0]
 make_llvm_ast(javaForLife)
 dot(javaForLife, "output/llvm_tree.dot")
-# TODO

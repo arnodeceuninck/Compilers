@@ -20,7 +20,6 @@ class Break(ReservedType):
         return "\t; break\n"
 
 
-
 class Continue(ReservedType):
     def __init__(self, value=""):
         ReservedType.__init__(self, "continue")

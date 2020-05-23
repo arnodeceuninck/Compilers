@@ -66,7 +66,7 @@ class VInt(Variable):
         return "i32"
 
     def get_type(self):
-        type = "int" + ("*"*self.ptr)
+        type = "int" + ("*" * self.ptr)
         if self.array and not isinstance(self.parent, Assign):
             type += "*"
         return type

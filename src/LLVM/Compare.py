@@ -1,10 +1,9 @@
-
-
 def llvm_compare(ast):
     if isinstance(ast, LogicAnd):
         llvm_logic_and(ast)
     else:
         llvm_default_compare(ast)
+
 
 def llvm_default_compare(ast):
     llvm_code(ast[0])
@@ -41,6 +40,7 @@ def llvm_default_compare(ast):
 
     llvm.output += output
 
+
 def llvm_logic_and(ast):
     llvm_code(ast[0])
     llvm_code(ast[1])
@@ -76,6 +76,7 @@ def llvm_logic_and(ast):
     output += bool_to_type
 
     llvm.output += output
+
 
 from src.LLVM.LLVM import llvm_code, llvm, variable, get_llvm_type
 from src.Node.Compare import LogicAnd, Compare, BoolClasses, CBool

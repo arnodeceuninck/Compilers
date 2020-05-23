@@ -199,6 +199,7 @@ class LLVMConstChar(LLVMConst):
     def get_type(self):
         return LLVMType("i8")
 
+
 class LLVMConstArray(LLVMConst):
     def __init__(self, size, type):
         super().__init__("[No value for array]")
@@ -214,6 +215,7 @@ class LLVMConstArray(LLVMConst):
     def get_mips_type(self):
         # TODO: Check align
         return "\t.align 4\n\t\t\t.space"
+
 
 class LLVMConstInt(LLVMConst):
     def __init__(self, value):
@@ -438,7 +440,7 @@ class LLVMType(LLVMAst):
     def get_size(self):
         if isinstance(self.type, LLVMArrayType):
             return self.type.get_size()
-        sizes = {"i32": 4, "float": 8, "i8": 4, "i1": 4} # i8 and i1 must be 4, because that's the minimal align size
+        sizes = {"i32": 4, "float": 8, "i8": 4, "i1": 4}  # i8 and i1 must be 4, because that's the minimal align size
         return sizes[self.type]
 
 
@@ -472,5 +474,6 @@ class LLVMArrayType(LLVMType):
 
     def get_size(self):
         return self.size * self.type.get_size()
+
 
 from src.symbolTable import *

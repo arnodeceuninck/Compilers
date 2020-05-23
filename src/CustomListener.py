@@ -159,7 +159,8 @@ class CustomListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#function_declaration.
     def enterFunction_declaration(self, ctx: cParser.Function_declarationContext):
-        function = Function(value=str(ctx.var.text), return_type=str(ctx.type_().getText()), function_type="declaration")
+        function = Function(value=str(ctx.var.text), return_type=str(ctx.type_().getText()),
+                            function_type="declaration")
         function.scope_count = self.scope_count + 1
         self.add(function)
         pass
@@ -228,15 +229,14 @@ class CustomListener(ParseTreeListener):
                 array = self.trees.pop()
                 variable = array[0]
                 variable.array = True
-                if not isinstance(array[1], CInt): # Checks whether it only consists of digits
+                if not isinstance(array[1], CInt):  # Checks whether it only consists of digits
                     raise ArrayIndexError()
                 variable.array_number = int(array[1].value)  # Get the value of the CInt (TODO: other expressions)
                 variable.parent = None
                 self.add(variable)  # Only add variable, ignore array for now (because only int allowed)
 
-
-
-        if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx, (cParser.LvalueContext, cParser.Operation_bracketsContext)):
+        if ctx.getChild(0).getText() == "*" and isinstance(ctx.parentCtx,
+                                                           (cParser.LvalueContext, cParser.Operation_bracketsContext)):
             ptr_count = 1
             while ctx.getText()[ptr_count] == '*':
                 ptr_count += 1
@@ -277,7 +277,6 @@ class CustomListener(ParseTreeListener):
         variable.ptr += 1
         self.add(variable)
         pass
-
 
     # Enter a parse tree produced by cParser#function_use.
     def enterFunction_use(self, ctx: cParser.Function_useContext):
@@ -505,7 +504,7 @@ class CustomListener(ParseTreeListener):
     # Enter a parse tree produced by cParser#operation_unary_plus_minus_not.
     def enterOperation_unary_plus_minus_not(self, ctx: cParser.Operation_unary_plus_minus_notContext):
         self.help_operation(ctx, (ctx.plus, UPlus), (ctx.minus, UMinus), (ctx.not_, UNot),
-                            (ctx.dref, UDeref)) # (ctx.rref, UReref),
+                            (ctx.dref, UDeref))  # (ctx.rref, UReref),
         pass
 
     # Exit a parse tree produced by cParser#operation_unary_plus_minus_not.
