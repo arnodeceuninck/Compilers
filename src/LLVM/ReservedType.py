@@ -22,7 +22,7 @@ def llvm_break(ast):
         loop = loop.parent
 
     # Handle the break
-    end_label = "end" + str(loop.id())
+    end_label = "end." + str(loop.id())
     goto(end_label)
 
 
@@ -36,7 +36,7 @@ def llvm_continue(ast):
         loop = loop.parent
 
     # Handle the continue
-    loop_label = "loop" + str(loop.id())
+    loop_label = "loop." + str(loop.id())
     goto(loop_label)
 
 

@@ -297,8 +297,8 @@ def llvm_if(ast):
     llvm_code(condition)
 
     # Make both labels unique
-    label_true = "iftrue" + str(ast.id())
-    label_false = "iffalse" + str(ast.id())
+    label_true = "iftrue." + str(ast.id())
+    label_false = "iffalse." + str(ast.id())
     code = "\tbr {type} {var}, label %{label_true}, label %{label_false}\n"
     code = code.format(type="i1",
                        var=variable(condition),
@@ -307,7 +307,7 @@ def llvm_if(ast):
     llvm.output += code
 
     # Make a unique label for the end
-    label_end = "end" + str(ast.id())
+    label_end = "end." + str(ast.id())
     if_statement_sequence = ast.children[1]
     llvm.output += ast.label(label_true) + "\n"
     llvm_code(if_statement_sequence)
@@ -328,12 +328,12 @@ def llvm_for(ast):
     llvm_code(initialize)
 
     # Make for loop label unique
-    label_for = "loop" + str(ast.id())
+    label_for = "loop." + str(ast.id())
     # This is to avoid a bug in llvm, just dont delete!
     goto(label_for)
 
     # Make while loop label unique for just after the condition
-    label_after_check = "afterCheck" + str(ast.id())
+    label_after_check = "afterCheck." + str(ast.id())
     # Create the label
     llvm.output += ast.label(label_for) + "\n"
 
@@ -341,7 +341,7 @@ def llvm_for(ast):
     llvm_code(condition)
 
     # Make a unique label for the end
-    label_end = "end" + str(ast.id())
+    label_end = "end." + str(ast.id())
     # Check if we can go further with the loop
     code = "\tbr {type} {var}, label %{label_while}, label %{label_end}\n"
     code = code.format(type="i1",
@@ -367,12 +367,12 @@ def llvm_for(ast):
 
 def llvm_while(ast):
     # Make while loop label unique
-    label_while = "loop" + str(ast.id())
+    label_while = "loop." + str(ast.id())
     # This is to avoid a bug in llvm, just dont delete!
     goto(label_while)
 
     # Make while loop label unique for just after the check condition
-    label_after_check = "afterCheck" + str(ast.id())
+    label_after_check = "afterCheck." + str(ast.id())
     # Create the label
     llvm.output += ast.label(label_while) + "\n"
 
@@ -380,7 +380,7 @@ def llvm_while(ast):
     llvm_code(condition)
 
     # Make a unique label for the end
-    label_end = "end" + str(ast.id())
+    label_end = "end." + str(ast.id())
     # Check if we can go further with the loop
     code = "\tbr {type} {var}, label %{label_while}, label %{label_end}\n"
     code = code.format(type="i1",
