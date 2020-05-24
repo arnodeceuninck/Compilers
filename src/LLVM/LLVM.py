@@ -504,13 +504,17 @@ def get_tag_type(tag: str):
 
 # Returns true when a tag and its argument align
 def check_equal_tag_argument(tag: str, argument, function_name):
+    arg_type = argument.get_type()
+    # Scanf always ends in a pointer argument so we need to look out for this
+    if function_name == "scanf":
+        arg_type = arg_type[:-1]
     # The first and last character of a tag will always form a valid tag from which a type can be deduced
     tag_type = get_tag_type(tag[0] + tag[-1])
-    if tag == "%d" and argument.get_type() != 'int':
+    if tag == "%d" and arg_type != 'int':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
-    elif tag == "%f" and argument.get_type() != 'float':
+    elif tag == "%f" and arg_type != 'float':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
-    elif tag == "%c" and argument.get_type() != 'char':
+    elif tag == "%c" and arg_type != 'char':
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)
     elif tag == "%s" and (not isinstance(argument, CString) and not (isinstance(argument, VChar) and argument.array)):
         raise IncompatibleFunctionType(tag_type, argument.get_type(), function_name)

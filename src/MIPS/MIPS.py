@@ -432,13 +432,13 @@ def build_end_stackframe(symbol_table: SymbolTable):
                     frame_offset += 4  # + 4 to undo the -4
             continue
         else:
-            stackframe_string += "\tl{load_store_type} ${reg_type}0, {var_label}\n".format(var_label=str(v),
-                                                                                           load_store_type=load_store,
-                                                                                           reg_type=reg_type)
-            stackframe_string += "\ts{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
+            stackframe_string += "\tl{load_store_type} ${reg_type}0, {frame_offset}($fp)\n".format(
                 frame_offset=frame_offset,
                 load_store_type=load_store,
                 reg_type=reg_type)
+            stackframe_string += "\ts{load_store_type} ${reg_type}0, {var_label}\n".format(var_label=str(v),
+                                                                                           load_store_type=load_store,
+                                                                                           reg_type=reg_type)
 
         # Add 4 to the frame offset because we advance 1 variable
         frame_offset += 4

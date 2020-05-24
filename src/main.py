@@ -14,7 +14,7 @@ def main(argv):
     # return
 
     # try:
-    javaForLife = compile(argv[1], False)
+    javaForLife = compile(argv[1])
     if javaForLife:
         dot(javaForLife, "output/c_tree.dot")
         javaForLife.constant_folding()

@@ -467,6 +467,13 @@ def create_printf(ast):
         return
     elif ast.name not in ["printf", "__isoc99_scanf"]:
         return
+    # If the printf also has no children then we know that it is a function call to not stdio
+    elif not len(ast[0].children):
+        return
+    # If the first argument is not a string then we know that this is not a printf from stdio and
+    # we need not to take further action
+    elif ".str." not in ast[0][0][0].name:
+        return
 
     string_id = ast[0][0][0].name  # Children path: Argument list, Array Index, LLVMVariable
     string = search_string(string_id, ast)
