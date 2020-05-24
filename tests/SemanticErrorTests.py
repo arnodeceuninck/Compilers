@@ -115,7 +115,7 @@ class SemanticErrorTests(unittest.TestCase):
 
     # TODO fix this code
     def test_incompatibleTypes7(self):
-        self.help_test(FunctionUndefinedError, "[ERROR] Function f not defined")
+        self.help_test(IncompatibleFunctionType, "[ERROR] Function f with type 'int' is incompatible with 'char'")
 
     def test_invalidIncludeError(self):
         self.help_test(SyntaxCompilerError,

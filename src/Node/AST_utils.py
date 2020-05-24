@@ -4,7 +4,7 @@ from src.ErrorListener import RerefError, CompilerError, ConstError, Incompatibl
     SyntaxCompilerError, ReservedVariableOutOfScope, VariableRedeclarationError, ExpressionOutOfScope, \
     FunctionRedeclarationError, FunctionUndefinedError, DerefError, ReturnValueError, FunctionWrongDefinedError, \
     FunctionDefinitionOutOfScope, FunctionRedefinitionError, MainNotFoundError, ArrayIndexError, NoArrayError, \
-    VariableRedefinitionError, CallAmountMismatchError
+    VariableRedefinitionError, CallAmountMismatchError, IncompatibleFunctionType
 from src.Node.AST import Function, has_symbol_table, Include
 from src.CustomListener import CustomListener
 from src.Node.Variable import *
@@ -420,6 +420,15 @@ def check_global_scope(ast):
             raise ExpressionOutOfScope(child.value)
 
 
+def call_mismatch(calling_function, callee_function):
+    function_name = calling_function.value
+    for idx in range(len(calling_function[0].children)):
+        ltype = callee_function[0][idx].get_type()
+        rtype = calling_function[0][idx].get_type()
+        if ltype != rtype:
+            raise IncompatibleFunctionType(ltype, rtype, function_name)
+
+
 # This function will store all the declared and defined functions in order to check for the use functions
 # if no declared or defined function is found for the use function then there needs to be an error
 # if at the end the list does not only exist of defined functions then there is also an error
@@ -447,6 +456,8 @@ def check_function(ast):
                 if function.value == ast.value and function.function_type == "definition":
                     if len(function[0].children) != len(ast[0].children):
                         raise CallAmountMismatchError(ast.value, len(function[0].children), len(ast[0].children))
+                    else:
+                        call_mismatch(ast, function)
             raise FunctionUndefinedError(ast.value)
     elif function_type == "definition":
         # We need to check if the Function definition only has 1 parent and is defined in the global scope

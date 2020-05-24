@@ -1,6 +1,6 @@
-void f(int a, int b){}
+#include <stdio.h>
 
 int main(){
-    f(1);
-    return 0;
+    printf("%s", 5);
+    return 1;
 }
