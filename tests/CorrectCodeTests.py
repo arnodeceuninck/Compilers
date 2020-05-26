@@ -9,16 +9,20 @@ import inspect
 import unittest
 import subprocess
 from src.LLVM.LLVM import to_LLVM
-
+from tests.FileCompare import equal
 
 class CorrectCodeTests(unittest.TestCase):
     def help_compare(self, file1, file2):
-        # src: https://stackoverflow.com/questions/42512016/how-to-compare-two-files-as-part-of-unittest-while-getting-useful-output-in-cas
-        file1 = open(file1)
-        file2 = open(file2)
-        self.assertListEqual(list(file1), list(file2))
-        file1.close()
-        file2.close()
+        # This type of compare sees 1.00000 and 1.00000000 as the same result
+        self.assertTrue(equal(file1, file2))
+
+        # Not using this method, since it doesn't allow to check whether the difference is only an extra zero after the decimal digit (which is allowed)
+        # # src: https://stackoverflow.com/questions/42512016/how-to-compare-two-files-as-part-of-unittest-while-getting-useful-output-in-cas
+        # file1 = open(file1)
+        # file2 = open(file2)
+        # self.assertListEqual(list(file1), list(file2))
+        # file1.close()
+        # file2.close()
 
     def help_test(self):
         # Get the name of the function

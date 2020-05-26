@@ -591,6 +591,7 @@ def make_ast(tree, optimize: bool = True):
     javaForLife.traverse(check_supported_operations)
     AST.stdio = has_been_included_stdio(javaForLife)  # Adds if the stdio is included
     javaForLife.traverse(check_function)  # Checks if all the functions are defined
+    javaForLife.constant_folding()
     if not AST.main:
         raise MainNotFoundError()
     # TODO: check if functions do end with a return when not void OPTIONAL!!!

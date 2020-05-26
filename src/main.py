@@ -17,8 +17,8 @@ def main(argv):
     javaForLife = compile(argv[1])
     if javaForLife:
         dot(javaForLife, "output/c_tree.dot")
-        javaForLife.constant_folding()
-        dot(javaForLife, "output/c_tree_folded.dot")
+        # javaForLife.constant_folding() # Folding happens automatically in compile function
+        # dot(javaForLife, "output/c_tree_folded.dot")
         # Creates comments for every assignment, for loop and if statement
         # insert_comments(communismForLife)
         to_LLVM(javaForLife, "output/compiled.ll")
