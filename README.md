@@ -2,7 +2,7 @@
 ## Auteurs
 Arno Deceuninck & Basil Rommens
 ## Quickstart
-```run.sh``` for running ```main.py``` with ```test.c```
+```run.sh``` for running ```main.py``` with ```y.c```
 
 ```test.sh``` for running unittests
 ## Opgave
@@ -77,7 +77,7 @@ Arno Deceuninck & Basil Rommens
 
 ### 6. Arrays
 #### Mandatory
-- [ ] Arrays
+- [x] Arrays
 - [x] Import: printf(char *format, ...)
 - [x] Import: intf(const char *format, ...)
 
@@ -134,89 +134,12 @@ Omdat het ridicuul zou zijn om elke mogelijke escape sequence van c te implement
 ![alt text](doc/escape_sequences.png)
 
 ## Testen
-In de tests folder vind je een bestand ```test.py```. Als je dit runt, runnen er ineens een paar testen. De uitleg waarvoor
+In de tests folder vind je een bestand ```test.py```. Als je dit runt (eventueel ```test.sh```, runnen er ineens een paar testen. De uitleg waarvoor
 welke test specifiek dient kan je terugvinden in het c bestand van de test zelf (in de folder ```tests/input```). Om specifiek te weten waarop de testen werken, kan je een kijkje nemen in het ```tests/test.py```. 
 
-## Benchmark Result
-### CorrectCode (21/32)
-#### Code with arrays (6/32)
-All these files do not work right now:
-- scanf2.c
-- scoping.c
-- unaryOperations.c
-- variables3.c
-- variables7.c
-- variables8.c
-#### Other files (5/32)
-Did not know that double pointers needed to work. Scoping does not work. The first 2 compares give some weird result because own implementation
-see video. And strings passed as arguments in printf.
-- comparisons1.c
-- comparisons2.c
-- intToFloatConversion.c
-- printf2.c
-- variables6.c
-### SemanticErrors (17/47)
-Skipped all array files
-
-#### Undetected semantic errors:
-- declarationDeclarationMismatch1.c
-- declarationDeclarationMismatch2.c
-- declarationDeclarationMismatch3.c
-- declarationDefinitionMismatch1.c
-- declarationDefinitionMismatch2.c
-- declarationDefinitionMismatch3.c
-- definitionInLocalScope.c
-- functionCallargumentMismatch1.c
-- functionCallargumentMismatch2.c
-- functionCallargumentMismatch3.c
-Note: Not sure about everything above this line whether it's undetected or uncaught
-- functionCallargumentMismatch4.c
-- incompatibleTypes6.c
-- mainNotFound.c
-- returnTypeMismatch.c
-
-####Wrong error:
-None
-
-####Uncaught errors (much red in Python): 
-!!! Every file with an empty main
-- functionRedefinition1.c
-- functionRedefinition2.c
-- functionRedefinition3.c
-- incompatibleTypes7.c
-
-####Works as they should:
-- dereferenceTypeMismatch1.c
-- dereferenceTypeMismatch2.c
-- incompatibleTypes1.c
-- incompatibleTypes2.c
-- incompatibleTypes3.c
-- incompatibleTypes4.c
-- incompatibleTypes5.c
-- invalidIncludeError.c
-- invalidLoopControlStatement.c
-- parameterRedefinition1.c
-- parameterRedefinition2.c
-- parameterRedefinition3.c
-- pointerOperationError.c
-- returnOutsideFunction.c
-- undeclaredFunction.c
-- undeclaredVariable1.c
-- undeclaredVariable2.c
-- undeclaredVariable3.c
-- variableRedefinition1.c
-- variableRedefinition2.c
-- variableRedefinition3.c
-- variableRedefinition4.c
-- variableRedefinition5.c
-- variableRedefinition6.c 
-
-####Unsupported:
-- All array files
-- invalidUnaryOperation.c
-
-###MIPS tests
-Passing: 19 of 32 tests (actually 18, because of scanf2)
+## Benchmark Result (102/111)
+The Benchmark tests have been changed from the given ones, because we don't support for example `i++`, so had to change this everywhere to `i = i + 1`.
+### CorrectCode (28/32)
 - [x] binaryOperations1.c
 - [x] binaryOperations2.c
 - [x] breakAndContinue.c
@@ -249,3 +172,177 @@ Passing: 19 of 32 tests (actually 18, because of scanf2)
 - [x] variables7.c
 - [x] variables8.c
 - [x] while.c
+
+### SemanticErrors (46/47)
+- [x] arrayAccessTypeMismatch2.c
+- [x] arrayAccessTypeMismatch.c
+- [x] arrayCompareError.c
+- [x] arraySizeTypeMismatch.c
+- [x] declarationDeclarationMismatch1.c
+- [x] declarationDeclarationMismatch2.c
+- [x] declarationDeclarationMismatch3.c
+- [x] declarationDefinitionMismatch1.c
+- [x] declarationDefinitionMismatch2.c
+- [x] declarationDefinitionMismatch3.c
+- [x] definitionInLocalScope.c
+- [x] dereferenceTypeMismatch1.c
+- [x] dereferenceTypeMismatch2.c
+- [x] functionCallargumentMismatch1.c
+- [x] functionCallargumentMismatch2.c
+- [x] functionCallargumentMismatch3.c
+- [x] functionCallargumentMismatch4.c
+- [x] functionRedefinition1.c
+- [x] functionRedefinition2.c
+- [x] functionRedefinition3.c
+- [x] incompatibleTypes1.c
+- [x] incompatibleTypes2.c
+- [x] incompatibleTypes3.c
+- [x] incompatibleTypes4.c
+- [x] incompatibleTypes5.c
+- [x] incompatibleTypes6.c
+- [x] incompatibleTypes7.c
+- [x] invalidIncludeError.c
+- [x] invalidLoopControlStatement.c
+- [ ] invalidUnaryOperation.c
+- [x] mainNotFound.c
+- [x] parameterRedefinition1.c
+- [x] parameterRedefinition2.c
+- [x] parameterRedefinition3.c
+- [x] pointerOperationError.c
+- [x] returnOutsideFunction.c
+- [x] returnTypeMismatch.c
+- [x] undeclaredFunction.c
+- [x] undeclaredVariable1.c
+- [x] undeclaredVariable2.c
+- [x] undeclaredVariable3.c
+- [x] variableRedefinition1.c
+- [x] variableRedefinition2.c
+- [x] variableRedefinition3.c
+- [x] variableRedefinition4.c
+- [x] variableRedefinition5.c
+- [x] variableRedefinition6.c
+
+###MIPS tests (28/32)
+- [x] binaryOperations1.c
+- [x] binaryOperations2.c
+- [x] breakAndContinue.c
+- [ ] comparisons1.c
+- [ ] comparisons2.c
+- [x] dereferenceAssignment.c
+- [x] fibonacciRecursive.c
+- [ ] floatToIntConversion.c
+- [x] for.c
+- [x] forwardDeclaration.c
+- [x] if.c
+- [x] ifElse.c
+- [ ] intToFloatConversion.c
+- [x] modulo.c
+- [x] pointerArgument.c
+- [x] prime.c
+- [x] printf1.c
+- [x] printf2.c
+- [x] printf3.c
+- [x] scanf1.c
+- [ ] scanf2.c (passes because manual input required)
+- [x] scoping.c
+- [x] unaryOperations.c
+- [x] variables1.c
+- [x] variables2.c
+- [x] variables3.c
+- [x] variables4.c
+- [x] variables5.c
+- [x] variables6.c
+- [x] variables7.c
+- [x] variables8.c
+- [x] while.c
+
+## Explenation
+### Part 1 (Intermiate Project Evaluation)
+#### Grammar structure (Arno)
+- Start with optional include and operation sequence
+- operation sequence can be an operation, function, conditional statement or unnamed scope
+- operation can be an assignment, return operation or arithmetic operation
+
+#### AST (Basil)
+- root is always statement sequence
+- Statement sequence contains all statements as children
+- operation is in the root, children are the operands
+- first child of function contains arguments, second child the statement sequence
+- conditional statements have two or three children: condition, if and optionally else
+
+#### Constant folding (Arno)
+- recursive function, only continues folding if all children have folded successfully
+- Folds using a lambda a class can have als attribute
+
+#### Symbol table (Basil)
+- Tree of symbol tables -> testing in which scope we need to look
+- There should be added that once a value is called in the scope it is created when running through the ast generation
+
+#### Code generation (Basil)
+- Also recursive
+- output code is attribute of AST, each recursive function writes to this output
+- function for getting a llvm variable of a node, which loads the variable into memory if required
+- Functions of which the llvm code has the same structure have a get_llvm_template function, which gets filled in in the superclass (virtual functions)
+- We should also note that autogenerated llvm variables are always preceded by a . instead of a letter, we do not use numbers because it vastly complicates the code
+
+#### Benchmark (Arno)
+- Test function compares output and return code with clang compiled code
+- Semantic error tests try to catch the error type that's expected and compares the string version of this error with the expected output
+- Many tests fail because ++ isn't implemented (since it was optional) -> but we fixed it right now not in the zip though
+- Arrays aren't working yet, but we are working on it, so these tests aren’t in the 
+- Function declaration c++ style also causes errors to fail: One function can be declared multiple times with different parameters
+- comparisons are interpreted as float
+- Definition in local scope not scope checked
+- returnType mismatch not checked
+- main not found not checked
+- scan functions showed as succeeding but need to be tested manually :(
+
+### Part 2 (Final Evaluation)
+#### Introduction (Basil)
+- We have chosen to translate llvm to mips
+- this was easier to do because of not using the ast, and doing double work
+- LLVM can be translated fast to mips, without too much hassle
+#### Grammar (Arno)
+- We have changed most of our c grammar because it was a mess as earlier said by Brentje
+- We’ve  also made a new grammar for making a tree from the llvm code
+- From the root (start_rule) you can go to a list of operations and after that your declarations
+- An operation can be any of these, 
+- most of the grammar rules explain itself 
+- Then we have all the operations there are
+- The grammar is just a generalization of the llvm code and is not that interesting to explain further
+#### AST (Arno)
+- The ast contains all the lines in llvm, it is directly a 1 to 1 translation
+- Functions have a special representation in the ast
+- In case of a definition these are the function arguments and the statement sequence
+- In case of a function call we have the function arguments below it
+- For a scanf and printf we do a separation of the string into the arguments in order to put the arguments passed through into the children like it is right there to be printed
+- The ast is not deep at all so there are not a lot of things to take account for our llvm generation took all the hard work off our shoulders
+#### Symbol table (Basil)
+- We use the same symbol table as before but we tweaked the code slightly in order to accomodate for llvm
+- Now we have a separate dot generation for the symbol table
+- Global variables are in the root of the symbol table
+- There is also a global table available which contains all the variables
+- It can be generated after all the symbol tables have been linked, and will be generated when executing the function merge
+#### Code generation (Basil)
+- For the code generation we use separate files in order to keep the ast class clean
+- It uses a visitor which traverses in preorder traversal, it is the same as reading the llvm code from left to right
+- We translate each operation directly from the llvm code to mips
+- We do this by loading each variable into the 0 and 1 register of its kind
+- So in the t or f register depending on the value it is
+- And then we store the values in that memory location of like in llvm described
+- You can see in the global variables that there are quite a lot this is because these are all the llvm variables
+- For every function we have a building stackframe and a destructing stackframe, which speaks for itself
+#### Benchmark (Arno)
+- The benchmark still fails on some tests but all are explainable
+- There is still one test failing in semantic errors this is because we do not support -- and ++
+- We also need to note that some of the benchmarks are modified because we do not support all the functionality, since some of it was optional
+- There is also a massive improvement to the previous submission of our code because we have tweaked it such that the benchmarks will run
+- This does not  mean we have hardcoded all the benchmarks to succeed
+- There is also the thing of scan tests not being tested, they need to be done manually
+- Both our comparison tests do not work, because we have a special implementation
+- This means when we compare two variables/constants we keep them in their type and do not convert them to decimal
+- We do this in order to not mess around with types, it is too much work that is not necessary in our case
+- Since our tests use a standard compiler we can not change the format tag since it will still fail because the standard compiler will give 0 for the output of a float when it is a decimal
+- SPIM does behave weird because on mips it should work all right if tested by hand
+- Also our float to int conversion do not work since they are optional
+- A lot of tests for C to LLVM are fixed
