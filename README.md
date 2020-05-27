@@ -303,7 +303,7 @@ The Benchmark tests have been changed from the given ones, because we don't supp
 - this was easier to do because of not using the ast, and doing double work
 - LLVM can be translated fast to mips, without too much hassle
 #### Grammar (Arno)
-- We have changed most of our c grammar because it was a mess as earlier said by Brentje
+- We have changed most of our c grammar because it was a mess as earlier said by Brent
 - We’ve  also made a new grammar for making a tree from the llvm code
 - From the root (start_rule) you can go to a list of operations and after that your declarations
 - An operation can be any of these, 
