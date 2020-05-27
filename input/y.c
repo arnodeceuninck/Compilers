@@ -1,7 +1,7 @@
+
 #include <stdio.h>
 
 int f(int a) {
-    printf("%d; ", a);
 	if (a<2) {
 		return a;
 	}
