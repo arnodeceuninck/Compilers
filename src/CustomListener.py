@@ -42,6 +42,7 @@ class CustomListener(ParseTreeListener):
 
     # Enter a parse tree produced by cParser#start_rule.
     def enterStart_rule(self, ctx: cParser.Start_ruleContext):
+        print()
         pass
 
     # Exit a parse tree produced by cParser#start_rule.
